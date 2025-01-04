@@ -12,7 +12,7 @@ interface CollapsiblePanelProps {
 }
 
 const MIN_VISIBLE_WIDTH = 50;
-const DEFAULT_WIDTH = 300;
+const DEFAULT_WIDTH = 400;
 const AUTO_HIDE_THRESHOLD = 150; // Width threshold for auto-hiding
 
 export function CollapsiblePanel({
