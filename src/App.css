@@ -26,50 +26,62 @@
   cursor: col-resize;
 }
 
-/* Panel styles */
-.panel-transition {
-  transition: all 0.3s ease-in-out;
+/* Panel Container */
+.panel-container {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  backdrop-filter: blur(8px);
+  border-right: 1px solid rgba(229, 231, 235, 1);
+}
+
+/* Auto-hide animation */
+.panel-container.will-change-transform {
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Panel Title Bar */
+.panel-title-bar {
+  transition: all 0.2s ease-in-out;
+  will-change: opacity, transform;
+  overflow: hidden;
+}
+
+/* Vertical Text */
+.vertical-text {
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  white-space: nowrap;
+  transform: rotate(180deg);
+  padding: 1rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: color 0.15s ease-in-out;
+  user-select: none;
+}
+
+/* Panel Resize Handle */
+.panel-resize-handle {
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out,
+              background-color 0.15s ease-in-out;
+}
+
+.panel-container:hover .panel-resize-handle {
+  opacity: 1;
 }
 
 /* Hide scrollbar but allow scrolling */
 .hide-scrollbar {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .hide-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-
-/* Panel shadow */
-.panel-shadow {
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-}
-
-/* Panel handle hover effect */
-.panel-handle:hover {
-  background-color: #f3f4f6;
-  transform: scale(1.1);
-  transition: all 0.2s ease-in-out;
-}
-
-/* Panel tab styles */
-.panel-tab {
-  position: fixed;
-  display: flex;
-  align-items: center;
-  padding: 0.75rem;
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  z-index: 50;
-}
-
-.panel-tab:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: none;
 }
 
 /* Z-index layers */
@@ -92,5 +104,12 @@
 
 /* Main content transitions */
 .main-content {
-  transition: margin 0.3s ease-in-out;
-} 
+  transition: margin 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Prevent text selection during resize */
+.user-select-none {
+  user-select: none;
+}
+
+/* Remove any old unused styles */ 

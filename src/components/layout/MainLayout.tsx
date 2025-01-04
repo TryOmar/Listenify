@@ -7,6 +7,7 @@ import { cn } from '../../lib/utils';
 
 const MIN_MAIN_PANEL_WIDTH = 400; // Minimum width before hiding main panel
 const MIN_GAP = 20; // Minimum gap between panels
+const TITLE_BAR_WIDTH = 44; // Width of the title bar (11 * 4px Tailwind units)
 
 export function MainLayout() {
     const [leftPanelWidth, setLeftPanelWidth] = useState(0);
@@ -15,14 +16,14 @@ export function MainLayout() {
 
     // Handle left panel width changes with collision prevention
     const handleLeftPanelWidth = useCallback((width: number) => {
-        const maxAllowedWidth = window.innerWidth - rightPanelWidth - MIN_GAP;
+        const maxAllowedWidth = window.innerWidth - rightPanelWidth - MIN_GAP - TITLE_BAR_WIDTH;
         const adjustedWidth = Math.min(width, maxAllowedWidth);
         setLeftPanelWidth(adjustedWidth);
     }, [rightPanelWidth]);
 
     // Handle right panel width changes with collision prevention
     const handleRightPanelWidth = useCallback((width: number) => {
-        const maxAllowedWidth = window.innerWidth - leftPanelWidth - MIN_GAP;
+        const maxAllowedWidth = window.innerWidth - leftPanelWidth - MIN_GAP - TITLE_BAR_WIDTH;
         const adjustedWidth = Math.min(width, maxAllowedWidth);
         setRightPanelWidth(adjustedWidth);
     }, [leftPanelWidth]);
@@ -30,12 +31,12 @@ export function MainLayout() {
     // Calculate available space and handle main panel visibility
     useEffect(() => {
         const handleResize = () => {
-            const availableWidth = window.innerWidth - leftPanelWidth - rightPanelWidth;
+            const availableWidth = window.innerWidth - leftPanelWidth - rightPanelWidth - (TITLE_BAR_WIDTH * 2);
 
             // Check for panel collision
-            if (leftPanelWidth + rightPanelWidth + MIN_GAP > window.innerWidth) {
+            if (leftPanelWidth + rightPanelWidth + MIN_GAP > window.innerWidth - (TITLE_BAR_WIDTH * 2)) {
                 // Adjust right panel if it would overlap
-                const newRightWidth = window.innerWidth - leftPanelWidth - MIN_GAP;
+                const newRightWidth = window.innerWidth - leftPanelWidth - MIN_GAP - (TITLE_BAR_WIDTH * 2);
                 setRightPanelWidth(Math.max(0, newRightWidth));
             }
 
@@ -56,8 +57,8 @@ export function MainLayout() {
                     !isMainPanelVisible && 'opacity-0 pointer-events-none'
                 )}
                 style={{
-                    marginLeft: `${leftPanelWidth}px`,
-                    marginRight: `${rightPanelWidth}px`,
+                    marginLeft: `${leftPanelWidth > 0 ? leftPanelWidth : TITLE_BAR_WIDTH}px`,
+                    marginRight: `${rightPanelWidth > 0 ? rightPanelWidth : TITLE_BAR_WIDTH}px`,
                     minWidth: `${MIN_MAIN_PANEL_WIDTH}px`,
                 }}
             >
@@ -72,7 +73,7 @@ export function MainLayout() {
                 title="Recent Items"
                 storageKey="listenify-words-panel"
                 onWidthChange={handleLeftPanelWidth}
-                maxAllowedWidth={window.innerWidth - rightPanelWidth - MIN_GAP}
+                maxAllowedWidth={window.innerWidth - rightPanelWidth - MIN_GAP - TITLE_BAR_WIDTH}
             >
                 <SavedItemsPanel />
             </CollapsiblePanel>
@@ -83,7 +84,7 @@ export function MainLayout() {
                 title="AI Chat"
                 storageKey="listenify-chat-panel"
                 onWidthChange={handleRightPanelWidth}
-                maxAllowedWidth={window.innerWidth - leftPanelWidth - MIN_GAP}
+                maxAllowedWidth={window.innerWidth - leftPanelWidth - MIN_GAP - TITLE_BAR_WIDTH}
             >
                 <ChatPanel />
             </CollapsiblePanel>

@@ -1,205 +1,248 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, GripVertical } from 'lucide-react';
-import { Resizable, ResizeCallbackData } from 'react-resizable';
+import React, { useEffect, useState } from 'react';
 import { cn } from '../../lib/utils';
+import { ChevronLeft, ChevronRight, ListMusic, MessageSquare } from 'lucide-react';
 
 interface CollapsiblePanelProps {
+    children: React.ReactNode;
     side: 'left' | 'right';
     title: string;
-    defaultIsOpen?: boolean;
     storageKey: string;
-    children: React.ReactNode;
-    onWidthChange?: (width: number) => void;
-    maxAllowedWidth?: number;
+    onWidthChange: (width: number) => void;
+    maxAllowedWidth: number;
 }
 
-interface PanelState {
-    isOpen: boolean;
-    width: number;
-    wasAutoHidden: boolean;
-    lastToggleAction: 'show' | 'hide';
-}
-
-const AUTO_HIDE_THRESHOLD = 150; // Width threshold for auto-hide
-const DEFAULT_WIDTH = 300; // Default width when opening panel
+const MIN_VISIBLE_WIDTH = 50;
+const DEFAULT_WIDTH = 300;
+const AUTO_HIDE_THRESHOLD = 100; // Width threshold for auto-hiding
 
 export function CollapsiblePanel({
+    children,
     side,
     title,
-    defaultIsOpen = false,
     storageKey,
-    children,
     onWidthChange,
     maxAllowedWidth,
 }: CollapsiblePanelProps) {
-    const [state, setState] = useState<PanelState>(() => {
-        const stored = localStorage.getItem(storageKey);
-        return stored
-            ? JSON.parse(stored)
-            : {
-                isOpen: defaultIsOpen,
-                width: DEFAULT_WIDTH,
-                wasAutoHidden: false,
-                lastToggleAction: 'hide'
-            };
-    });
+    const [width, setWidth] = useState(0);
+    const [isResizing, setIsResizing] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [startWidth, setStartWidth] = useState(0);
+    const [isDraggingToClose, setIsDraggingToClose] = useState(false);
 
+    // Load saved width from localStorage
     useEffect(() => {
-        localStorage.setItem(storageKey, JSON.stringify(state));
-    }, [state, storageKey]);
-
-    useEffect(() => {
-        if (onWidthChange) {
-            requestAnimationFrame(() => {
-                onWidthChange(state.isOpen ? state.width : 0);
-            });
+        const savedWidth = localStorage.getItem(storageKey);
+        if (savedWidth) {
+            const parsedWidth = Number(savedWidth);
+            setWidth(parsedWidth);
+            setIsVisible(parsedWidth > MIN_VISIBLE_WIDTH);
         }
-    }, [state.isOpen, state.width, onWidthChange]);
+    }, [storageKey]);
 
-    // Adjust width if it exceeds maxAllowedWidth
+    // Save width to localStorage when it changes
     useEffect(() => {
-        if (maxAllowedWidth && state.width > maxAllowedWidth && state.isOpen) {
-            setState(prev => ({
-                ...prev,
-                width: maxAllowedWidth
-            }));
-        }
-    }, [maxAllowedWidth]);
+        localStorage.setItem(storageKey, width.toString());
+        onWidthChange(width);
+    }, [width, storageKey, onWidthChange]);
 
-    const handleResize = useCallback((e: React.SyntheticEvent, { size }: ResizeCallbackData) => {
-        const newWidth = Math.max(50, size.width);
+    const handleMouseDown = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setIsResizing(true);
+        setStartX(e.clientX);
+        setStartWidth(width);
+        setIsDraggingToClose(false);
+        document.body.style.cursor = 'col-resize';
+    };
 
-        // Respect maxAllowedWidth if provided
-        const finalWidth = maxAllowedWidth ? Math.min(newWidth, maxAllowedWidth) : newWidth;
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isResizing) return;
 
-        requestAnimationFrame(() => {
-            // Auto-hide when dragged too small
-            if (finalWidth < AUTO_HIDE_THRESHOLD) {
-                setState(prev => ({
-                    ...prev,
-                    isOpen: false,
-                    wasAutoHidden: true,
-                    lastToggleAction: 'hide'
-                }));
+            const diff = side === 'left'
+                ? e.clientX - startX
+                : startX - e.clientX;
+
+            let newWidth = Math.max(0, startWidth + diff);
+            newWidth = Math.min(newWidth, maxAllowedWidth);
+
+            // Check if we're dragging towards closing
+            if (newWidth < AUTO_HIDE_THRESHOLD) {
+                setIsDraggingToClose(true);
+            }
+
+            // If dragging to close and width is very small, start the closing animation
+            if (isDraggingToClose && newWidth < MIN_VISIBLE_WIDTH) {
+                setWidth(0);
+                setIsVisible(false);
+                setIsResizing(false);
+                document.body.style.cursor = '';
                 return;
             }
 
-            setState(prev => ({
-                ...prev,
-                width: finalWidth,
-                wasAutoHidden: false
-            }));
-        });
-    }, [maxAllowedWidth]);
+            // Update visibility and width
+            setWidth(newWidth);
+            setIsVisible(newWidth > MIN_VISIBLE_WIDTH);
+
+            // Prevent text selection during resize
+            e.preventDefault();
+        };
+
+        const handleMouseUp = () => {
+            setIsResizing(false);
+            document.body.style.cursor = '';
+
+            // Auto-hide if width is below threshold
+            if (width < AUTO_HIDE_THRESHOLD) {
+                setWidth(0);
+                setIsVisible(false);
+            }
+            setIsDraggingToClose(false);
+        };
+
+        if (isResizing) {
+            document.addEventListener('mousemove', handleMouseMove, { passive: false });
+            document.addEventListener('mouseup', handleMouseUp);
+        }
+
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = '';
+        };
+    }, [isResizing, side, maxAllowedWidth, width, startX, startWidth, isDraggingToClose]);
 
     const togglePanel = () => {
-        setState(prev => {
-            const willBeOpen = !prev.isOpen;
-            const shouldResetWidth = prev.lastToggleAction === 'hide' || prev.wasAutoHidden;
-            let newWidth = willBeOpen && shouldResetWidth ? DEFAULT_WIDTH : prev.width;
+        if (isVisible) {
+            setWidth(0);
+            setIsVisible(false);
+        } else {
+            setWidth(DEFAULT_WIDTH);
+            setIsVisible(true);
+        }
+    };
 
-            // Respect maxAllowedWidth when toggling
-            if (maxAllowedWidth && newWidth > maxAllowedWidth) {
-                newWidth = maxAllowedWidth;
-            }
-
-            return {
-                ...prev,
-                isOpen: willBeOpen,
-                width: newWidth,
-                wasAutoHidden: false,
-                lastToggleAction: willBeOpen ? 'show' : 'hide'
-            };
-        });
+    const getPanelIcon = () => {
+        if (side === 'left') return <ListMusic size={16} />;
+        return <MessageSquare size={16} />;
     };
 
     return (
         <>
-            {/* Fixed Position Toggle Button */}
-            <button
-                onClick={togglePanel}
-                className={cn(
-                    'fixed top-1/2 -translate-y-1/2 z-50 flex items-center bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-md',
-                    side === 'left' ? 'left-0' : 'right-0',
-                    !state.isOpen && 'rounded-lg py-3 px-4 text-sm font-medium',
-                    state.isOpen
-                        ? 'rounded-full p-2'
-                        : side === 'left'
-                            ? 'translate-x-0 rounded-r-lg'
-                            : 'translate-x-0 rounded-l-lg'
-                )}
-                style={{
-                    writingMode: !state.isOpen ? 'vertical-rl' : 'horizontal-tb',
-                    transform: !state.isOpen
-                        ? `translateY(-50%) ${side === 'right' ? 'rotate(180deg)' : ''}`
-                        : `translateY(-50%) ${side === 'left' ? 'translateX(calc(100% + 4px))' : 'translateX(calc(-100% - 4px))'}`
-                }}
-            >
-                {state.isOpen ? (
-                    side === 'left' ? (
-                        <ChevronLeft size={18} />
-                    ) : (
-                        <ChevronRight size={18} />
-                    )
-                ) : (
-                    <>
-                        <span className="text-sm">{title}</span>
-                        {side === 'left' ? (
-                            <ChevronRight size={18} className="mt-1" />
-                        ) : (
-                            <ChevronLeft size={18} className="mt-1" />
-                        )}
-                    </>
-                )}
-            </button>
-
             {/* Panel */}
             <div
                 className={cn(
-                    'fixed top-0 h-full bg-white panel-shadow z-40',
+                    'fixed top-0 h-full bg-white shadow-lg transition-all duration-200 ease-in-out z-panel',
                     side === 'left' ? 'left-0' : 'right-0',
-                    !state.isOpen && (side === 'left' ? '-translate-x-full' : 'translate-x-full')
+                    'panel-container',
+                    isDraggingToClose && 'will-change-transform'
                 )}
                 style={{
-                    width: state.width,
-                    transition: state.isOpen ? 'none' : 'transform 0.3s ease-in-out'
+                    width: `${width}px`,
+                    transform: !isVisible ? `translateX(${side === 'left' ? '-100%' : '100%'})` : 'translateX(0)'
                 }}
             >
-                <Resizable
-                    width={state.width}
-                    height={window.innerHeight}
-                    onResize={handleResize}
-                    draggableOpts={{
-                        grid: [1, 1],
-                        enableUserSelectHack: false,
-                    }}
-                    handle={
-                        <div
-                            className={cn(
-                                'absolute h-full w-2 cursor-col-resize hover:bg-blue-500/20 group flex items-center justify-center',
-                                side === 'left' ? 'right-0' : 'left-0'
-                            )}
-                        >
-                            <GripVertical
-                                size={18}
-                                className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                            />
-                        </div>
-                    }
-                    resizeHandles={[side === 'left' ? 'e' : 'w']}
-                    minConstraints={[50, 0]}
-                    maxConstraints={[maxAllowedWidth || 2000, 0]}
-                >
-                    <div className="h-full flex flex-col">
-                        {/* Panel Title */}
-                        <div className="p-3 border-b bg-gray-50">
-                            <h2 className="text-base font-semibold">{title}</h2>
+                {/* Panel Header */}
+                <div className={cn(
+                    "h-12 bg-gray-50 border-b flex items-center px-4 gap-2",
+                    isVisible ? 'opacity-100' : 'opacity-0'
+                )}>
+                    {getPanelIcon()}
+                    <h2 className="text-sm font-semibold text-gray-700">{title}</h2>
+                </div>
+
+                {/* Panel Content */}
+                <div className={cn(
+                    'h-[calc(100%-3rem)] overflow-auto hide-scrollbar',
+                    isVisible ? 'opacity-100' : 'opacity-0'
+                )}>
+                    {children}
+                </div>
+
+                {/* Resize Handle */}
+                <div
+                    className={cn(
+                        'absolute top-0 w-1 h-full cursor-col-resize hover:bg-blue-100 z-resize-handle transition-colors duration-150',
+                        side === 'left' ? 'right-0' : 'left-0',
+                        'panel-resize-handle'
+                    )}
+                    onMouseDown={handleMouseDown}
+                />
+
+                {/* Toggle Button */}
+                {isVisible && (
+                    <button
+                        onClick={togglePanel}
+                        className={cn(
+                            'absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white shadow-md',
+                            'flex items-center justify-center hover:bg-gray-50 transition-colors duration-150',
+                            'border border-gray-200 z-50',
+                            side === 'left' ? '-right-3' : '-left-3'
+                        )}
+                    >
+                        {side === 'left' ? (
+                            <ChevronLeft size={14} className="text-gray-600" />
+                        ) : (
+                            <ChevronRight size={14} className="text-gray-600" />
+                        )}
+                    </button>
+                )}
+            </div>
+
+            {/* Title Bar */}
+            <div
+                className={cn(
+                    'fixed top-0 h-full w-11 transition-all duration-200 ease-in-out z-panel-button',
+                    'panel-title-bar',
+                    side === 'left' ? 'left-0' : 'right-0',
+                    isVisible ? 'opacity-0 pointer-events-none' : 'opacity-100 cursor-pointer'
+                )}
+                onClick={togglePanel}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+            >
+                <div className={cn(
+                    'absolute inset-0 bg-gray-50 border-r hover:bg-gray-100 transition-colors duration-150',
+                    side === 'right' && 'border-l border-r-0'
+                )}>
+                    {/* Title Container */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        {/* Top Icon */}
+                        <div className={cn(
+                            'absolute top-4 text-gray-400',
+                            isHovered && 'text-gray-600'
+                        )}>
+                            {getPanelIcon()}
                         </div>
 
-                        {/* Panel Content */}
-                        <div className="flex-1 overflow-hidden">{children}</div>
+                        {/* Title Text */}
+                        <div className={cn(
+                            'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2',
+                            'vertical-text'
+                        )}>
+                            <span className={cn(
+                                'text-xs font-semibold tracking-wider uppercase',
+                                'text-gray-600',
+                                isHovered && 'text-gray-900'
+                            )}>
+                                {title}
+                            </span>
+                        </div>
+
+                        {/* Arrow Icon */}
+                        <div className={cn(
+                            'absolute bottom-4 text-gray-400',
+                            isHovered && 'text-gray-600'
+                        )}>
+                            {side === 'left' ? (
+                                <ChevronRight size={16} />
+                            ) : (
+                                <ChevronLeft size={16} />
+                            )}
+                        </div>
                     </div>
-                </Resizable>
+                </div>
             </div>
         </>
     );
