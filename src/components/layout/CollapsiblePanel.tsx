@@ -13,7 +13,7 @@ interface CollapsiblePanelProps {
 
 const MIN_VISIBLE_WIDTH = 50;
 const DEFAULT_WIDTH = 300;
-const AUTO_HIDE_THRESHOLD = 100; // Width threshold for auto-hiding
+const AUTO_HIDE_THRESHOLD = 150; // Width threshold for auto-hiding
 
 export function CollapsiblePanel({
     children,
@@ -29,7 +29,6 @@ export function CollapsiblePanel({
     const [isHovered, setIsHovered] = useState(false);
     const [startX, setStartX] = useState(0);
     const [startWidth, setStartWidth] = useState(0);
-    const [isDraggingToClose, setIsDraggingToClose] = useState(false);
 
     // Load saved width from localStorage
     useEffect(() => {
@@ -52,7 +51,6 @@ export function CollapsiblePanel({
         setIsResizing(true);
         setStartX(e.clientX);
         setStartWidth(width);
-        setIsDraggingToClose(false);
         document.body.style.cursor = 'col-resize';
     };
 
@@ -67,23 +65,16 @@ export function CollapsiblePanel({
             let newWidth = Math.max(0, startWidth + diff);
             newWidth = Math.min(newWidth, maxAllowedWidth);
 
-            // Check if we're dragging towards closing
+            // Instantly transform to sidebar when below threshold
             if (newWidth < AUTO_HIDE_THRESHOLD) {
-                setIsDraggingToClose(true);
-            }
-
-            // If dragging to close and width is very small, start the closing animation
-            if (isDraggingToClose && newWidth < MIN_VISIBLE_WIDTH) {
                 setWidth(0);
                 setIsVisible(false);
-                setIsResizing(false);
-                document.body.style.cursor = '';
-                return;
+                onWidthChange(0);
+            } else {
+                setWidth(newWidth);
+                setIsVisible(true);
+                onWidthChange(newWidth);
             }
-
-            // Update visibility and width
-            setWidth(newWidth);
-            setIsVisible(newWidth > MIN_VISIBLE_WIDTH);
 
             // Prevent text selection during resize
             e.preventDefault();
@@ -92,13 +83,6 @@ export function CollapsiblePanel({
         const handleMouseUp = () => {
             setIsResizing(false);
             document.body.style.cursor = '';
-
-            // Auto-hide if width is below threshold
-            if (width < AUTO_HIDE_THRESHOLD) {
-                setWidth(0);
-                setIsVisible(false);
-            }
-            setIsDraggingToClose(false);
         };
 
         if (isResizing) {
@@ -111,7 +95,7 @@ export function CollapsiblePanel({
             document.removeEventListener('mouseup', handleMouseUp);
             document.body.style.cursor = '';
         };
-    }, [isResizing, side, maxAllowedWidth, width, startX, startWidth, isDraggingToClose]);
+    }, [isResizing, side, maxAllowedWidth, startX, startWidth, onWidthChange]);
 
     const togglePanel = () => {
         if (isVisible) {
@@ -135,8 +119,7 @@ export function CollapsiblePanel({
                 className={cn(
                     'fixed top-0 h-full bg-white shadow-lg transition-all duration-200 ease-in-out z-panel',
                     side === 'left' ? 'left-0' : 'right-0',
-                    'panel-container',
-                    isDraggingToClose && 'will-change-transform'
+                    'panel-container'
                 )}
                 style={{
                     width: `${width}px`,
