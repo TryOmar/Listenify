@@ -21,11 +21,11 @@ export function TranscriptPanel() {
     if (window.SpeechRecognition || window.webkitSpeechRecognition) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
-      
+
       recognition.continuous = true;
       recognition.interimResults = true;
-      
-      recognition.onresult = (event) => {
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         let interimTranscript = '';
         let finalTranscript = '';
 
@@ -67,15 +67,14 @@ export function TranscriptPanel() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">Live Transcription</h2>
+    <div className="flex flex-col h-full bg-white">
+      <div className="flex justify-between items-center p-4 border-b">
+        <h2 className="text-lg font-semibold">Live Transcription</h2>
         <div className="flex gap-2">
           <button
             onClick={toggleListening}
-            className={`p-2 rounded-full ${
-              isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
-            } text-white transition-colors`}
+            className={`p-2 rounded-full ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
+              } text-white transition-colors`}
           >
             {isListening ? <MicOff size={20} /> : <Mic size={20} />}
           </button>
@@ -90,7 +89,7 @@ export function TranscriptPanel() {
       </div>
       <div
         ref={transcriptRef}
-        className="flex-1 overflow-y-auto p-4 bg-gray-50 rounded-lg"
+        className="flex-1 overflow-y-auto p-4"
       >
         <div className="space-x-1 text-lg">
           {renderTranscript()}
