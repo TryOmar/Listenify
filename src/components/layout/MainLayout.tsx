@@ -14,34 +14,51 @@ export function MainLayout() {
     const [leftPanelWidth, setLeftPanelWidth] = useState(0);
     const [rightPanelWidth, setRightPanelWidth] = useState(0);
     const [isMainPanelVisible, setIsMainPanelVisible] = useState(true);
+    const [lastModifiedPanel, setLastModifiedPanel] = useState<'left' | 'right' | null>(null);
 
     // Calculate maximum allowed width for left panel
     const getMaxLeftWidth = useCallback(() => {
-        const maxWidth = window.innerWidth - (rightPanelWidth || TITLE_BAR_WIDTH) - MIN_GAP;
-        // Ensure we leave space for the right panel's title bar or full width
-        return Math.max(0, maxWidth - PANEL_SPACING);
+        const rightSpace = rightPanelWidth || TITLE_BAR_WIDTH;
+        const maxWidth = window.innerWidth - rightSpace - MIN_GAP - PANEL_SPACING;
+        return Math.max(0, maxWidth);
     }, [rightPanelWidth]);
 
     // Calculate maximum allowed width for right panel
     const getMaxRightWidth = useCallback(() => {
-        const maxWidth = window.innerWidth - (leftPanelWidth || TITLE_BAR_WIDTH) - MIN_GAP;
-        // Ensure we leave space for the left panel's title bar or full width
-        return Math.max(0, maxWidth - PANEL_SPACING);
+        const leftSpace = leftPanelWidth || TITLE_BAR_WIDTH;
+        const maxWidth = window.innerWidth - leftSpace - MIN_GAP - PANEL_SPACING;
+        return Math.max(0, maxWidth);
     }, [leftPanelWidth]);
 
     // Handle left panel width changes with collision prevention
     const handleLeftPanelWidth = useCallback((width: number) => {
+        setLastModifiedPanel('left');
         const maxAllowedWidth = getMaxLeftWidth();
         const adjustedWidth = Math.min(width, maxAllowedWidth);
+
+        // If expanding left panel would cause overlap, shrink right panel
+        if (adjustedWidth + (rightPanelWidth || TITLE_BAR_WIDTH) + PANEL_SPACING > window.innerWidth - MIN_GAP) {
+            const newRightWidth = Math.max(0, window.innerWidth - adjustedWidth - PANEL_SPACING - MIN_GAP);
+            setRightPanelWidth(newRightWidth);
+        }
+
         setLeftPanelWidth(adjustedWidth);
-    }, [getMaxLeftWidth]);
+    }, [getMaxLeftWidth, rightPanelWidth]);
 
     // Handle right panel width changes with collision prevention
     const handleRightPanelWidth = useCallback((width: number) => {
+        setLastModifiedPanel('right');
         const maxAllowedWidth = getMaxRightWidth();
         const adjustedWidth = Math.min(width, maxAllowedWidth);
+
+        // If expanding right panel would cause overlap, shrink left panel
+        if (adjustedWidth + (leftPanelWidth || TITLE_BAR_WIDTH) + PANEL_SPACING > window.innerWidth - MIN_GAP) {
+            const newLeftWidth = Math.max(0, window.innerWidth - adjustedWidth - PANEL_SPACING - MIN_GAP);
+            setLeftPanelWidth(newLeftWidth);
+        }
+
         setRightPanelWidth(adjustedWidth);
-    }, [getMaxRightWidth]);
+    }, [getMaxRightWidth, leftPanelWidth]);
 
     // Calculate available space and handle main panel visibility
     useEffect(() => {
@@ -52,10 +69,15 @@ export function MainLayout() {
                 PANEL_SPACING;
 
             // Adjust panels if they would overlap
-            if (leftPanelWidth + rightPanelWidth + PANEL_SPACING > window.innerWidth - (TITLE_BAR_WIDTH * 2)) {
+            if (leftPanelWidth + rightPanelWidth + PANEL_SPACING > window.innerWidth - MIN_GAP) {
                 // Prioritize the most recently moved panel
-                const newRightWidth = window.innerWidth - leftPanelWidth - PANEL_SPACING - (TITLE_BAR_WIDTH * 2);
-                setRightPanelWidth(Math.max(0, newRightWidth));
+                if (lastModifiedPanel === 'right') {
+                    const newLeftWidth = Math.max(0, window.innerWidth - rightPanelWidth - PANEL_SPACING - MIN_GAP);
+                    setLeftPanelWidth(newLeftWidth);
+                } else {
+                    const newRightWidth = Math.max(0, window.innerWidth - leftPanelWidth - PANEL_SPACING - MIN_GAP);
+                    setRightPanelWidth(newRightWidth);
+                }
             }
 
             setIsMainPanelVisible(availableWidth >= MIN_MAIN_PANEL_WIDTH);
@@ -64,7 +86,7 @@ export function MainLayout() {
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [leftPanelWidth, rightPanelWidth]);
+    }, [leftPanelWidth, rightPanelWidth, lastModifiedPanel]);
 
     return (
         <div className="relative h-full">
