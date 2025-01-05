@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, MessageSquare, Trash2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { cn } from '../../lib/utils';
 import { useChatStore } from '../../store/useChatStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
@@ -85,7 +87,46 @@ export function ChatPanel() {
                                         : 'bg-gray-100 text-gray-700 rounded-bl-none'
                                 )}
                             >
-                                <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                                {message.sender === 'user' ? (
+                                    <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                                ) : (
+                                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                                        <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
+                                            components={{
+                                                // Style code blocks
+                                                code({ node, inline, className, children, ...props }) {
+                                                    return (
+                                                        <code
+                                                            className={cn(
+                                                                'bg-gray-200 rounded px-1',
+                                                                !inline && 'block bg-gray-800 text-gray-100 p-2 my-2'
+                                                            )}
+                                                            {...props}
+                                                        >
+                                                            {children}
+                                                        </code>
+                                                    );
+                                                },
+                                                // Style links
+                                                a({ node, children, ...props }) {
+                                                    return (
+                                                        <a
+                                                            className="text-blue-600 hover:underline"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            {...props}
+                                                        >
+                                                            {children}
+                                                        </a>
+                                                    );
+                                                }
+                                            }}
+                                        >
+                                            {message.text}
+                                        </ReactMarkdown>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))
