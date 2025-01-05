@@ -22,34 +22,37 @@ export function WordsTab() {
   return (
     <section className="space-y-4">
       <h3 className="text-lg font-semibold">Word Actions</h3>
-      
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <input
-          type="text"
-          placeholder="Action Name"
-          value={newAction.name}
-          onChange={(e) => setNewAction({ ...newAction, name: e.target.value })}
-          className="flex-1 px-3 py-2 border rounded-lg"
-        />
-        <input
-          type="text"
-          placeholder="URL Template (use {word})"
-          value={newAction.url}
-          onChange={(e) => setNewAction({ ...newAction, url: e.target.value })}
-          className="flex-1 px-3 py-2 border rounded-lg"
-        />
-        <input
-          type="text"
-          placeholder="Icon"
-          value={newAction.icon}
-          onChange={(e) => setNewAction({ ...newAction, icon: e.target.value })}
-          className="w-20 px-3 py-2 border rounded-lg"
-        />
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-[1fr,1fr,auto] gap-4">
+          <input
+            type="text"
+            placeholder="Action Name"
+            value={newAction.name}
+            onChange={(e) => setNewAction({ ...newAction, name: e.target.value })}
+            className="px-3 py-2 border rounded-lg"
+          />
+          <input
+            type="text"
+            placeholder="URL Template (use {word})"
+            value={newAction.url}
+            onChange={(e) => setNewAction({ ...newAction, url: e.target.value })}
+            className="px-3 py-2 border rounded-lg"
+          />
+          <input
+            type="text"
+            placeholder="Icon"
+            value={newAction.icon}
+            onChange={(e) => setNewAction({ ...newAction, icon: e.target.value })}
+            className="w-20 px-3 py-2 border rounded-lg"
+          />
+        </div>
         <button
           type="submit"
-          className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          className="w-full p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
         >
-          <Plus size={20} />
+          <Plus className="inline mr-2" size={20} />
+          Add Word Action
         </button>
       </form>
 
