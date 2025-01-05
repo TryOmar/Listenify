@@ -55,7 +55,7 @@ export function TranscriptPanel() {
     clearTranscript,
   } = useTranscriptStore();
 
-  const { general: { maxWords, fontSize } } = useSettingsStore();
+  const { general: { maxWords, fontSize, speechLanguage } } = useSettingsStore();
   const transcriptRef = useRef<HTMLDivElement>(null);
   const interimTranscriptRef = useRef<string>('');
   const finalTranscriptRef = useRef<string>('');
@@ -90,6 +90,7 @@ export function TranscriptPanel() {
 
       recognition.continuous = true;
       recognition.interimResults = true;
+      recognition.lang = speechLanguage;
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
         let interimTranscript = '';
@@ -127,7 +128,7 @@ export function TranscriptPanel() {
 
       setRecognition(recognition);
     }
-  }, [maxWords, setTranscript, setRecognition]);
+  }, [maxWords, setTranscript, setRecognition, speechLanguage]);
 
   const toggleListening = () => {
     if (!recognition) return;
