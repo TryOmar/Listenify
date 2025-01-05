@@ -1,14 +1,25 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useSettingsStore } from '../store/useSettingsStore';
 
 interface TextSelectionPopupProps {
     selectedText: string;
     onAIPromptClick: (prompt: string) => void;
+    onClose: () => void;
 }
 
-export function TextSelectionPopup({ selectedText, onAIPromptClick }: TextSelectionPopupProps) {
+export function TextSelectionPopup({ selectedText, onAIPromptClick, onClose }: TextSelectionPopupProps) {
     const { actions, prompts, general } = useSettingsStore();
+
+    // Add window blur handler
+    useEffect(() => {
+        const handleWindowBlur = () => {
+            onClose();
+        };
+
+        window.addEventListener('blur', handleWindowBlur);
+        return () => window.removeEventListener('blur', handleWindowBlur);
+    }, [onClose]);
 
     const getProcessedUrl = (url: string) => {
         return url
@@ -25,11 +36,13 @@ export function TextSelectionPopup({ selectedText, onAIPromptClick }: TextSelect
             .replace('{speech_language_code}', general.speechLanguage)
             .replace('{translation_language_code}', general.translationLanguage);
         onAIPromptClick(processedPrompt);
+        onClose();
     };
 
     const handleTextActionClick = (e: React.MouseEvent, url: string) => {
         e.stopPropagation();
         window.open(url, '_blank');
+        onClose();
         setTimeout(() => {
             window.getSelection()?.removeAllRanges();
         }, 100);

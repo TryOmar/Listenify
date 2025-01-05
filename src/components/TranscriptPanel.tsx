@@ -318,6 +318,11 @@ export function TranscriptPanel() {
             <TextSelectionPopup
               selectedText={selectedText}
               onAIPromptClick={handleAIPromptClick}
+              onClose={() => {
+                setSelectedText('');
+                setSelectionPosition(null);
+                window.getSelection()?.removeAllRanges();
+              }}
             />
           </div>
         )}

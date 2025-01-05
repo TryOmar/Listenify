@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { ExternalLink } from 'lucide-react';
 import { useSettingsStore } from '../store/useSettingsStore';
@@ -17,6 +17,19 @@ export function WordPopup({ word }: WordPopupProps) {
   const { isChatPanelOpen, openChatPanel } = usePanelStore();
   const { addToast } = useToastStore();
 
+  // Add window blur handler
+  useEffect(() => {
+    const handleWindowBlur = () => {
+      const popoverTrigger = document.querySelector('[data-state="open"]') as HTMLElement;
+      if (popoverTrigger) {
+        popoverTrigger.click(); // Close the popover
+      }
+    };
+
+    window.addEventListener('blur', handleWindowBlur);
+    return () => window.removeEventListener('blur', handleWindowBlur);
+  }, []);
+
   const getProcessedUrl = (url: string) => {
     return url
       .replace('{word}', encodeURIComponent(word))
@@ -25,6 +38,12 @@ export function WordPopup({ word }: WordPopupProps) {
   };
 
   const handleAIPromptClick = async (prompt: string) => {
+    // Close the popover after clicking
+    const popoverTrigger = document.querySelector('[data-state="open"]') as HTMLElement;
+    if (popoverTrigger) {
+      popoverTrigger.click();
+    }
+
     // Open chat panel if it's closed
     if (!isChatPanelOpen) {
       openChatPanel();
@@ -60,6 +79,16 @@ export function WordPopup({ word }: WordPopupProps) {
     }
   };
 
+  const handleTextActionClick = (e: React.MouseEvent, url: string) => {
+    e.stopPropagation();
+    window.open(url, '_blank');
+    // Close the popover after clicking
+    const popoverTrigger = document.querySelector('[data-state="open"]') as HTMLElement;
+    if (popoverTrigger) {
+      popoverTrigger.click();
+    }
+  };
+
   const wordPrompts = prompts.filter(p => p.type === 'word');
 
   return (
@@ -84,6 +113,7 @@ export function WordPopup({ word }: WordPopupProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded transition-colors"
+                  onClick={(e) => handleTextActionClick(e, getProcessedUrl(action.url))}
                 >
                   <span>{action.icon}</span>
                   <span className="flex-1">{action.name}</span>
