@@ -9,6 +9,7 @@ import { useChatStore } from '../store/useChatStore';
 import { usePanelStore } from '../store/usePanelStore';
 import { useToastStore } from '../store/useToastStore';
 import { generateGeminiResponse } from '../services/geminiService';
+import { cn, isRTL } from '../lib/utils';
 
 type SpeechRecognitionResult = {
   isFinal: boolean;
@@ -301,8 +302,14 @@ export function TranscriptPanel() {
         }}
       >
         <div
-          className="space-x-1"
-          style={{ fontSize: `${fontSize}px` }}
+          className={cn(
+            "space-x-1",
+            isRTL(speechLanguage) && "text-right"
+          )}
+          style={{
+            fontSize: `${fontSize}px`,
+            direction: isRTL(speechLanguage) ? 'rtl' : 'ltr'
+          }}
         >
           {renderTranscript()}
         </div>
