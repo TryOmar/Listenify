@@ -12,7 +12,13 @@ import {
   Settings
 } from 'lucide-react';
 import { useSettingsStore } from '../../../store/useSettingsStore';
-import type { AIModel } from '../../../store/useSettingsStore';
+
+interface AIModel {
+  id: string;
+  name: string;
+  model: string;
+  apiKey: string;
+}
 
 const AI_MODEL_OPTIONS = [
   { value: 'gemini', label: 'Gemini', icon: Sparkles },
@@ -122,7 +128,12 @@ export function ModelsTab() {
                 {getModelIcon(model.model)}
               </div>
               <div className="flex-1">
-                <h4 className="font-medium">{model.name}</h4>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-medium">{model.name}</h4>
+                  <span className="text-xs text-gray-400">
+                    {AI_MODEL_OPTIONS.find(opt => opt.value === model.model)?.label || 'Custom Model'}
+                  </span>
+                </div>
                 <div className="flex items-center gap-2">
                   <input
                     type={visibleKeys[model.id] ? "text" : "password"}
@@ -142,8 +153,8 @@ export function ModelsTab() {
                 <button
                   onClick={() => setActiveModel(model.id)}
                   className={`p-2 rounded ${activeModelId === model.id
-                      ? 'text-green-500 bg-green-50'
-                      : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                    ? 'text-green-500 bg-green-50'
+                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
                     }`}
                   title={activeModelId === model.id ? 'Active Model' : 'Set as Active'}
                 >
