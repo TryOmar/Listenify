@@ -92,71 +92,78 @@ const defaultActions = {
 };
 
 const defaultPrompts: AIPrompt[] = [
-  // Text-based prompts
+  // Text-based prompts (using {text})
   {
     id: '1',
     name: 'Translate Text',
-    prompt: 'Please translate this text into English:\n\n{text}',
+    prompt: 'Translate the following text from {speech_language_code} to {translation_language_code}:\n\n{text}',
     modelId: '',
     type: 'text',
   },
   {
     id: '2',
     name: 'Summarize',
-    prompt: 'Please summarize this text into bullet points:\n\n{text}',
+    prompt: 'Summarize the following text in {speech_language_code}:\n\n{text}',
     modelId: '',
     type: 'text',
   },
   {
     id: '3',
     name: 'Rephrase',
-    prompt: 'Please rephrase this text in a different way while maintaining its meaning:\n\n{text}',
+    prompt: 'Rephrase the following text in {speech_language_code} while maintaining its meaning:\n\n{text}',
     modelId: '',
     type: 'text',
   },
-  // Word-based prompts
   {
     id: '4',
+    name: 'Explain',
+    prompt: 'Explain the following text in simple terms in {speech_language_code}:\n\n{text}',
+    modelId: '',
+    type: 'text',
+  },
+  // Word-based prompts (using {word})
+  {
+    id: '5',
     name: 'Definition',
     prompt: 'What is the definition of \'{word}\' in {speech_language_code}?',
     modelId: '',
     type: 'word',
   },
   {
-    id: '5',
-    name: 'Translate Word',
-    prompt: 'Can you translate \'{word}\' into {translation_language_code}?',
-    modelId: '',
-    type: 'word',
-  },
-  {
     id: '6',
-    name: 'Example Sentences',
-    prompt: 'Please use \'{word}\' in example sentences in {speech_language_code}.',
+    name: 'Translation',
+    prompt: 'Translate the word \'{word}\' from {speech_language_code} to {translation_language_code}.',
     modelId: '',
     type: 'word',
   },
   {
     id: '7',
-    name: 'Synonyms & Antonyms',
-    prompt: 'What are synonyms and antonyms of \'{word}\' in {speech_language_code}?',
+    name: 'Example Sentences',
+    prompt: 'Provide 3 example sentences using the word \'{word}\' in {speech_language_code}.',
     modelId: '',
     type: 'word',
   },
   {
     id: '8',
-    name: 'Word Forms',
-    prompt: 'What are the different forms of \'{word}\' (e.g., noun, verb, adjective) in {speech_language_code}?',
+    name: 'Synonyms & Antonyms',
+    prompt: 'List the synonyms and antonyms of \'{word}\' in {speech_language_code}.',
     modelId: '',
     type: 'word',
   },
   {
     id: '9',
-    name: 'Compare Words',
-    prompt: 'How does \'{word}\' compare to similar words in {speech_language_code}, and what are the differences?',
+    name: 'Word Forms',
+    prompt: 'Show all grammatical forms of the word \'{word}\' in {speech_language_code} (noun, verb, adjective, etc.).',
     modelId: '',
     type: 'word',
   },
+  {
+    id: '10',
+    name: 'Word Usage',
+    prompt: 'Explain how to properly use \'{word}\' in {speech_language_code}, including common collocations and phrases.',
+    modelId: '',
+    type: 'word',
+  }
 ];
 
 // Documentation for variables in prompts and actions
@@ -233,7 +240,14 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'listenify-settings',
-      version: 2,
+      version: 3,
+      onRehydrateStorage: () => {
+        return (state) => {
+          if (state) {
+            state.prompts = defaultPrompts;
+          }
+        };
+      },
     }
   )
 );
