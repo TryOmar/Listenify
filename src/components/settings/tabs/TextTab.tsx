@@ -22,7 +22,16 @@ export function TextTab() {
   return (
     <section className="space-y-4">
       <h3 className="text-lg font-semibold">Text Selection Actions</h3>
-      
+
+      <div className="text-sm text-gray-500 mb-4">
+        <p>Available placeholders:</p>
+        <ul className="list-disc list-inside mt-1">
+          <li><code>{'{text}'}</code> - Selected text</li>
+          <li><code>{'{speech_language_code}'}</code> - Speech language (e.g., 'en')</li>
+          <li><code>{'{translation_language_code}'}</code> - Translation language (e.g., 'ar')</li>
+        </ul>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-[1fr,1fr,auto] gap-4">
           <input
@@ -34,7 +43,7 @@ export function TextTab() {
           />
           <input
             type="text"
-            placeholder="URL Template (use {text})"
+            placeholder="URL Template (use placeholders)"
             value={newAction.url}
             onChange={(e) => setNewAction({ ...newAction, url: e.target.value })}
             className="px-3 py-2 border rounded-lg"

@@ -16,19 +16,36 @@ export function GeneralTab() {
       <h3 className="text-lg font-semibold">General Settings</h3>
 
       <div className="space-y-4">
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium">Interface Language</label>
-          <select
-            value={general.language}
-            onChange={(e) => updateGeneralSettings({ language: e.target.value })}
-            className="px-3 py-2 border rounded-lg"
-          >
-            {LANGUAGES.map((lang) => (
-              <option key={lang.value} value={lang.value}>
-                {lang.label}
-              </option>
-            ))}
-          </select>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium">Speech Language</label>
+            <select
+              value={general.speechLanguage}
+              onChange={(e) => updateGeneralSettings({ speechLanguage: e.target.value })}
+              className="px-3 py-2 border rounded-lg"
+            >
+              {LANGUAGES.map((lang) => (
+                <option key={lang.value} value={lang.value}>
+                  {lang.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium">Translation Language</label>
+            <select
+              value={general.translationLanguage}
+              onChange={(e) => updateGeneralSettings({ translationLanguage: e.target.value })}
+              className="px-3 py-2 border rounded-lg"
+            >
+              {LANGUAGES.map((lang) => (
+                <option key={lang.value} value={lang.value}>
+                  {lang.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="flex items-center justify-between">

@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export interface GeneralSettings {
-  language: string;
+  speechLanguage: string;
+  translationLanguage: string;
   theme: 'light' | 'dark';
   fontSize: number;
   maxWords: number;
@@ -63,7 +64,8 @@ interface SettingsState {
 }
 
 const defaultGeneralSettings: GeneralSettings = {
-  language: 'en',
+  speechLanguage: 'en',
+  translationLanguage: 'ar',
   theme: 'light',
   fontSize: 16,
   maxWords: 100,
@@ -73,7 +75,7 @@ const defaultPopupActions: PopupAction[] = [
   {
     id: '1',
     name: 'Google Translate',
-    url: 'https://translate.google.com/?sl=en&tl=ar&text={word}',
+    url: 'https://translate.google.com/?sl={speech_language_code}&tl={translation_language_code}&text={word}',
     icon: '🌐',
   },
   {
@@ -94,7 +96,7 @@ const defaultTextActions: TextAction[] = [
   {
     id: '1',
     name: 'Google Translate',
-    url: 'https://translate.google.com/?sl=en&tl=ar&text={text}',
+    url: 'https://translate.google.com/?sl={speech_language_code}&tl={translation_language_code}&text={text}',
     icon: '🌐',
   },
 ];

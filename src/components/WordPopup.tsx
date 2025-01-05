@@ -8,7 +8,14 @@ interface WordPopupProps {
 }
 
 export function WordPopup({ word }: WordPopupProps) {
-  const { popupActions } = useSettingsStore();
+  const { popupActions, general } = useSettingsStore();
+
+  const getProcessedUrl = (url: string, word: string) => {
+    return url
+      .replace('{word}', encodeURIComponent(word))
+      .replace('{speech_language_code}', general.speechLanguage)
+      .replace('{translation_language_code}', general.translationLanguage);
+  };
 
   return (
     <Popover.Root>
@@ -26,7 +33,7 @@ export function WordPopup({ word }: WordPopupProps) {
             {popupActions.map((action) => (
               <a
                 key={action.id}
-                href={action.url.replace('{word}', encodeURIComponent(word))}
+                href={getProcessedUrl(action.url, word)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded transition-colors"
