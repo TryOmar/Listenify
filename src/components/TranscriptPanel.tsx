@@ -69,20 +69,17 @@ export function TranscriptPanel() {
 
   // Effect to update displayed transcript when maxWords changes
   useEffect(() => {
-    // Get all available words from either fullTranscript or current transcript
-    const allWords = fullTranscriptRef.current.length > 0
-      ? fullTranscriptRef.current
-      : transcript.split(/\s+/).filter(Boolean);
+    // Get all words from current transcript
+    const allWords = transcript.split(/\s+/).filter(Boolean);
 
-    // Store in fullTranscript if not already there
-    if (fullTranscriptRef.current.length === 0 && allWords.length > 0) {
-      fullTranscriptRef.current = allWords.slice(-5000);
+    // If word count exceeds maxWords, clear and start fresh
+    if (allWords.length > maxWords) {
+      finalTranscriptRef.current = '';
+      fullTranscriptRef.current = [];
+      setTranscript('');
+      addToast('Maximum words reached, starting fresh', 'info');
     }
-
-    // Update displayed transcript with last maxWords
-    const displayedWords = allWords.slice(-maxWords);
-    setTranscript(displayedWords.join(' '));
-  }, [maxWords, transcript, setTranscript]);
+  }, [maxWords, transcript, setTranscript, addToast]);
 
   useEffect(() => {
     if (window.SpeechRecognition || window.webkitSpeechRecognition) {
@@ -110,21 +107,37 @@ export function TranscriptPanel() {
         // Store interim transcript for reference
         interimTranscriptRef.current = interimTranscript;
 
-        // Update full transcript (limited to 5000 words)
+        // Get all words
         const allWords = (finalTranscript + ' ' + interimTranscript).trim().split(/\s+/);
-        fullTranscriptRef.current = allWords.slice(-5000);
 
-        // Display only the last maxWords
-        const displayedWords = fullTranscriptRef.current.slice(-maxWords);
-        setTranscript(displayedWords.join(' '));
+        // If word count exceeds maxWords, clear and start fresh
+        if (allWords.length > maxWords) {
+          finalTranscriptRef.current = '';
+          fullTranscriptRef.current = [];
+          setTranscript('');
+          addToast('Maximum words reached, starting fresh', 'info');
+        } else {
+          // Update transcript normally
+          fullTranscriptRef.current = allWords;
+          setTranscript(allWords.join(' '));
+        }
       };
 
       recognition.onend = () => {
         // When speech recognition ends, update the final transcript
         const allWords = finalTranscriptRef.current.trim().split(/\s+/);
-        fullTranscriptRef.current = allWords.slice(-5000);
-        const displayedWords = fullTranscriptRef.current.slice(-maxWords);
-        setTranscript(displayedWords.join(' '));
+
+        // If word count exceeds maxWords, clear and start fresh
+        if (allWords.length > maxWords) {
+          finalTranscriptRef.current = '';
+          fullTranscriptRef.current = [];
+          setTranscript('');
+          addToast('Maximum words reached, starting fresh', 'info');
+        } else {
+          // Update transcript normally
+          fullTranscriptRef.current = allWords;
+          setTranscript(allWords.join(' '));
+        }
       };
 
       setRecognition(recognition);
