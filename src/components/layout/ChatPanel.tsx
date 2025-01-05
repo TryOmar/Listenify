@@ -94,13 +94,13 @@ export function ChatPanel() {
                                         <ReactMarkdown
                                             remarkPlugins={[remarkGfm]}
                                             components={{
-                                                // Style code blocks
-                                                code({ node, inline, className, children, ...props }) {
+                                                code({ inline, className, children, ...props }) {
                                                     return (
                                                         <code
                                                             className={cn(
                                                                 'bg-gray-200 rounded px-1',
-                                                                !inline && 'block bg-gray-800 text-gray-100 p-2 my-2'
+                                                                !inline && 'block bg-gray-800 text-gray-100 p-2 my-2',
+                                                                className
                                                             )}
                                                             {...props}
                                                         >
@@ -108,8 +108,7 @@ export function ChatPanel() {
                                                         </code>
                                                     );
                                                 },
-                                                // Style links
-                                                a({ node, children, ...props }) {
+                                                a({ children, ...props }) {
                                                     return (
                                                         <a
                                                             className="text-blue-600 hover:underline"
@@ -137,13 +136,25 @@ export function ChatPanel() {
             {/* Message Input */}
             <form onSubmit={handleSend} className="p-4 border-t">
                 <div className="flex gap-2">
-                    <input
-                        type="text"
+                    <textarea
                         value={newMessage}
                         onChange={e => setNewMessage(e.target.value)}
-                        placeholder={isLoading ? 'AI is thinking...' : 'Type a message...'}
+                        onKeyDown={e => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSend(e);
+                            }
+                        }}
+                        placeholder={isLoading ? 'AI is thinking...' : 'Type a message... (Shift + Enter for new line)'}
                         disabled={isLoading}
-                        className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                        rows={1}
+                        className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 resize-none"
+                        style={{
+                            minHeight: '42px',
+                            maxHeight: '200px',
+                            height: 'auto',
+                            overflowY: 'auto'
+                        }}
                     />
                     <button
                         type="submit"
