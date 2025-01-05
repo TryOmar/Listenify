@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useSettingsStore } from '../../../store/useSettingsStore';
-import type { PopupAction } from '../../../store/useSettingsStore';
+import type { Action } from '../../../store/useSettingsStore';
 
 export function WordsTab() {
-  const { popupActions, addPopupAction, removePopupAction } = useSettingsStore();
-  const [newAction, setNewAction] = useState<Omit<PopupAction, 'id'>>({
+  const { actions, addWordAction, removeWordAction } = useSettingsStore();
+  const [newAction, setNewAction] = useState<Omit<Action, 'id'>>({
     name: '',
     url: '',
     icon: '🔗',
@@ -14,7 +14,7 @@ export function WordsTab() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newAction.name && newAction.url) {
-      addPopupAction(newAction);
+      addWordAction(newAction);
       setNewAction({ name: '', url: '', icon: '🔗' });
     }
   };
@@ -66,19 +66,19 @@ export function WordsTab() {
       </form>
 
       <div className="space-y-2">
-        {popupActions.map((action) => (
+        {actions.word.map((action) => (
           <div
             key={action.id}
-            className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg"
+            className="flex items-center gap-2 p-4 bg-gray-50 rounded-lg"
           >
             <span className="w-8 text-center">{action.icon}</span>
             <span className="flex-1">{action.name}</span>
             <span className="flex-1 text-gray-500 truncate">{action.url}</span>
             <button
-              onClick={() => removePopupAction(action.id)}
-              className="p-1 text-red-500 hover:bg-red-50 rounded"
+              onClick={() => removeWordAction(action.id)}
+              className="p-2 text-red-500 hover:bg-red-50 rounded"
             >
-              <Trash2 size={16} />
+              <Trash2 size={20} />
             </button>
           </div>
         ))}

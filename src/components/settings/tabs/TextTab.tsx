@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useSettingsStore } from '../../../store/useSettingsStore';
-import type { TextAction } from '../../../store/useSettingsStore';
+import type { Action } from '../../../store/useSettingsStore';
 
 export function TextTab() {
-  const { textActions, addTextAction, removeTextAction } = useSettingsStore();
-  const [newAction, setNewAction] = useState<Omit<TextAction, 'id'>>({
+  const { actions, addTextAction, removeTextAction } = useSettingsStore();
+  const [newAction, setNewAction] = useState<Omit<Action, 'id'>>({
     name: '',
     url: '',
     icon: '🔗',
@@ -66,7 +66,7 @@ export function TextTab() {
       </form>
 
       <div className="space-y-2">
-        {textActions.map((action) => (
+        {actions.text.map((action) => (
           <div
             key={action.id}
             className="flex items-center gap-2 p-4 bg-gray-50 rounded-lg"

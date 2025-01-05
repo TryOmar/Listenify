@@ -9,60 +9,49 @@ export interface GeneralSettings {
   maxWords: number;
 }
 
-export interface PopupAction {
+export interface Action {
   id: string;
   name: string;
   url: string;
   icon: string;
 }
 
-export interface TextAction {
-  id: string;
-  name: string;
-  url: string;
-  icon: string;
-}
-
-export interface AIModel {
-  id: string;
-  name: string;
-  model: string;
-  apiKey: string;
-}
-
-export interface AIAction {
+export interface AIPrompt {
   id: string;
   name: string;
   prompt: string;
   modelId: string;
+  type: 'word' | 'text';  // Simplified type to clearly indicate where it should appear
 }
 
 interface SettingsState {
   general: GeneralSettings;
-  popupActions: PopupAction[];
-  textActions: TextAction[];
-  aiModels: AIModel[];
-  aiActions: AIAction[];
+  actions: {
+    word: Action[];    // Actions for single word clicks
+    text: Action[];    // Actions for text selection
+  };
+  prompts: AIPrompt[];
+  aiModels: {
+    id: string;
+    name: string;
+    model: string;
+    apiKey: string;
+  }[];
   activeModelId: string | null;
 
   // Actions
   updateGeneralSettings: (settings: Partial<GeneralSettings>) => void;
-  addPopupAction: (action: Omit<PopupAction, 'id'>) => void;
-  removePopupAction: (id: string) => void;
-  updatePopupAction: (id: string, action: Partial<PopupAction>) => void;
-  addTextAction: (action: Omit<TextAction, 'id'>) => void;
+  addTextAction: (action: Omit<Action, 'id'>) => void;
   removeTextAction: (id: string) => void;
-  updateTextAction: (id: string, action: Partial<TextAction>) => void;
-  addAIModel: (model: Omit<AIModel, 'id'>) => void;
-  removeAIModel: (id: string) => void;
-  updateAIModel: (id: string, model: Partial<AIModel>) => void;
+  addWordAction: (action: Omit<Action, 'id'>) => void;
+  removeWordAction: (id: string) => void;
+  updatePrompts: (prompts: AIPrompt[]) => void;
+  updateAIModels: (models: { id: string; name: string; model: string; apiKey: string; }[]) => void;
   setActiveModel: (id: string | null) => void;
-  addAIAction: (action: Omit<AIAction, 'id'>) => void;
-  removeAIAction: (id: string) => void;
-  updateAIAction: (id: string, action: Partial<AIAction>) => void;
   resetToDefaults: () => void;
 }
 
+// Default settings
 const defaultGeneralSettings: GeneralSettings = {
   speechLanguage: 'en',
   translationLanguage: 'ar',
@@ -71,77 +60,120 @@ const defaultGeneralSettings: GeneralSettings = {
   maxWords: 100,
 };
 
-const defaultPopupActions: PopupAction[] = [
-  {
-    id: '1',
-    name: 'Google Translate',
-    url: 'https://translate.google.com/?sl={speech_language_code}&tl={translation_language_code}&text={word}',
-    icon: '🌐',
-  },
-  {
-    id: '2',
-    name: 'Google Images',
-    url: 'https://www.google.com/search?tbm=isch&q={word}',
-    icon: '🖼️',
-  },
-  {
-    id: '3',
-    name: 'Dictionary.com',
-    url: 'https://www.dictionary.com/browse/{word}',
-    icon: '📚',
-  },
-];
+const defaultActions = {
+  word: [
+    {
+      id: '1',
+      name: 'Google Translate',
+      url: 'https://translate.google.com/?sl={speech_language_code}&tl={translation_language_code}&text={word}',
+      icon: '🌐',
+    },
+    {
+      id: '2',
+      name: 'Google Images',
+      url: 'https://www.google.com/search?tbm=isch&q={word}',
+      icon: '🖼️',
+    },
+    {
+      id: '3',
+      name: 'Dictionary.com',
+      url: 'https://www.dictionary.com/browse/{word}',
+      icon: '📚',
+    },
+  ],
+  text: [
+    {
+      id: '1',
+      name: 'Google Translate',
+      url: 'https://translate.google.com/?sl={speech_language_code}&tl={translation_language_code}&text={text}',
+      icon: '🌐',
+    },
+  ],
+};
 
-const defaultTextActions: TextAction[] = [
+const defaultPrompts: AIPrompt[] = [
+  // Text-based prompts
   {
     id: '1',
-    name: 'Google Translate',
-    url: 'https://translate.google.com/?sl={speech_language_code}&tl={translation_language_code}&text={text}',
-    icon: '🌐',
-  },
-];
-
-const defaultAIActions: AIAction[] = [
-  {
-    id: '1',
-    name: 'Translate to English',
+    name: 'Translate Text',
     prompt: 'Please translate this text into English:\n\n{text}',
     modelId: '',
+    type: 'text',
   },
   {
     id: '2',
     name: 'Summarize',
     prompt: 'Please summarize this text into bullet points:\n\n{text}',
     modelId: '',
+    type: 'text',
   },
   {
     id: '3',
     name: 'Rephrase',
     prompt: 'Please rephrase this text in a different way while maintaining its meaning:\n\n{text}',
     modelId: '',
+    type: 'text',
   },
+  // Word-based prompts
   {
     id: '4',
-    name: 'Explain Simply',
-    prompt: 'Please explain this text in simple terms that anyone can understand:\n\n{text}',
+    name: 'Definition',
+    prompt: 'What is the definition of \'{word}\' in {speech_language_code}?',
     modelId: '',
+    type: 'word',
   },
   {
     id: '5',
-    name: 'Find Key Points',
-    prompt: 'Please identify and list the key points from this text:\n\n{text}',
+    name: 'Translate Word',
+    prompt: 'Can you translate \'{word}\' into {translation_language_code}?',
     modelId: '',
+    type: 'word',
+  },
+  {
+    id: '6',
+    name: 'Example Sentences',
+    prompt: 'Please use \'{word}\' in example sentences in {speech_language_code}.',
+    modelId: '',
+    type: 'word',
+  },
+  {
+    id: '7',
+    name: 'Synonyms & Antonyms',
+    prompt: 'What are synonyms and antonyms of \'{word}\' in {speech_language_code}?',
+    modelId: '',
+    type: 'word',
+  },
+  {
+    id: '8',
+    name: 'Word Forms',
+    prompt: 'What are the different forms of \'{word}\' (e.g., noun, verb, adjective) in {speech_language_code}?',
+    modelId: '',
+    type: 'word',
+  },
+  {
+    id: '9',
+    name: 'Compare Words',
+    prompt: 'How does \'{word}\' compare to similar words in {speech_language_code}, and what are the differences?',
+    modelId: '',
+    type: 'word',
   },
 ];
+
+// Documentation for variables in prompts and actions
+export const VARIABLES_DOC = {
+  word: 'Selected single word - use in word popup prompts',
+  text: 'Selected text - use in text selection prompts',
+  speech_language_code: 'Speech language code (e.g., "en")',
+  translation_language_code: 'Translation language code (e.g., "ar")',
+};
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       general: defaultGeneralSettings,
-      popupActions: defaultPopupActions,
-      textActions: defaultTextActions,
+      actions: defaultActions,
+      prompts: defaultPrompts,
       aiModels: [],
-      aiActions: defaultAIActions,
       activeModelId: null,
 
       updateGeneralSettings: (settings) =>
@@ -149,81 +181,59 @@ export const useSettingsStore = create<SettingsState>()(
           general: { ...state.general, ...settings },
         })),
 
-      addPopupAction: (action) =>
-        set((state) => ({
-          popupActions: [...state.popupActions, { ...action, id: crypto.randomUUID() }],
-        })),
-      removePopupAction: (id) =>
-        set((state) => ({
-          popupActions: state.popupActions.filter((action) => action.id !== id),
-        })),
-      updatePopupAction: (id, action) =>
-        set((state) => ({
-          popupActions: state.popupActions.map((a) =>
-            a.id === id ? { ...a, ...action } : a
-          ),
-        })),
-
       addTextAction: (action) =>
         set((state) => ({
-          textActions: [...state.textActions, { ...action, id: crypto.randomUUID() }],
+          actions: {
+            ...state.actions,
+            text: [...state.actions.text, { ...action, id: crypto.randomUUID() }],
+          },
         })),
+
       removeTextAction: (id) =>
         set((state) => ({
-          textActions: state.textActions.filter((action) => action.id !== id),
-        })),
-      updateTextAction: (id, action) =>
-        set((state) => ({
-          textActions: state.textActions.map((a) =>
-            a.id === id ? { ...a, ...action } : a
-          ),
+          actions: {
+            ...state.actions,
+            text: state.actions.text.filter(a => a.id !== id),
+          },
         })),
 
-      addAIModel: (model) =>
+      addWordAction: (action) =>
         set((state) => ({
-          aiModels: [...state.aiModels, { ...model, id: crypto.randomUUID() }],
+          actions: {
+            ...state.actions,
+            word: [...state.actions.word, { ...action, id: crypto.randomUUID() }],
+          },
         })),
-      removeAIModel: (id) =>
+
+      removeWordAction: (id) =>
         set((state) => ({
-          aiModels: state.aiModels.filter((model) => model.id !== id),
-          activeModelId: state.activeModelId === id ? null : state.activeModelId,
+          actions: {
+            ...state.actions,
+            word: state.actions.word.filter(a => a.id !== id),
+          },
         })),
-      updateAIModel: (id, model) =>
-        set((state) => ({
-          aiModels: state.aiModels.map((m) =>
-            m.id === id ? { ...m, ...model } : m
-          ),
-        })),
+
+      updatePrompts: (prompts) =>
+        set({ prompts }),
+
+      updateAIModels: (models) =>
+        set({ aiModels: models }),
+
       setActiveModel: (id) =>
         set({ activeModelId: id }),
-
-      addAIAction: (action) =>
-        set((state) => ({
-          aiActions: [...state.aiActions, { ...action, id: crypto.randomUUID() }],
-        })),
-      removeAIAction: (id) =>
-        set((state) => ({
-          aiActions: state.aiActions.filter((action) => action.id !== id),
-        })),
-      updateAIAction: (id, action) =>
-        set((state) => ({
-          aiActions: state.aiActions.map((a) =>
-            a.id === id ? { ...a, ...action } : a
-          ),
-        })),
 
       resetToDefaults: () =>
         set({
           general: defaultGeneralSettings,
-          popupActions: defaultPopupActions,
-          textActions: defaultTextActions,
+          actions: defaultActions,
+          prompts: defaultPrompts,
           aiModels: [],
-          aiActions: defaultAIActions,
           activeModelId: null,
         }),
     }),
     {
       name: 'listenify-settings',
+      version: 2,
     }
   )
 );
