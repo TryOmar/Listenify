@@ -7,6 +7,7 @@ import { TextSelectionPopup } from './TextSelectionPopup';
 import { SettingsDialog } from './settings/SettingsDialog';
 import { useChatStore } from '../store/useChatStore';
 import { usePanelStore } from '../store/usePanelStore';
+import { useToastStore } from '../store/useToastStore';
 
 type SpeechRecognitionResult = {
   isFinal: boolean;
@@ -62,6 +63,7 @@ export function TranscriptPanel() {
   const [selectionPosition, setSelectionPosition] = useState<{ x: number; y: number } | null>(null);
   const { addMessage } = useChatStore();
   const { isChatPanelOpen, openChatPanel } = usePanelStore();
+  const { addToast } = useToastStore();
 
   // Effect to update displayed transcript when maxWords changes
   useEffect(() => {
@@ -131,10 +133,12 @@ export function TranscriptPanel() {
 
     if (isListening) {
       recognition.stop();
+      addToast('Microphone stopped', 'info');
     } else {
       finalTranscriptRef.current = transcript;
       fullTranscriptRef.current = transcript.split(/\s+/).filter(Boolean);
       recognition.start();
+      addToast('Microphone started', 'success');
     }
     setIsListening(!isListening);
   };
@@ -144,10 +148,12 @@ export function TranscriptPanel() {
     interimTranscriptRef.current = '';
     finalTranscriptRef.current = '';
     fullTranscriptRef.current = [];
+    addToast('Transcript cleared', 'info');
   };
 
   const handleCopyTranscript = () => {
     navigator.clipboard.writeText(transcript);
+    addToast('Transcript copied to clipboard', 'success');
   };
 
   const renderTranscript = () => {
