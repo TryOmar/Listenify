@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Mic, MicOff, Trash2 } from 'lucide-react';
+import { Mic, MicOff, Trash2, Copy } from 'lucide-react';
 import { useTranscriptStore } from '../store/useTranscriptStore';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { WordPopup } from './WordPopup';
@@ -139,6 +139,10 @@ export function TranscriptPanel() {
     fullTranscriptRef.current = [];
   };
 
+  const handleCopyTranscript = () => {
+    navigator.clipboard.writeText(transcript);
+  };
+
   const renderTranscript = () => {
     return transcript.split(/\s+/).filter(Boolean).map((word, index) => (
       <WordPopup key={`${word}-${index}`} word={word} />
@@ -155,7 +159,12 @@ export function TranscriptPanel() {
   return (
     <div className="flex flex-col h-full bg-white">
       <div className="flex justify-between items-center p-4 border-b">
-        <h2 className="text-lg font-semibold">Live Transcription</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-lg font-semibold">Live Transcription</h2>
+          <span className="text-sm text-gray-500">
+            {transcript.split(/\s+/).filter(Boolean).length} / {maxWords} words
+          </span>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={toggleListening}
@@ -163,6 +172,13 @@ export function TranscriptPanel() {
               } text-white transition-colors`}
           >
             {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+          </button>
+          <button
+            onClick={handleCopyTranscript}
+            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+            title="Copy transcript"
+          >
+            <Copy size={20} />
           </button>
           <button
             onClick={handleClearTranscript}
