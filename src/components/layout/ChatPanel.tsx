@@ -62,7 +62,7 @@ export function ChatPanel() {
     return (
         <div className="h-full flex flex-col">
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 hide-scrollbar">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
                 {messages.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-gray-500">
                         <MessageSquare size={40} className="mb-2 opacity-50" />
