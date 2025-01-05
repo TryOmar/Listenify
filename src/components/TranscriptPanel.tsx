@@ -138,6 +138,11 @@ export function TranscriptPanel() {
           fullTranscriptRef.current = allWords;
           setTranscript(allWords.join(' '));
         }
+
+        // Restart recognition if it's still supposed to be listening
+        if (isListening) {
+          recognition.start();
+        }
       };
 
       setRecognition(recognition);
