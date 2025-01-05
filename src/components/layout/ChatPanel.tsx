@@ -1,15 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, MessageSquare } from 'lucide-react';
 import { cn } from '../../lib/utils';
-
-interface Message {
-    id: string;
-    text: string;
-    sender: 'user' | 'ai';
-}
+import { useChatStore } from '../../store/useChatStore';
 
 export function ChatPanel() {
-    const [messages, setMessages] = useState<Message[]>([]);
+    const { messages, addMessage } = useChatStore();
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -25,23 +20,12 @@ export function ChatPanel() {
         e.preventDefault();
         if (!newMessage.trim()) return;
 
-        const userMessage: Message = {
-            id: crypto.randomUUID(),
-            text: newMessage,
-            sender: 'user',
-        };
-
-        setMessages(prev => [...prev, userMessage]);
+        addMessage(newMessage, 'user');
         setNewMessage('');
 
         // Simulate AI response
         setTimeout(() => {
-            const aiMessage: Message = {
-                id: crypto.randomUUID(),
-                text: 'This is a simulated AI response.',
-                sender: 'ai',
-            };
-            setMessages(prev => [...prev, aiMessage]);
+            addMessage('This is a simulated AI response.', 'ai');
         }, 1000);
     };
 

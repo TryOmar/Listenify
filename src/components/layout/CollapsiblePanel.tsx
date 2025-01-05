@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { cn } from '../../lib/utils';
 import { ChevronLeft, ChevronRight, ListMusic, MessageSquare } from 'lucide-react';
+import { usePanelStore } from '../../store/usePanelStore';
 
 interface CollapsiblePanelProps {
     children: React.ReactNode;
@@ -29,6 +30,7 @@ export function CollapsiblePanel({
     const [isHovered, setIsHovered] = useState(false);
     const [startX, setStartX] = useState(0);
     const [startWidth, setStartWidth] = useState(0);
+    const { isChatPanelOpen, toggleChatPanel } = usePanelStore();
 
     // Load saved width from localStorage
     useEffect(() => {
@@ -39,6 +41,14 @@ export function CollapsiblePanel({
             setIsVisible(parsedWidth > MIN_VISIBLE_WIDTH);
         }
     }, [storageKey]);
+
+    // Sync chat panel state
+    useEffect(() => {
+        if (side === 'right') {
+            setIsVisible(isChatPanelOpen);
+            setWidth(isChatPanelOpen ? DEFAULT_WIDTH : 0);
+        }
+    }, [side, isChatPanelOpen]);
 
     // Save width to localStorage when it changes
     useEffect(() => {
@@ -98,12 +108,16 @@ export function CollapsiblePanel({
     }, [isResizing, side, maxAllowedWidth, startX, startWidth, onWidthChange]);
 
     const togglePanel = () => {
-        if (isVisible) {
-            setWidth(0);
-            setIsVisible(false);
+        if (side === 'right') {
+            toggleChatPanel();
         } else {
-            setWidth(DEFAULT_WIDTH);
-            setIsVisible(true);
+            if (isVisible) {
+                setWidth(0);
+                setIsVisible(false);
+            } else {
+                setWidth(DEFAULT_WIDTH);
+                setIsVisible(true);
+            }
         }
     };
 

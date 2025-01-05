@@ -1,9 +1,12 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Mic, MicOff, Trash2, Copy } from 'lucide-react';
 import { useTranscriptStore } from '../store/useTranscriptStore';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { WordPopup } from './WordPopup';
+import { TextSelectionPopup } from './TextSelectionPopup';
 import { SettingsDialog } from './settings/SettingsDialog';
+import { useChatStore } from '../store/useChatStore';
+import { usePanelStore } from '../store/usePanelStore';
 
 type SpeechRecognitionResult = {
   isFinal: boolean;
@@ -55,6 +58,10 @@ export function TranscriptPanel() {
   const interimTranscriptRef = useRef<string>('');
   const finalTranscriptRef = useRef<string>('');
   const fullTranscriptRef = useRef<string[]>([]);
+  const [selectedText, setSelectedText] = useState('');
+  const [selectionPosition, setSelectionPosition] = useState<{ x: number; y: number } | null>(null);
+  const { addMessage } = useChatStore();
+  const { isChatPanelOpen, openChatPanel } = usePanelStore();
 
   // Effect to update displayed transcript when maxWords changes
   useEffect(() => {
@@ -144,9 +151,16 @@ export function TranscriptPanel() {
   };
 
   const renderTranscript = () => {
-    return transcript.split(/\s+/).filter(Boolean).map((word, index) => (
-      <WordPopup key={`${word}-${index}`} word={word} />
-    ));
+    // Split by spaces but keep the spaces in the array
+    const words = transcript.match(/\S+|\s+/g) || [];
+    return words.map((word, index) => {
+      // If it's a space, render it directly
+      if (/^\s+$/.test(word)) {
+        return <span key={`space-${index}`}>{word}</span>;
+      }
+      // Otherwise render the word with popup
+      return <WordPopup key={`${word}-${index}`} word={word} />;
+    });
   };
 
   // Scroll to bottom when transcript updates
@@ -155,6 +169,67 @@ export function TranscriptPanel() {
       transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
     }
   }, [transcript]);
+
+  // Add click away handler
+  useEffect(() => {
+    const handleClickAway = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // Don't clear if clicking inside the popup
+      if (target.closest('.text-selection-popup')) {
+        return;
+      }
+      // Don't clear during text selection
+      if (window.getSelection()?.toString()) {
+        return;
+      }
+      setSelectedText('');
+      setSelectionPosition(null);
+    };
+
+    document.addEventListener('mousedown', handleClickAway);
+    return () => document.removeEventListener('mousedown', handleClickAway);
+  }, []);
+
+  const handleTextSelection = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed) {
+      return;
+    }
+
+    const text = selection.toString();
+    // Only trim leading and trailing whitespace
+    if (text.trim()) {
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+
+      // Store the text with its internal spaces preserved
+      setSelectedText(text.replace(/^\s+|\s+$/g, '')); // Only trim outer spaces
+      setSelectionPosition({
+        x: rect.left + rect.width / 2,
+        y: rect.bottom + 10,
+      });
+    }
+  };
+
+  const handleAIPromptClick = (prompt: string) => {
+    if (!isChatPanelOpen) {
+      openChatPanel();
+    }
+    // Use the exact selected text in the prompt
+    const processedPrompt = prompt.replace('{text}', selectedText);
+    addMessage(processedPrompt, 'user');
+    // Simulate AI response
+    setTimeout(() => {
+      addMessage('This is a simulated AI response.', 'ai');
+    }, 1000);
+
+    // Clear selection after the action is completed
+    setTimeout(() => {
+      setSelectedText('');
+      setSelectionPosition(null);
+      window.getSelection()?.removeAllRanges();
+    }, 100);
+  };
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -192,6 +267,14 @@ export function TranscriptPanel() {
       <div
         ref={transcriptRef}
         className="flex-1 overflow-y-auto p-4"
+        onMouseUp={(e) => {
+          e.stopPropagation();
+          handleTextSelection();
+        }}
+        onTouchEnd={(e) => {
+          e.stopPropagation();
+          handleTextSelection();
+        }}
       >
         <div
           className="space-x-1"
@@ -199,6 +282,22 @@ export function TranscriptPanel() {
         >
           {renderTranscript()}
         </div>
+        {selectedText && selectionPosition && (
+          <div
+            className="text-selection-popup fixed"
+            style={{
+              left: `${selectionPosition.x}px`,
+              top: `${selectionPosition.y}px`,
+              transform: 'translate(-50%, 0)',
+              zIndex: 50,
+            }}
+          >
+            <TextSelectionPopup
+              selectedText={selectedText}
+              onAIPromptClick={handleAIPromptClick}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
