@@ -25,8 +25,8 @@ export interface TextAction {
 export interface AIModel {
   id: string;
   name: string;
+  model: string;
   apiKey: string;
-  baseUrl?: string;
 }
 
 export interface AIAction {
