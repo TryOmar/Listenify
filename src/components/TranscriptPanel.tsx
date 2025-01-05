@@ -8,6 +8,7 @@ import { SettingsDialog } from './settings/SettingsDialog';
 import { useChatStore } from '../store/useChatStore';
 import { usePanelStore } from '../store/usePanelStore';
 import { useToastStore } from '../store/useToastStore';
+import { generateGeminiResponse } from '../services/geminiService';
 
 type SpeechRecognitionResult = {
   isFinal: boolean;
@@ -217,17 +218,33 @@ export function TranscriptPanel() {
     }
   };
 
-  const handleAIPromptClick = (prompt: string) => {
+  const handleAIPromptClick = async (prompt: string) => {
     if (!isChatPanelOpen) {
       openChatPanel();
     }
-    // Use the exact selected text in the prompt
-    const processedPrompt = prompt.replace('{text}', selectedText);
-    addMessage(processedPrompt, 'user');
-    // Simulate AI response
-    setTimeout(() => {
-      addMessage('This is a simulated AI response.', 'ai');
-    }, 1000);
+
+    // Add user's prompt to chat
+    addMessage(prompt, 'user');
+
+    const activeModel = useSettingsStore.getState().aiModels.find(
+      model => model.id === useSettingsStore.getState().activeModelId
+    );
+
+    try {
+      if (activeModel?.model === 'gemini' && activeModel.apiKey) {
+        // Use Gemini
+        const response = await generateGeminiResponse(prompt, activeModel.apiKey);
+        addMessage(response, 'ai');
+      } else {
+        // Fallback to simulation
+        setTimeout(() => {
+          addMessage('Please configure an AI model in settings.', 'ai');
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Error generating response:', error);
+      addToast('Error generating AI response', 'error');
+    }
 
     // Clear selection after the action is completed
     setTimeout(() => {

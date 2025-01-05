@@ -4,6 +4,8 @@ import { ExternalLink } from 'lucide-react';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { useChatStore } from '../store/useChatStore';
 import { usePanelStore } from '../store/usePanelStore';
+import { useToastStore } from '../store/useToastStore';
+import { generateGeminiResponse } from '../services/geminiService';
 
 interface WordPopupProps {
   word: string;
@@ -13,6 +15,7 @@ export function WordPopup({ word }: WordPopupProps) {
   const { actions, prompts, general } = useSettingsStore();
   const { addMessage } = useChatStore();
   const { isChatPanelOpen, openChatPanel } = usePanelStore();
+  const { addToast } = useToastStore();
 
   const getProcessedUrl = (url: string) => {
     return url
@@ -21,7 +24,7 @@ export function WordPopup({ word }: WordPopupProps) {
       .replace('{translation_language_code}', general.translationLanguage);
   };
 
-  const handleAIPromptClick = (prompt: string) => {
+  const handleAIPromptClick = async (prompt: string) => {
     // Open chat panel if it's closed
     if (!isChatPanelOpen) {
       openChatPanel();
@@ -33,11 +36,28 @@ export function WordPopup({ word }: WordPopupProps) {
       .replace('{speech_language_code}', general.speechLanguage)
       .replace('{translation_language_code}', general.translationLanguage);
 
+    // Add user's prompt to chat
     addMessage(processedPrompt, 'user');
-    // Simulate AI response
-    setTimeout(() => {
-      addMessage('This is a simulated AI response.', 'ai');
-    }, 1000);
+
+    const activeModel = useSettingsStore.getState().aiModels.find(
+      model => model.id === useSettingsStore.getState().activeModelId
+    );
+
+    try {
+      if (activeModel?.model === 'gemini' && activeModel.apiKey) {
+        // Use Gemini
+        const response = await generateGeminiResponse(processedPrompt, activeModel.apiKey);
+        addMessage(response, 'ai');
+      } else {
+        // Fallback to simulation
+        setTimeout(() => {
+          addMessage('Please configure an AI model in settings.', 'ai');
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Error generating response:', error);
+      addToast('Error generating AI response', 'error');
+    }
   };
 
   const wordPrompts = prompts.filter(p => p.type === 'word');

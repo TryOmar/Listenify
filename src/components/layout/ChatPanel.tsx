@@ -2,11 +2,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, MessageSquare } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useChatStore } from '../../store/useChatStore';
+import { useSettingsStore } from '../../store/useSettingsStore';
+import { useToastStore } from '../../store/useToastStore';
+import { generateGeminiResponse } from '../../services/geminiService';
 
 export function ChatPanel() {
     const { messages, addMessage } = useChatStore();
+    const { aiModels, activeModelId } = useSettingsStore();
+    const { addToast } = useToastStore();
     const [newMessage, setNewMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const activeModel = aiModels.find(model => model.id === activeModelId);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -16,17 +24,32 @@ export function ChatPanel() {
         scrollToBottom();
     }, [messages]);
 
-    const handleSend = (e: React.FormEvent) => {
+    const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newMessage.trim()) return;
+        if (!newMessage.trim() || isLoading) return;
 
+        // Add user message
         addMessage(newMessage, 'user');
         setNewMessage('');
+        setIsLoading(true);
 
-        // Simulate AI response
-        setTimeout(() => {
-            addMessage('This is a simulated AI response.', 'ai');
-        }, 1000);
+        try {
+            if (activeModel?.model === 'gemini' && activeModel.apiKey) {
+                // Use Gemini
+                const response = await generateGeminiResponse(newMessage, activeModel.apiKey);
+                addMessage(response, 'ai');
+            } else {
+                // Fallback to simulation
+                setTimeout(() => {
+                    addMessage('Please configure an AI model in settings.', 'ai');
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('Error generating response:', error);
+            addToast('Error generating AI response', 'error');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -37,6 +60,11 @@ export function ChatPanel() {
                     <div className="h-full flex flex-col items-center justify-center text-gray-500">
                         <MessageSquare size={40} className="mb-2 opacity-50" />
                         <p className="text-center">No messages yet. Start a conversation!</p>
+                        {!activeModel?.apiKey && (
+                            <p className="text-sm mt-2 text-gray-400">
+                                Note: Configure an AI model in settings to get started.
+                            </p>
+                        )}
                     </div>
                 ) : (
                     messages.map(message => (
@@ -52,7 +80,7 @@ export function ChatPanel() {
                                         : 'bg-gray-100 text-gray-700 rounded-bl-none'
                                 )}
                             >
-                                <p className="text-sm">{message.text}</p>
+                                <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                             </div>
                         </div>
                     ))
@@ -67,12 +95,14 @@ export function ChatPanel() {
                         type="text"
                         value={newMessage}
                         onChange={e => setNewMessage(e.target.value)}
-                        placeholder="Type a message..."
-                        className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder={isLoading ? 'AI is thinking...' : 'Type a message...'}
+                        disabled={isLoading}
+                        className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                     />
                     <button
                         type="submit"
-                        className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                        disabled={isLoading}
+                        className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
                     >
                         <Send size={20} />
                     </button>

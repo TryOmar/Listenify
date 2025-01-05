@@ -15,15 +15,15 @@ import { useSettingsStore } from '../../../store/useSettingsStore';
 import type { AIModel } from '../../../store/useSettingsStore';
 
 const AI_MODEL_OPTIONS = [
+  { value: 'gemini', label: 'Gemini', icon: Sparkles },
   { value: 'gpt-4', label: 'GPT-4', icon: Cpu },
   { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', icon: Zap },
-  { value: 'gemini-pro', label: 'Gemini Pro', icon: Sparkles },
   { value: 'claude-3', label: 'Claude 3', icon: Brain },
   { value: 'custom', label: 'Custom Model', icon: Settings },
 ];
 
 export function ModelsTab() {
-  const { aiModels, activeModelId, addAIModel, removeAIModel, setActiveModel } = useSettingsStore();
+  const { aiModels, activeModelId, updateAIModels, setActiveModel } = useSettingsStore();
   const [newModel, setNewModel] = useState<Omit<AIModel, 'id'>>({
     name: '',
     model: AI_MODEL_OPTIONS[0].value,
@@ -44,8 +44,17 @@ export function ModelsTab() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newModel.name && newModel.model && newModel.apiKey) {
-      addAIModel(newModel);
+      const newModelWithId = { ...newModel, id: crypto.randomUUID() };
+      updateAIModels([...aiModels, newModelWithId]);
       setNewModel({ name: '', model: AI_MODEL_OPTIONS[0].value, apiKey: '' });
+    }
+  };
+
+  const handleRemoveModel = (id: string) => {
+    const updatedModels = aiModels.filter(model => model.id !== id);
+    updateAIModels(updatedModels);
+    if (activeModelId === id) {
+      setActiveModel(null);
     }
   };
 
@@ -57,7 +66,7 @@ export function ModelsTab() {
           <div className="grid grid-cols-2 gap-4">
             <input
               type="text"
-              placeholder="Custom Name (e.g., My Work GPT-4)"
+              placeholder="Custom Name (e.g., My Gemini)"
               value={newModel.name}
               onChange={(e) => setNewModel({ ...newModel, name: e.target.value })}
               className="px-3 py-2 border rounded-lg"
@@ -102,57 +111,56 @@ export function ModelsTab() {
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Available Models</h3>
+        <h3 className="text-lg font-semibold">Configured Models</h3>
         <div className="space-y-3">
           {aiModels.map((model) => (
             <div
               key={model.id}
-              className="flex flex-col p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+              className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg"
             >
-              <div className="flex items-center gap-4">
-                <span className="text-gray-600" role="img" aria-label={model.model}>
-                  {getModelIcon(model.model)}
-                </span>
-                <button
-                  onClick={() => setActiveModel(model.id)}
-                  className={`flex-1 flex items-center gap-2 text-left ${activeModelId === model.id ? 'text-blue-600' : ''
-                    }`}
-                >
-                  <div>
-                    <h4 className="font-medium text-lg">{model.name}</h4>
-                    <p className="text-sm text-gray-500">{model.model}</p>
-                  </div>
-                  {activeModelId === model.id && (
-                    <Check size={16} className="text-blue-600 ml-2" />
-                  )}
-                </button>
+              <div className="text-gray-500">
+                {getModelIcon(model.model)}
+              </div>
+              <div className="flex-1">
+                <h4 className="font-medium">{model.name}</h4>
                 <div className="flex items-center gap-2">
+                  <input
+                    type={visibleKeys[model.id] ? "text" : "password"}
+                    value={model.apiKey}
+                    readOnly
+                    className="text-sm text-gray-500 bg-transparent border-none p-0"
+                  />
                   <button
                     onClick={() => toggleKeyVisibility(model.id)}
-                    className="p-2 text-gray-500 hover:text-gray-700 rounded"
-                    aria-label="Toggle API key visibility"
+                    className="p-1 text-gray-400 hover:text-gray-600 rounded"
                   >
-                    {visibleKeys[model.id] ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                  <button
-                    onClick={() => removeAIModel(model.id)}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded"
-                  >
-                    <Trash2 size={20} />
+                    {visibleKeys[model.id] ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
-              <div className="mt-2 flex items-center gap-2">
-                <span className="text-sm text-gray-500">API Key:</span>
-                <code className="flex-1 font-mono text-sm bg-gray-100 px-3 py-1 rounded">
-                  {visibleKeys[model.id] ? model.apiKey : '•'.repeat(20)}
-                </code>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setActiveModel(model.id)}
+                  className={`p-2 rounded ${activeModelId === model.id
+                      ? 'text-green-500 bg-green-50'
+                      : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                    }`}
+                  title={activeModelId === model.id ? 'Active Model' : 'Set as Active'}
+                >
+                  <Check size={20} />
+                </button>
+                <button
+                  onClick={() => handleRemoveModel(model.id)}
+                  className="p-2 text-red-500 hover:bg-red-50 rounded"
+                >
+                  <Trash2 size={20} />
+                </button>
               </div>
             </div>
           ))}
           {aiModels.length === 0 && (
-            <p className="text-gray-500 text-center py-4">
-              No AI models added yet. Add one above to get started.
+            <p className="text-center text-gray-500 py-4">
+              No AI models configured yet.
             </p>
           )}
         </div>
