@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageSquare } from 'lucide-react';
+import { Send, MessageSquare, Trash2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useChatStore } from '../../store/useChatStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
@@ -7,7 +7,7 @@ import { useToastStore } from '../../store/useToastStore';
 import { generateGeminiResponse } from '../../services/geminiService';
 
 export function ChatPanel() {
-    const { messages, addMessage } = useChatStore();
+    const { messages, addMessage, clearMessages } = useChatStore();
     const { aiModels, activeModelId } = useSettingsStore();
     const { addToast } = useToastStore();
     const [newMessage, setNewMessage] = useState('');
@@ -50,6 +50,11 @@ export function ChatPanel() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleClearChat = () => {
+        clearMessages();
+        addToast('Chat cleared', 'info');
     };
 
     return (
@@ -106,6 +111,17 @@ export function ChatPanel() {
                     >
                         <Send size={20} />
                     </button>
+                    {messages.length > 0 && (
+                        <button
+                            type="button"
+                            onClick={handleClearChat}
+                            disabled={isLoading}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                            title="Clear chat"
+                        >
+                            <Trash2 size={20} />
+                        </button>
+                    )}
                 </div>
             </form>
         </div>
