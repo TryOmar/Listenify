@@ -14,7 +14,7 @@ export function GeneralTab() {
   return (
     <section className="space-y-6">
       <h3 className="text-lg font-semibold">General Settings</h3>
-      
+
       <div className="space-y-4">
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Interface Language</label>
@@ -34,8 +34,8 @@ export function GeneralTab() {
         <div className="flex items-center justify-between">
           <label className="text-sm font-medium">Theme</label>
           <button
-            onClick={() => updateGeneralSettings({ 
-              theme: general.theme === 'light' ? 'dark' : 'light' 
+            onClick={() => updateGeneralSettings({
+              theme: general.theme === 'light' ? 'dark' : 'light'
             })}
             className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200"
           >
@@ -48,27 +48,10 @@ export function GeneralTab() {
           <input
             type="range"
             min="12"
-            max="24"
+            max="60"
             value={general.fontSize}
-            onChange={(e) => updateGeneralSettings({ 
-              fontSize: parseInt(e.target.value) 
-            })}
-            className="w-full"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium">
-            Line Spacing ({general.lineSpacing.toFixed(1)})
-          </label>
-          <input
-            type="range"
-            min="1"
-            max="2"
-            step="0.1"
-            value={general.lineSpacing}
-            onChange={(e) => updateGeneralSettings({ 
-              lineSpacing: parseFloat(e.target.value) 
+            onChange={(e) => updateGeneralSettings({
+              fontSize: parseInt(e.target.value)
             })}
             className="w-full"
           />
@@ -81,11 +64,11 @@ export function GeneralTab() {
           <input
             type="range"
             min="50"
-            max="500"
+            max="5000"
             step="50"
             value={general.maxWords}
-            onChange={(e) => updateGeneralSettings({ 
-              maxWords: parseInt(e.target.value) 
+            onChange={(e) => updateGeneralSettings({
+              maxWords: parseInt(e.target.value)
             })}
             className="w-full"
           />

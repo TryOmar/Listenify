@@ -102,7 +102,7 @@ export function MainLayout() {
                     minWidth: `${MIN_MAIN_PANEL_WIDTH}px`,
                 }}
             >
-                <div className="max-w-4xl mx-auto h-full px-4">
+                <div className="max-w-4xl mx-auto h-full px-4 pb-8">
                     <TranscriptPanel />
                 </div>
             </div>

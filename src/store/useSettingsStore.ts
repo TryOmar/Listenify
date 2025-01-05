@@ -5,7 +5,6 @@ export interface GeneralSettings {
   language: string;
   theme: 'light' | 'dark';
   fontSize: number;
-  lineSpacing: number;
   maxWords: number;
 }
 
@@ -44,7 +43,7 @@ interface SettingsState {
   aiModels: AIModel[];
   aiActions: AIAction[];
   activeModelId: string | null;
-  
+
   // Actions
   updateGeneralSettings: (settings: Partial<GeneralSettings>) => void;
   addPopupAction: (action: Omit<PopupAction, 'id'>) => void;
@@ -67,7 +66,6 @@ const defaultGeneralSettings: GeneralSettings = {
   language: 'en',
   theme: 'light',
   fontSize: 16,
-  lineSpacing: 1.5,
   maxWords: 100,
 };
 
