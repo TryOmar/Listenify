@@ -36,7 +36,7 @@ export function SettingsDialog() {
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 animate-in fade-in-0 z-[100]" />
-        <Dialog.Content className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[90vw] max-w-3xl max-h-[85vh] bg-white rounded-xl shadow-xl animate-in fade-in-0 zoom-in-95 z-[100]">
+        <Dialog.Content className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[90vw] max-w-5xl max-h-[85vh] bg-white rounded-xl shadow-xl animate-in fade-in-0 zoom-in-95 z-[100]">
           <Dialog.Title className="sr-only">Settings</Dialog.Title>
           <div className="flex h-[85vh]">
             {/* Sidebar */}
