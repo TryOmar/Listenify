@@ -270,7 +270,7 @@ export function TranscriptPanel() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-[50vh] bg-white">
       <div className="flex justify-between items-center p-4 border-b">
         <div className="flex items-center gap-4">
           <h2 className="text-lg font-semibold">Live Transcription</h2>
