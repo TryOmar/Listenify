@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send } from 'lucide-react';
+import { Send, MessageSquare } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 interface Message {
     id: string;
     text: string;
     sender: 'user' | 'ai';
-    timestamp: Date;
 }
 
 export function ChatPanel() {
@@ -30,7 +29,6 @@ export function ChatPanel() {
             id: crypto.randomUUID(),
             text: newMessage,
             sender: 'user',
-            timestamp: new Date(),
         };
 
         setMessages(prev => [...prev, userMessage]);
@@ -42,7 +40,6 @@ export function ChatPanel() {
                 id: crypto.randomUUID(),
                 text: 'This is a simulated AI response.',
                 sender: 'ai',
-                timestamp: new Date(),
             };
             setMessages(prev => [...prev, aiMessage]);
         }, 1000);
@@ -52,26 +49,30 @@ export function ChatPanel() {
         <div className="h-full flex flex-col">
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 hide-scrollbar">
-                {messages.map(message => (
-                    <div
-                        key={message.id}
-                        className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                        <div
-                            className={cn(
-                                'max-w-[80%] p-3 rounded-lg',
-                                message.sender === 'user'
-                                    ? 'bg-blue-500 text-white rounded-br-none'
-                                    : 'bg-gray-100 text-gray-700 rounded-bl-none'
-                            )}
-                        >
-                            <p className="text-sm">{message.text}</p>
-                            <span className="text-xs opacity-70 mt-1 block">
-                                {message.timestamp.toLocaleTimeString()}
-                            </span>
-                        </div>
+                {messages.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-gray-500">
+                        <MessageSquare size={40} className="mb-2 opacity-50" />
+                        <p className="text-center">No messages yet. Start a conversation!</p>
                     </div>
-                ))}
+                ) : (
+                    messages.map(message => (
+                        <div
+                            key={message.id}
+                            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                            <div
+                                className={cn(
+                                    'max-w-[80%] p-3 rounded-lg',
+                                    message.sender === 'user'
+                                        ? 'bg-blue-500 text-white rounded-br-none'
+                                        : 'bg-gray-100 text-gray-700 rounded-bl-none'
+                                )}
+                            >
+                                <p className="text-sm">{message.text}</p>
+                            </div>
+                        </div>
+                    ))
+                )}
                 <div ref={messagesEndRef} />
             </div>
 
