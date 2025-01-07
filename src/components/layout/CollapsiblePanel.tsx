@@ -94,13 +94,22 @@ export function CollapsiblePanel({
     const togglePanel = () => {
         if (side === 'right') {
             toggleChatPanel();
+            if (isVisible) {
+                setWidth(0);
+                onWidthChange(0);
+            } else {
+                setWidth(DEFAULT_WIDTH);
+                onWidthChange(DEFAULT_WIDTH);
+            }
         } else {
             if (isVisible) {
                 setWidth(0);
                 setIsVisible(false);
+                onWidthChange(0);
             } else {
                 setWidth(DEFAULT_WIDTH);
                 setIsVisible(true);
+                onWidthChange(DEFAULT_WIDTH);
             }
         }
     };
