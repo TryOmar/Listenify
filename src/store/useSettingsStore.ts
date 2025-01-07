@@ -163,7 +163,142 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Explain how to properly use \'{word}\' in {speech_language_code}, including common collocations and phrases.',
     modelId: '',
     type: 'word',
+  },
+  {
+    id: '11',
+    name: 'Grammar Correction',
+    prompt: 'Correct any grammatical errors in the following text in {speech_language_code}:\n\n{text}',
+    modelId: '',
+    type: 'text',
+  },
+  {
+    id: '12',
+    name: 'Tone Adjustment',
+    prompt: 'Rewrite the following text in a more formal tone in {speech_language_code}:\n\n{text}',
+    modelId: '',
+    type: 'text',
+  },
+  {
+    id: '13',
+    name: 'Question Generation',
+    prompt: 'Generate comprehension questions based on the following text in {speech_language_code}:\n\n{text}',
+    modelId: '',
+    type: 'text',
+  },
+  {
+    id: '14',
+    name: 'Idiomatic Expressions Explanation',
+    prompt: 'Identify and explain any idiomatic expressions in the following text in {speech_language_code}:\n\n{text}',
+    modelId: '',
+    type: 'text',
+  },
+  {
+    id: '15',
+    name: 'Paraphrase in Different Style',
+    prompt: 'Paraphrase the following text in a more casual style in {speech_language_code}:\n\n{text}',
+    modelId: '',
+    type: 'text',
+  },
+
+  // Additional Word-based prompts (using {word})
+  {
+    id: '16',
+    name: 'Pronunciation Guide',
+    prompt: 'Provide a pronunciation guide for \'{word}\' in {speech_language_code}, including phonetic transcription and audio references if possible.',
+    modelId: '',
+    type: 'word',
+  },
+  {
+    id: '17',
+    name: 'Etymology',
+    prompt: 'Explain the origin and historical development of the word \'{word}\' in {speech_language_code}.',
+    modelId: '',
+    type: 'word',
+  },
+  {
+    id: '18',
+    name: 'Collocations',
+    prompt: 'List common collocations for the word \'{word}\' in {speech_language_code}.',
+    modelId: '',
+    type: 'word',
+  },
+  {
+    id: '19',
+    name: 'Common Mistakes',
+    prompt: 'What are common mistakes made when using the word \'{word}\' in {speech_language_code}?',
+    modelId: '',
+    type: 'word',
+  },
+  {
+    id: '20',
+    name: 'Idioms and Phrases',
+    prompt: 'Provide idioms or phrases that include the word \'{word}\' in {speech_language_code}.',
+    modelId: '',
+    type: 'word',
+  },
+  {
+    id: '21',
+    name: 'Word Family',
+    prompt: 'List related words to \'{word}\' in {speech_language_code}, such as derivatives and compound words.',
+    modelId: '',
+    type: 'word',
+  },
+  {
+    id: '22',
+    name: 'Cultural Context',
+    prompt: 'Explain any cultural nuances or contexts associated with the word \'{word}\' in {speech_language_code}.',
+    modelId: '',
+    type: 'word',
+  },
+  {
+    id: '23',
+    name: 'Usage in Idioms',
+    prompt: 'Provide idiomatic expressions that feature the word \'{word}\' in {speech_language_code} and explain their meanings.',
+    modelId: '',
+    type: 'word',
+  },
+  {
+    id: '24',
+    name: 'Practice Exercises',
+    prompt: 'Create fill-in-the-blank sentences to practice using the word \'{word}\' in {speech_language_code}.',
+    modelId: '',
+    type: 'word',
+  },
+  {
+    id: '25',
+    name: 'Comparison with Similar Words',
+    prompt: 'Compare and contrast the word \'{word}\' with similar words in {speech_language_code}, highlighting differences in usage.',
+    modelId: '',
+    type: 'word',
+  },
+  // New Text-based prompt for suggesting a response
+  {
+    id: '26',
+    name: 'Response Suggestion',
+    prompt: 'Suggest a suitable response to the following text in {speech_language_code}:\n\n{text}',
+    modelId: '',
+    type: 'text',
+  },
+
+  // New Text-based prompt for rephrasing in 5 different ways
+  {
+    id: '27',
+    name: 'Rephrase with Variations',
+    prompt: 'Rephrase the following sentence in 5 different ways using bullet points, while maintaining its meaning in {speech_language_code}:\n\n{text}',
+    modelId: '',
+    type: 'text',
+  },
+
+  // New Text-based prompt for using advanced vocabulary
+  {
+    id: '28',
+    name: 'Advanced Vocabulary',
+    prompt: 'Rewrite the following sentence using more advanced vocabulary in {speech_language_code}:\n\n{text}',
+    modelId: '',
+    type: 'text',
   }
+
+
 ];
 
 // Documentation for variables in prompts and actions
