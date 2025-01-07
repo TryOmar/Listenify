@@ -8,7 +8,10 @@ function App() {
     <>
       <div className="flex flex-col h-screen bg-gray-100">
         <header className="py-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-900">Listenify</h1>
+          <div className="flex items-center justify-center gap-2">
+            <h1 className="text-4xl font-bold text-gray-900">Listenify</h1>
+            <span className="text-sm text-gray-500 mt-6">by Omar Abbas</span>
+          </div>
           <p className="text-gray-600 mt-2">
             Improve your English listening skills with real-time transcription
           </p>
