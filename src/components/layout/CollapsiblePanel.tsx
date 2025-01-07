@@ -137,6 +137,7 @@ export function CollapsiblePanel({
                 )}
                 style={{
                     width: `${width}px`,
+                    maxWidth: 'calc(100vw - 20px)',
                     transform: !isVisible ? `translateX(${side === 'left' ? '-100%' : '100%'})` : 'translateX(0)'
                 }}
             >
