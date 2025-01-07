@@ -32,16 +32,6 @@ export function CollapsiblePanel({
     const [startWidth, setStartWidth] = useState(0);
     const { isChatPanelOpen, toggleChatPanel } = usePanelStore();
 
-    // Load saved width from localStorage
-    useEffect(() => {
-        const savedWidth = localStorage.getItem(storageKey);
-        if (savedWidth) {
-            const parsedWidth = Number(savedWidth);
-            setWidth(parsedWidth);
-            setIsVisible(parsedWidth > MIN_VISIBLE_WIDTH);
-        }
-    }, [storageKey]);
-
     // Sync chat panel state
     useEffect(() => {
         if (side === 'right') {
@@ -49,12 +39,6 @@ export function CollapsiblePanel({
             setWidth(isChatPanelOpen ? DEFAULT_WIDTH : 0);
         }
     }, [side, isChatPanelOpen]);
-
-    // Save width to localStorage when it changes
-    useEffect(() => {
-        localStorage.setItem(storageKey, width.toString());
-        onWidthChange(width);
-    }, [width, storageKey, onWidthChange]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         e.preventDefault();
