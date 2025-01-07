@@ -126,6 +126,16 @@ export function CollapsiblePanel({
         return <MessageSquare size={16} />;
     };
 
+    // Add CSS transition for smooth animation
+    const panelStyle = {
+        transition: 'width 0.3s ease',
+        width: `${width}px`,
+        maxWidth: 'calc(100vw - 15vw)',
+        transform: !isVisible ? `translateX(${side === 'left' ? '-100%' : '100%'})` : 'translateX(0)',
+        left: side === 'left' ? 0 : 'auto',
+        right: side === 'right' ? 0 : 'auto',
+    };
+
     return (
         <>
             {/* Panel */}
@@ -135,11 +145,7 @@ export function CollapsiblePanel({
                     side === 'left' ? 'left-0' : 'right-0',
                     'panel-container'
                 )}
-                style={{
-                    width: `${width}px`,
-                    maxWidth: 'calc(100vw - 20px)',
-                    transform: !isVisible ? `translateX(${side === 'left' ? '-100%' : '100%'})` : 'translateX(0)'
-                }}
+                style={panelStyle}
             >
                 {/* Panel Header */}
                 <div className={cn(
