@@ -6,9 +6,10 @@ interface TextSelectionPopupProps {
     selectedText: string;
     onAIPromptClick: (prompt: string) => void;
     onClose: () => void;
+    preventSave?: boolean;
 }
 
-export function TextSelectionPopup({ selectedText, onAIPromptClick, onClose }: TextSelectionPopupProps) {
+export function TextSelectionPopup({ selectedText, onAIPromptClick, onClose, preventSave = false }: TextSelectionPopupProps) {
     const { actions, prompts, general } = useSettingsStore();
 
     // Add window blur handler
@@ -51,6 +52,8 @@ export function TextSelectionPopup({ selectedText, onAIPromptClick, onClose }: T
     const textPrompts = prompts.filter(p => p.type === 'text');
 
     const addTextToSavedItems = (text: string) => {
+        if (preventSave) return;
+
         const savedTexts = JSON.parse(localStorage.getItem('savedTexts') || '[]');
         const existingIndex = savedTexts.indexOf(text);
         if (existingIndex !== -1) {

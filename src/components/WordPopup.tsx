@@ -9,9 +9,10 @@ import { generateGeminiResponse } from '../services/geminiService';
 
 interface WordPopupProps {
   word: string;
+  preventSave?: boolean;
 }
 
-export function WordPopup({ word }: WordPopupProps) {
+export function WordPopup({ word, preventSave = false }: WordPopupProps) {
   const { actions, prompts, general } = useSettingsStore();
   const { addMessage } = useChatStore();
   const { isChatPanelOpen, openChatPanel } = usePanelStore();
@@ -104,7 +105,9 @@ export function WordPopup({ word }: WordPopupProps) {
 
   // Call addWordToSavedItems when a word is clicked
   const handleWordClick = () => {
-    addWordToSavedItems(word);
+    if (!preventSave) {
+      addWordToSavedItems(word);
+    }
   };
 
   return (
@@ -118,6 +121,9 @@ export function WordPopup({ word }: WordPopupProps) {
         <Popover.Content
           className="bg-white rounded-lg shadow-lg p-2 w-64 max-h-80 overflow-y-auto animate-in fade-in-0 zoom-in-95"
           sideOffset={5}
+          side="right"
+          align="start"
+          alignOffset={0}
         >
           <div className="flex flex-col gap-1">
             <div className="border-b pb-2 mb-2">
