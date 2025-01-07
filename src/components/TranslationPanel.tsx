@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Trash2, Send, RefreshCw } from 'lucide-react';
+import { useSettingsStore } from '../store/useSettingsStore';
+import { generateGeminiResponse } from '../services/geminiService';
+import { isRTL } from '../lib/utils';
 
 interface TranslationPanelProps {
     textToTranslate: string;
@@ -10,52 +13,57 @@ interface TranslationPanelProps {
 export function TranslationPanel({ textToTranslate, speechLanguage, translationLanguage }: TranslationPanelProps) {
     const [translatedText, setTranslatedText] = useState('');
     const [isVisible, setIsVisible] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [hasReachedLimit, setHasReachedLimit] = useState(false);
+
+    const { aiModels, activeModelId } = useSettingsStore();
+    const activeModel = aiModels.find(model => model.id === activeModelId);
+
+    const translateText = async () => {
+        if (!activeModel || !activeModel.apiKey) {
+            setErrorMessage('No AI model configured. Please configure an AI model in settings.');
+            return;
+        }
+
+        try {
+            const prompt = `Translate the following text from ${speechLanguage} to ${translationLanguage} and provide only the translation without any additional information or alternatives:\n\n${textToTranslate}`;
+            const response = await generateGeminiResponse(prompt, activeModel.apiKey);
+            setTranslatedText(response);
+            setErrorMessage('');
+        } catch (error) {
+            console.error('Error generating translation:', error);
+            setErrorMessage('Error generating translation.');
+        }
+    };
+
+    const clearTranslation = () => {
+        setTranslatedText('');
+        setErrorMessage('');
+    };
 
     const toggleVisibility = () => {
         setIsVisible(!isVisible);
         if (!isVisible && textToTranslate.trim() !== '') {
-            // Fetch translation when making the panel visible
-            fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(textToTranslate)}&langpair=${speechLanguage}|${translationLanguage}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.responseData) {
-                        setTranslatedText(data.responseData.translatedText);
-                    }
-                })
-                .catch(error => console.error('Error fetching translation:', error));
+            fetchTranslation();
         }
     };
-
-    useEffect(() => {
-        if (!isVisible || textToTranslate.trim() === '') {
-            setTranslatedText('');
-            return;
-        }
-
-        // Example API call to a free translation service
-        fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(textToTranslate)}&langpair=${speechLanguage}|${translationLanguage}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.responseData) {
-                    setTranslatedText(data.responseData.translatedText);
-                }
-            })
-            .catch(error => console.error('Error fetching translation:', error));
-    }, [textToTranslate, speechLanguage, translationLanguage, isVisible]);
 
     return (
         <div className="flex flex-col h-[50vh] bg-gray-100">
             <div className="flex justify-between items-center p-4 border-b flex-wrap">
-                <h2 className="text-lg font-semibold">Live Translation</h2>
-                <button onClick={toggleVisibility} className="p-2">
-                    {isVisible ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-            </div>
-            {isVisible && (
-                <div className="flex-1 overflow-y-auto p-4">
-                    <p>{translatedText}</p>
+                <h2 className="text-lg font-semibold">Translate with AI</h2>
+                <div className="flex gap-2">
+                    <button onClick={translateText} className="p-2 bg-blue-500 text-white rounded">
+                        <RefreshCw size={20} />
+                    </button>
+                    <button onClick={clearTranslation} className="p-2 bg-gray-300 rounded">
+                        <Trash2 size={20} />
+                    </button>
                 </div>
-            )}
+            </div>
+            <div className="flex-1 overflow-y-auto p-4" style={{ direction: isRTL(translationLanguage) ? 'rtl' : 'ltr' }}>
+                {errorMessage ? <p className="text-red-500">{errorMessage}</p> : <p>{translatedText}</p>}
+            </div>
         </div>
     );
 } 
