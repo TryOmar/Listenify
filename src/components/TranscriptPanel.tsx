@@ -10,6 +10,7 @@ import { usePanelStore } from '../store/usePanelStore';
 import { useToastStore } from '../store/useToastStore';
 import { generateGeminiResponse } from '../services/geminiService';
 import { cn, isRTL } from '../lib/utils';
+import DiscordIcon from '../icons/discord.svg';
 
 type SpeechRecognitionResult = {
   isFinal: boolean;
@@ -284,6 +285,15 @@ export function TranscriptPanel() {
           </span>
         </div>
         <div className="flex gap-2">
+          <a
+            href="https://discord.gg/c3pxrhTCAB"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-full bg-[#5865F2] hover:bg-[#4752C4] text-white transition-colors"
+            title="Join our Discord community"
+          >
+            <img src={DiscordIcon} alt="Discord" width="20" height="20" />
+          </a>
           <button
             onClick={toggleListening}
             className={`p-2 rounded-full ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageSquare, Trash2 } from 'lucide-react';
+import { Send, MessageSquare, Trash2, MessageCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from '../../lib/utils';
@@ -7,6 +7,7 @@ import { useChatStore } from '../../store/useChatStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useToastStore } from '../../store/useToastStore';
 import { generateGeminiResponse } from '../../services/geminiService';
+import DiscordIcon from '../../icons/discord.svg';
 
 export function ChatPanel() {
     const { messages, addMessage, clearMessages } = useChatStore();
@@ -68,9 +69,20 @@ export function ChatPanel() {
                         <MessageSquare size={40} className="mb-2 opacity-50" />
                         <p className="text-center">No messages yet. Start a conversation!</p>
                         {!activeModel?.apiKey && (
-                            <p className="text-sm mt-2 text-gray-400">
-                                Note: Configure an AI model in settings to get started.
-                            </p>
+                            <div className="text-center mt-2">
+                                <p className="text-sm text-gray-400 mb-3">
+                                    Note: Configure an AI model in settings to get started.
+                                </p>
+                                <a
+                                    href="https://discord.gg/c3pxrhTCAB"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition-colors text-sm"
+                                >
+                                    <img src={DiscordIcon} alt="Discord" width="16" height="16" />
+                                    Join our Discord for help
+                                </a>
+                            </div>
                         )}
                     </div>
                 ) : (
