@@ -5,7 +5,7 @@ import { ChatPanel } from './ChatPanel';
 import { CollapsiblePanel } from './CollapsiblePanel';
 import { cn } from '../../lib/utils';
 
-const MIN_MAIN_PANEL_WIDTH = 400; // Minimum width before hiding main panel
+const MIN_MAIN_PANEL_WIDTH = 200; // Minimum width before hiding main panel
 const MIN_GAP = 24; // Increased minimum gap between panels
 const TITLE_BAR_WIDTH = 44; // Width of the title bar (11 * 4px Tailwind units)
 const PANEL_SPACING = 16; // Spacing between panels when both are visible

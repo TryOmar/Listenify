@@ -277,14 +277,14 @@ export function TranscriptPanel() {
 
   return (
     <div className="flex flex-col h-[50vh] bg-white">
-      <div className="flex justify-between items-center p-4 border-b">
-        <div className="flex items-center gap-4">
+      <div className="flex justify-between items-center p-4 border-b flex-wrap">
+        <div className="flex items-center gap-4 flex-grow mb-2">
           <h2 className="text-lg font-semibold">Live Transcription</h2>
           <span className="text-sm text-gray-500">
             {transcript.split(/\s+/).filter(Boolean).length} / {maxWords} words
           </span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3 flex-shrink-0 flex-wrap">
           <a
             href="https://discord.gg/c3pxrhTCAB"
             target="_blank"
@@ -296,8 +296,7 @@ export function TranscriptPanel() {
           </a>
           <button
             onClick={toggleListening}
-            className={`p-2 rounded-full ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
-              } text-white transition-colors`}
+            className={`p-2 rounded-full ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
           >
             {isListening ? <MicOff size={20} /> : <Mic size={20} />}
           </button>
