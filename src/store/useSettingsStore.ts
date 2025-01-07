@@ -80,6 +80,42 @@ const defaultActions = {
       url: 'https://www.dictionary.com/browse/{word}',
       icon: '📚',
     },
+    {
+      id: '4',
+      name: 'Cambridge Dictionary',
+      url: 'https://dictionary.cambridge.org/dictionary/english/{word}',
+      icon: '📖',
+    },
+    {
+      id: '5',
+      name: 'YouGlish',
+      url: 'https://youglish.com/pronounce/{word}/english',
+      icon: '🔊',
+    },
+    {
+      id: '6',
+      name: 'Forvo',
+      url: 'https://forvo.com/word/{word}/',
+      icon: '🔈',
+    },
+    {
+      id: '7',
+      name: 'Thesaurus',
+      url: 'https://www.thesaurus.com/browse/{word}',
+      icon: '📗',
+    },
+    {
+      id: '8',
+      name: 'DeepL Translator',
+      url: 'https://www.deepl.com/en/translator#{speech_language_code}/{translation_language_code}/{word}',
+      icon: '🈯',
+    },
+    {
+      id: '9',
+      name: 'etymonline',
+      url: 'https://www.etymonline.com/search?q={word}',
+      icon: '⭕',
+    },
   ],
   text: [
     {
@@ -88,6 +124,18 @@ const defaultActions = {
       url: 'https://translate.google.com/?sl={speech_language_code}&tl={translation_language_code}&text={text}',
       icon: '🌐',
     },
+    {
+      id: '2',
+      name: 'Google Images',
+      url: 'https://www.google.com/search?tbm=isch&q={text}',
+      icon: '🖼️',
+    },
+    {
+      id: '3',
+      name: 'DeepL Translator',
+      url: 'https://www.deepl.com/en/translator#{speech_language_code}/{translation_language_code}/{text}',
+      icon: '🈯',
+    }
   ],
 };
 
