@@ -11,6 +11,7 @@ import { useToastStore } from '../store/useToastStore';
 import { generateGeminiResponse } from '../services/geminiService';
 import { cn, isRTL } from '../lib/utils';
 import DiscordIcon from '../icons/discord.svg';
+import { TranslationPanel } from './TranslationPanel';
 
 type SpeechRecognitionResult = {
   isFinal: boolean;
@@ -57,7 +58,7 @@ export function TranscriptPanel() {
     clearTranscript,
   } = useTranscriptStore();
 
-  const { general: { maxWords, fontSize, speechLanguage } } = useSettingsStore();
+  const { general: { maxWords, fontSize, speechLanguage, translationLanguage } } = useSettingsStore();
   const transcriptRef = useRef<HTMLDivElement>(null);
   const interimTranscriptRef = useRef<string>('');
   const finalTranscriptRef = useRef<string>('');
@@ -67,6 +68,7 @@ export function TranscriptPanel() {
   const { addMessage } = useChatStore();
   const { isChatPanelOpen, openChatPanel } = usePanelStore();
   const { addToast } = useToastStore();
+  const [translatedText, setTranslatedText] = useState('');
 
   // Effect to update displayed transcript when maxWords changes
   useEffect(() => {
@@ -78,6 +80,7 @@ export function TranscriptPanel() {
       finalTranscriptRef.current = '';
       fullTranscriptRef.current = [];
       setTranscript('');
+      setTranslatedText('');
       addToast('Maximum words reached, starting fresh', 'info');
     }
   }, [maxWords, transcript, setTranscript, addToast]);
@@ -170,6 +173,7 @@ export function TranscriptPanel() {
     interimTranscriptRef.current = '';
     finalTranscriptRef.current = '';
     fullTranscriptRef.current = [];
+    setTranslatedText('');
     addToast('Transcript cleared', 'info');
   };
 
@@ -276,92 +280,95 @@ export function TranscriptPanel() {
   };
 
   return (
-    <div className="flex flex-col h-[50vh] bg-white">
-      <div className="flex justify-between items-center p-4 border-b flex-wrap">
-        <div className="flex items-center gap-4 flex-grow mb-2">
-          <h2 className="text-lg font-semibold">Live Transcription</h2>
-          <span className="text-sm text-gray-500">
-            {transcript.split(/\s+/).filter(Boolean).length} / {maxWords} words
-          </span>
+    <div className="flex flex-col space-y-4 h-full bg-white">
+      <div className="flex flex-col h-[45vh] bg-white">
+        <div className="flex justify-between items-center p-4 border-b flex-wrap">
+          <div className="flex items-center gap-4 flex-grow mb-2">
+            <h2 className="text-lg font-semibold">Live Transcription</h2>
+            <span className="text-sm text-gray-500">
+              {transcript.split(/\s+/).filter(Boolean).length} / {maxWords} words
+            </span>
+          </div>
+          <div className="flex gap-3 flex-shrink-0 flex-wrap">
+            <a
+              href="https://discord.gg/c3pxrhTCAB"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-full bg-[#5865F2] hover:bg-[#4752C4] text-white transition-colors"
+              title="Join our Discord community"
+            >
+              <img src={DiscordIcon} alt="Discord" width="20" height="20" />
+            </a>
+            <button
+              onClick={toggleListening}
+              className={`p-2 rounded-full ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
+            >
+              {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+            </button>
+            <button
+              onClick={handleCopyTranscript}
+              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+              title="Copy transcript"
+            >
+              <Copy size={20} />
+            </button>
+            <button
+              onClick={handleClearTranscript}
+              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+            >
+              <Trash2 size={20} />
+            </button>
+            <SettingsDialog />
+          </div>
         </div>
-        <div className="flex gap-3 flex-shrink-0 flex-wrap">
-          <a
-            href="https://discord.gg/c3pxrhTCAB"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-2 rounded-full bg-[#5865F2] hover:bg-[#4752C4] text-white transition-colors"
-            title="Join our Discord community"
-          >
-            <img src={DiscordIcon} alt="Discord" width="20" height="20" />
-          </a>
-          <button
-            onClick={toggleListening}
-            className={`p-2 rounded-full ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
-          >
-            {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-          </button>
-          <button
-            onClick={handleCopyTranscript}
-            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
-            title="Copy transcript"
-          >
-            <Copy size={20} />
-          </button>
-          <button
-            onClick={handleClearTranscript}
-            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
-          >
-            <Trash2 size={20} />
-          </button>
-          <SettingsDialog />
-        </div>
-      </div>
-      <div
-        ref={transcriptRef}
-        className="flex-1 overflow-y-auto p-4"
-        onMouseUp={(e) => {
-          e.stopPropagation();
-          handleTextSelection();
-        }}
-        onTouchEnd={(e) => {
-          e.stopPropagation();
-          handleTextSelection();
-        }}
-      >
         <div
-          className={cn(
-            "space-x-1",
-            isRTL(speechLanguage) && "text-right"
-          )}
-          style={{
-            fontSize: `${fontSize}px`,
-            direction: isRTL(speechLanguage) ? 'rtl' : 'ltr'
+          ref={transcriptRef}
+          className="flex-1 overflow-y-auto p-4"
+          onMouseUp={(e) => {
+            e.stopPropagation();
+            handleTextSelection();
+          }}
+          onTouchEnd={(e) => {
+            e.stopPropagation();
+            handleTextSelection();
           }}
         >
-          {renderTranscript()}
-        </div>
-        {selectedText && selectionPosition && (
           <div
-            className="text-selection-popup fixed"
+            className={cn(
+              "space-x-1",
+              isRTL(speechLanguage) && "text-right"
+            )}
             style={{
-              left: `${selectionPosition.x}px`,
-              top: `${selectionPosition.y}px`,
-              transform: 'translate(-50%, 0)',
-              zIndex: 50,
+              fontSize: `${fontSize}px`,
+              direction: isRTL(speechLanguage) ? 'rtl' : 'ltr'
             }}
           >
-            <TextSelectionPopup
-              selectedText={selectedText}
-              onAIPromptClick={handleAIPromptClick}
-              onClose={() => {
-                setSelectedText('');
-                setSelectionPosition(null);
-                window.getSelection()?.removeAllRanges();
-              }}
-            />
+            {renderTranscript()}
           </div>
-        )}
+          {selectedText && selectionPosition && (
+            <div
+              className="text-selection-popup fixed"
+              style={{
+                left: `${selectionPosition.x}px`,
+                top: `${selectionPosition.y}px`,
+                transform: 'translate(-50%, 0)',
+                zIndex: 50,
+              }}
+            >
+              <TextSelectionPopup
+                selectedText={selectedText}
+                onAIPromptClick={handleAIPromptClick}
+                onClose={() => {
+                  setSelectedText('');
+                  setSelectionPosition(null);
+                  window.getSelection()?.removeAllRanges();
+                }}
+              />
+            </div>
+          )}
+        </div>
       </div>
+      <TranslationPanel textToTranslate={transcript} speechLanguage={speechLanguage} translationLanguage={translationLanguage} />
     </div>
   );
 }
