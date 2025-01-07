@@ -67,7 +67,7 @@ export function TextSelectionPopup({ selectedText, onAIPromptClick, onClose }: T
     }, [selectedText]);
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-2 w-64 animate-in fade-in-0 zoom-in-95">
+        <div className="bg-white rounded-lg shadow-lg p-2 w-64 max-h-80 overflow-y-auto animate-in fade-in-0 zoom-in-95">
             <div className="flex flex-col gap-1">
                 <div className="border-b pb-2 mb-2">
                     <h3 className="font-medium text-sm text-gray-600 mb-1">Text Actions</h3>

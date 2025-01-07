@@ -116,7 +116,7 @@ export function WordPopup({ word }: WordPopupProps) {
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content
-          className="bg-white rounded-lg shadow-lg p-2 w-64 animate-in fade-in-0 zoom-in-95"
+          className="bg-white rounded-lg shadow-lg p-2 w-64 max-h-80 overflow-y-auto animate-in fade-in-0 zoom-in-95"
           sideOffset={5}
         >
           <div className="flex flex-col gap-1">
