@@ -14,6 +14,7 @@ const LANGUAGES = [
   { value: 'ko', label: 'Korean' },
   { value: 'ar', label: 'Arabic' },
   { value: 'hi', label: 'Hindi' },
+  { value: 'bn', label: 'Bengali' },
   { value: 'tr', label: 'Turkish' },
   { value: 'nl', label: 'Dutch' },
   { value: 'pl', label: 'Polish' },
