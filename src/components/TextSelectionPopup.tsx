@@ -50,6 +50,22 @@ export function TextSelectionPopup({ selectedText, onAIPromptClick, onClose }: T
 
     const textPrompts = prompts.filter(p => p.type === 'text');
 
+    const addTextToSavedItems = (text: string) => {
+        const savedTexts = JSON.parse(localStorage.getItem('savedTexts') || '[]');
+        const existingIndex = savedTexts.indexOf(text);
+        if (existingIndex !== -1) {
+            savedTexts.splice(existingIndex, 1);
+        }
+        savedTexts.unshift(text);
+        localStorage.setItem('savedTexts', JSON.stringify(savedTexts));
+        window.dispatchEvent(new Event('storage'));
+    };
+
+    // Call addTextToSavedItems when text is selected
+    useEffect(() => {
+        addTextToSavedItems(selectedText);
+    }, [selectedText]);
+
     return (
         <div className="bg-white rounded-lg shadow-lg p-2 w-64 animate-in fade-in-0 zoom-in-95">
             <div className="flex flex-col gap-1">

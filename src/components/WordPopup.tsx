@@ -91,10 +91,26 @@ export function WordPopup({ word }: WordPopupProps) {
 
   const wordPrompts = prompts.filter(p => p.type === 'word');
 
+  const addWordToSavedItems = (word: string) => {
+    const savedWords = JSON.parse(localStorage.getItem('savedWords') || '[]');
+    const existingIndex = savedWords.indexOf(word);
+    if (existingIndex !== -1) {
+      savedWords.splice(existingIndex, 1);
+    }
+    savedWords.unshift(word); // Add to the beginning for reverse order
+    localStorage.setItem('savedWords', JSON.stringify(savedWords));
+    window.dispatchEvent(new Event('storage')); // Trigger update
+  };
+
+  // Call addWordToSavedItems when a word is clicked
+  const handleWordClick = () => {
+    addWordToSavedItems(word);
+  };
+
   return (
     <Popover.Root>
       <Popover.Trigger asChild>
-        <button className="inline-block px-1 py-0.5 hover:bg-blue-100 rounded transition-colors">
+        <button className="inline-block px-1 py-0.5 hover:bg-blue-100 rounded transition-colors" onClick={handleWordClick}>
           {word}
         </button>
       </Popover.Trigger>
