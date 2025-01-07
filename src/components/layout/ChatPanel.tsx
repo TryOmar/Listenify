@@ -157,7 +157,7 @@ export function ChatPanel() {
                                 handleSend(e);
                             }
                         }}
-                        placeholder={isLoading ? 'AI is thinking...' : 'Type a message... (Shift + Enter for new line)'}
+                        placeholder={isLoading ? 'AI is thinking...' : 'Type a message...'}
                         disabled={isLoading}
                         rows={1}
                         className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 resize-none"
