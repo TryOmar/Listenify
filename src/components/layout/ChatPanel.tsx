@@ -109,7 +109,7 @@ export function ChatPanel() {
                                 {message.sender === 'user' ? (
                                     <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                                 ) : (
-                                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                                    <div className="prose prose-sm dark:prose-invert max-w-none [&>ul]:pl-6 [&>ol]:pl-6 [&>ul]:list-disc [&>ol]:list-decimal [&>ul>li]:my-0 [&>ol>li]:my-0 [&>p]:my-1">
                                         <ReactMarkdown
                                             remarkPlugins={[remarkGfm]}
                                             components={{
