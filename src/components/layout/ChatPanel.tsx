@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageSquare, Trash2, MessageCircle } from 'lucide-react';
+import { Send, MessageSquare, Trash2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from '../../lib/utils';
@@ -38,8 +38,15 @@ export function ChatPanel() {
 
         try {
             if (activeModel?.model === 'gemini' && activeModel.apiKey) {
-                // Use Gemini
-                const response = await generateGeminiResponse(newMessage, activeModel.apiKey);
+                // Use Gemini with chat history
+                const response = await generateGeminiResponse(
+                    newMessage,
+                    activeModel.apiKey,
+                    messages.map(msg => ({
+                        sender: msg.sender,
+                        text: msg.text
+                    }))
+                );
                 addMessage(response, 'ai');
             } else {
                 // Fallback to simulation

@@ -8,8 +8,25 @@ interface GeminiResponse {
     }>;
 }
 
-export async function generateGeminiResponse(prompt: string, apiKey: string): Promise<string> {
+interface ChatMessage {
+    sender: 'user' | 'ai';
+    text: string;
+}
+
+export async function generateGeminiResponse(prompt: string, apiKey: string, history: ChatMessage[] = []): Promise<string> {
     try {
+        // Convert chat history to Gemini's expected format
+        const contents = history.map(msg => ({
+            role: msg.sender === 'user' ? 'user' : 'model',
+            parts: [{ text: msg.text }]
+        }));
+
+        // Add the current prompt
+        contents.push({
+            role: 'user',
+            parts: [{ text: prompt }]
+        });
+
         const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
             {
@@ -18,9 +35,13 @@ export async function generateGeminiResponse(prompt: string, apiKey: string): Pr
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    contents: [{
-                        parts: [{ text: prompt }]
-                    }]
+                    contents,
+                    generationConfig: {
+                        temperature: 0.7,
+                        topK: 40,
+                        topP: 0.95,
+                        maxOutputTokens: 2048,
+                    },
                 }),
             }
         );
