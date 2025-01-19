@@ -65,22 +65,37 @@ export function GeneralTab() {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach(track => track.stop());
 
-      // Small delay to ensure browser has time to update device labels
       await new Promise(resolve => setTimeout(resolve, 500));
 
       const devices = await navigator.mediaDevices.enumerateDevices();
-      const audioInputs = devices
-        .filter(device => device.kind === 'audioinput')
-        .map(device => ({
-          deviceId: device.deviceId,
-          label: device.label || `Microphone ${device.deviceId.slice(0, 5)}...`
-        }));
-      setAudioDevices(audioInputs);
+      const cleanLabel = (label: string) => {
+        return label
+          .replace(/^Communications - /, '')
+          .replace(/^Default - /, '')
+          .trim();
+      };
 
-      // Open dropdown after devices are loaded
+      // Get unique devices by cleaned label
+      const uniqueDevices = new Map<string, AudioDevice>();
+      devices
+        .filter(device => device.kind === 'audioinput')
+        .forEach(device => {
+          const label = device.label || `Microphone ${device.deviceId.slice(0, 5)}...`;
+          const cleanedLabel = cleanLabel(label);
+
+          // Keep the first occurrence of each device
+          if (!uniqueDevices.has(cleanedLabel)) {
+            uniqueDevices.set(cleanedLabel, {
+              deviceId: device.deviceId,
+              label: cleanedLabel
+            });
+          }
+        });
+
+      setAudioDevices(Array.from(uniqueDevices.values()));
       setIsDropdownOpen(true);
 
-      if (audioInputs.length === 0) {
+      if (uniqueDevices.size === 0) {
         addToast('No audio input devices found', 'error');
       }
     } catch (error) {
@@ -108,7 +123,11 @@ export function GeneralTab() {
   };
 
   const getSelectedLabel = () => {
-    return general.audioDeviceLabel || 'Default Microphone';
+    if (general.audioDeviceId === 'default') {
+      return 'Default Microphone';
+    }
+    const selectedDevice = audioDevices.find(device => device.deviceId === general.audioDeviceId);
+    return selectedDevice?.label || 'No device selected';
   };
 
   return (
@@ -150,8 +169,14 @@ export function GeneralTab() {
                       className={`w-full px-3 py-2 text-left hover:bg-gray-100 
                         ${general.audioDeviceId === 'default' ? 'bg-blue-50 text-blue-600' : ''}`}
                     >
-                      Default Microphone
+                      Default System Microphone
                     </button>
+                    {audioDevices.length > 0 && (
+                      <>
+                        <div className="border-t border-gray-200 my-1"></div>
+                        <div className="px-3 py-1 text-xs text-gray-500">Available Devices</div>
+                      </>
+                    )}
                     {audioDevices.map((device) => (
                       <button
                         key={device.deviceId}
