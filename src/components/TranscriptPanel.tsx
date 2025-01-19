@@ -40,6 +40,17 @@ interface SpeechRecognitionConstructor {
   new(): SpeechRecognition;
 }
 
+interface ExtendedSpeechRecognition extends SpeechRecognition {
+  lang: string;
+  onstart: ((this: SpeechRecognition, ev: Event) => void) | null;
+  onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => void) | null;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: 'network' | 'not-allowed' | 'no-speech' | 'aborted' | string;
+  message: string;
+}
+
 declare global {
   interface Window {
     SpeechRecognition?: SpeechRecognitionConstructor;
@@ -68,19 +79,14 @@ export function TranscriptPanel() {
   const { addMessage } = useChatStore();
   const { isChatPanelOpen, openChatPanel } = usePanelStore();
   const { addToast } = useToastStore();
-  const [translatedText, setTranslatedText] = useState('');
 
   // Effect to update displayed transcript when maxWords changes
   useEffect(() => {
-    // Get all words from current transcript
     const allWords = transcript.split(/\s+/).filter(Boolean);
-
-    // If word count exceeds maxWords, clear and start fresh
     if (allWords.length > maxWords) {
       finalTranscriptRef.current = '';
       fullTranscriptRef.current = [];
       setTranscript('');
-      setTranslatedText('');
       addToast('Maximum words reached, starting fresh', 'info');
     }
   }, [maxWords, transcript, setTranscript, addToast]);
@@ -93,6 +99,11 @@ export function TranscriptPanel() {
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = speechLanguage;
+
+      recognition.onstart = () => {
+        console.log('Speech recognition started');
+        setIsListening(true);
+      };
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
         let interimTranscript = '';
@@ -108,64 +119,77 @@ export function TranscriptPanel() {
           }
         }
 
-        // Store interim transcript for reference
         interimTranscriptRef.current = interimTranscript;
-
-        // Get all words
         const allWords = (finalTranscript + ' ' + interimTranscript).trim().split(/\s+/);
 
-        // If word count exceeds maxWords, clear and start fresh
         if (allWords.length > maxWords) {
           finalTranscriptRef.current = '';
           fullTranscriptRef.current = [];
           setTranscript('');
           addToast('Maximum words reached, starting fresh', 'info');
         } else {
-          // Update transcript normally
           fullTranscriptRef.current = allWords;
           setTranscript(allWords.join(' '));
         }
       };
 
       recognition.onend = () => {
-        // When speech recognition ends, update the final transcript
-        const allWords = finalTranscriptRef.current.trim().split(/\s+/);
-
-        // If word count exceeds maxWords, clear and start fresh
-        if (allWords.length > maxWords) {
-          finalTranscriptRef.current = '';
-          fullTranscriptRef.current = [];
-          setTranscript('');
-          addToast('Maximum words reached, starting fresh', 'info');
-        } else {
-          // Update transcript normally
-          fullTranscriptRef.current = allWords;
-          setTranscript(allWords.join(' '));
-        }
-
-        // Restart recognition if it's still supposed to be listening
+        console.log('Speech recognition ended');
         if (isListening) {
-          recognition.start();
+          try {
+            recognition.start();
+          } catch (error) {
+            console.error('Failed to restart recognition:', error);
+            setIsListening(false);
+            addToast('Recognition stopped unexpectedly. Please start again.', 'error');
+          }
+        }
+      };
+
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error('Recognition error:', event.error);
+        if (event.error === 'not-allowed') {
+          setIsListening(false);
+          addToast('Microphone access was denied. Please allow microphone access and try again.', 'error');
         }
       };
 
       setRecognition(recognition);
-    }
-  }, [maxWords, setTranscript, setRecognition, speechLanguage]);
 
-  const toggleListening = () => {
+      return () => {
+        if (recognition) {
+          try {
+            recognition.stop();
+          } catch (error) {
+            console.error('Error stopping recognition:', error);
+          }
+        }
+      };
+    } else {
+      addToast('Speech recognition is not supported in your browser. Please use Chrome, Edge, or Safari.', 'error');
+    }
+  }, [maxWords, setTranscript, setRecognition, speechLanguage, addToast, setIsListening, isListening]);
+
+  const toggleListening = async () => {
     if (!recognition) return;
 
-    if (isListening) {
-      recognition.stop();
-      addToast('Microphone stopped', 'info');
-    } else {
-      finalTranscriptRef.current = transcript;
-      fullTranscriptRef.current = transcript.split(/\s+/).filter(Boolean);
-      recognition.start();
-      addToast('Microphone started', 'success');
+    try {
+      if (isListening) {
+        recognition.stop();
+        setIsListening(false);
+        addToast('Recording stopped', 'info');
+      } else {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        finalTranscriptRef.current = transcript;
+        fullTranscriptRef.current = transcript.split(/\s+/).filter(Boolean);
+        recognition.start();
+        addToast('Recording started', 'success');
+      }
+    } catch (error) {
+      console.error('Error toggling recognition:', error);
+      setIsListening(false);
+      addToast('Error with microphone access. Please check permissions and try again.', 'error');
     }
-    setIsListening(!isListening);
   };
 
   const handleClearTranscript = () => {
@@ -173,16 +197,22 @@ export function TranscriptPanel() {
     interimTranscriptRef.current = '';
     finalTranscriptRef.current = '';
     fullTranscriptRef.current = [];
-    setTranslatedText('');
     addToast('Transcript cleared', 'info');
   };
 
-  const handleCopyTranscript = () => {
-    navigator.clipboard.writeText(transcript);
-    addToast('Transcript copied to clipboard', 'success');
+  const handleCopyTranscript = async () => {
+    try {
+      await navigator.clipboard.writeText(transcript);
+      addToast('Transcript copied to clipboard', 'success');
+    } catch (error) {
+      console.error('Failed to copy transcript:', error);
+      addToast('Failed to copy transcript', 'error');
+    }
   };
 
   const renderTranscript = () => {
+    if (!transcript) return null;
+
     // Split by spaces but keep the spaces in the array
     const words = transcript.match(/\S+|\s+/g) || [];
     return words.map((word, index) => {
@@ -191,7 +221,13 @@ export function TranscriptPanel() {
         return <span key={`space-${index}`}>{word}</span>;
       }
       // Otherwise render the word with popup
-      return <WordPopup key={`${word}-${index}`} word={word} />;
+      return (
+        <WordPopup
+          key={`${word}-${index}`}
+          word={word}
+          preventSave={word.trim().length === 0}
+        />
+      );
     });
   };
 
@@ -302,6 +338,7 @@ export function TranscriptPanel() {
             <button
               onClick={toggleListening}
               className={`p-2 rounded-full ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
+              title={isListening ? 'Stop recording' : 'Start recording'}
             >
               {isListening ? <MicOff size={20} /> : <Mic size={20} />}
             </button>
@@ -309,14 +346,17 @@ export function TranscriptPanel() {
               onClick={handleCopyTranscript}
               className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
               title="Copy transcript"
+              disabled={!transcript}
             >
-              <Copy size={20} />
+              <Copy size={20} className={!transcript ? 'opacity-50' : ''} />
             </button>
             <button
               onClick={handleClearTranscript}
               className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+              title="Clear transcript"
+              disabled={!transcript}
             >
-              <Trash2 size={20} />
+              <Trash2 size={20} className={!transcript ? 'opacity-50' : ''} />
             </button>
             <SettingsDialog />
           </div>
@@ -335,7 +375,7 @@ export function TranscriptPanel() {
         >
           <div
             className={cn(
-              "space-x-1",
+              "whitespace-pre-wrap break-words",
               isRTL(speechLanguage) && "text-right"
             )}
             style={{

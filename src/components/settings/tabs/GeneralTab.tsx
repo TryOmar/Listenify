@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSettingsStore } from '../../../store/useSettingsStore';
+import { useToastStore } from '../../../store/useToastStore';
+import { Mic, ChevronDown } from 'lucide-react';
 
 const LANGUAGES = [
   { value: 'en', label: 'English' },
@@ -25,15 +27,147 @@ const LANGUAGES = [
   { value: 'fa', label: 'Persian' },
 ];
 
+interface AudioDevice {
+  deviceId: string;
+  label: string;
+}
+
 export function GeneralTab() {
   const { general, updateGeneralSettings } = useSettingsStore();
+  const { addToast } = useToastStore();
+  const [audioDevices, setAudioDevices] = useState<AudioDevice[]>([]);
+  const [isLoadingDevices, setIsLoadingDevices] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const loadAudioDevices = async () => {
+    if (audioDevices.length > 0) {
+      setIsDropdownOpen(true);
+      return;
+    }
+    if (isLoadingDevices) return;
+
+    setIsLoadingDevices(true);
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+
+      // Small delay to ensure browser has time to update device labels
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioInputs = devices
+        .filter(device => device.kind === 'audioinput')
+        .map(device => ({
+          deviceId: device.deviceId,
+          label: device.label || `Microphone ${device.deviceId.slice(0, 5)}...`
+        }));
+      setAudioDevices(audioInputs);
+
+      // Open dropdown after devices are loaded
+      setIsDropdownOpen(true);
+
+      if (audioInputs.length === 0) {
+        addToast('No audio input devices found', 'error');
+      }
+    } catch (error) {
+      console.error('Error getting audio devices:', error);
+      addToast('Failed to access microphone. Please check your permissions.', 'error');
+    } finally {
+      setIsLoadingDevices(false);
+    }
+  };
+
+  const handleDeviceSelect = (deviceId: string, label?: string) => {
+    updateGeneralSettings({
+      audioDeviceId: deviceId,
+      audioDeviceLabel: label || 'Default Microphone'
+    });
+    setIsDropdownOpen(false);
+  };
+
+  const handleDropdownClick = () => {
+    if (!audioDevices.length) {
+      loadAudioDevices();
+    } else {
+      setIsDropdownOpen(!isDropdownOpen);
+    }
+  };
+
+  const getSelectedLabel = () => {
+    return general.audioDeviceLabel || 'Default Microphone';
+  };
 
   return (
     <section className="space-y-6">
       <h3 className="text-lg font-semibold">General Settings</h3>
 
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium">Audio Input Device</label>
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={handleDropdownClick}
+                disabled={isLoadingDevices}
+                className={`w-full px-3 py-2 pr-10 border rounded-lg text-left transition-colors duration-200 
+                  ${isLoadingDevices ? 'bg-gray-50' : 'bg-white'}
+                  ${isDropdownOpen ? 'border-blue-500' : 'border-gray-300'}
+                  disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {getSelectedLabel()}
+              </button>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                {isLoadingDevices ? (
+                  <div className="h-4 w-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                ) : (
+                  <div className="flex items-center space-x-1">
+                    <Mic className={`h-4 w-4 transition-colors duration-200 
+                      ${isDropdownOpen ? 'text-blue-500' : 'text-gray-500'}`} />
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 
+                      ${isDropdownOpen ? 'transform rotate-180 text-blue-500' : 'text-gray-500'}`} />
+                  </div>
+                )}
+              </div>
+              {isDropdownOpen && audioDevices.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg">
+                  <div className="py-1">
+                    <button
+                      onClick={() => handleDeviceSelect('default')}
+                      className={`w-full px-3 py-2 text-left hover:bg-gray-100 
+                        ${general.audioDeviceId === 'default' ? 'bg-blue-50 text-blue-600' : ''}`}
+                    >
+                      Default Microphone
+                    </button>
+                    {audioDevices.map((device) => (
+                      <button
+                        key={device.deviceId}
+                        onClick={() => handleDeviceSelect(device.deviceId, device.label)}
+                        className={`w-full px-3 py-2 text-left hover:bg-gray-100 
+                          ${general.audioDeviceId === device.deviceId ? 'bg-blue-50 text-blue-600' : ''}`}
+                      >
+                        {device.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium">Speech Language</label>
             <select
