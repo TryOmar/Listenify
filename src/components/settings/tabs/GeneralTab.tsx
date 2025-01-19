@@ -123,11 +123,11 @@ export function GeneralTab() {
   };
 
   const getSelectedLabel = () => {
-    if (general.audioDeviceId === 'default') {
-      return 'Default Microphone';
+    if (general.audioDeviceId === 'default' || !general.audioDeviceId) {
+      return 'Default System Microphone';
     }
     const selectedDevice = audioDevices.find(device => device.deviceId === general.audioDeviceId);
-    return selectedDevice?.label || 'No device selected';
+    return selectedDevice?.label || 'Default System Microphone';
   };
 
   return (
