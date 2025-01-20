@@ -360,6 +360,8 @@ const defaultAIModel = {
 export const VARIABLES_DOC = {
   word: 'Selected single word - use in word popup prompts',
   text: 'Selected text - use in text selection prompts',
+  speech_language: 'Speech language (e.g., "English")',
+  translation_language: 'Translation language (e.g., "Arabic")',
   speech_language_code: 'Speech language code (e.g., "en")',
   translation_language_code: 'Translation language code (e.g., "ar")',
 };

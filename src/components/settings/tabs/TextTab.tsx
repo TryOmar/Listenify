@@ -26,9 +26,11 @@ export function TextTab() {
       <div className="text-sm text-gray-500 mb-4">
         <p>Available placeholders:</p>
         <ul className="list-disc list-inside mt-1">
-          <li><code>{'{text}'}</code> - Selected text</li>
-          <li><code>{'{speech_language_code}'}</code> - Speech language (e.g., 'en')</li>
-          <li><code>{'{translation_language_code}'}</code> - Translation language (e.g., 'ar')</li>
+          <li><code>{'{text}'}</code> - Selected text - use in text selection prompts</li>
+          <li><code>{'{speech_language}'}</code> - Speech language (e.g., "English")</li>
+          <li><code>{'{translation_language}'}</code> - Translation language (e.g., "Arabic")</li>
+          <li><code>{'{speech_language_code}'}</code> - Speech language code (e.g., "en")</li>
+          <li><code>{'{translation_language_code}'}</code> - Translation language code (e.g., "ar")</li>
         </ul>
       </div>
 
