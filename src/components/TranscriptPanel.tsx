@@ -83,6 +83,7 @@ export function TranscriptPanel() {
     if (allWords.length > maxWords) {
       finalTranscriptRef.current = '';
       fullTranscriptRef.current = [];
+      interimTranscriptRef.current = '';
       setTranscript('');
       addToast('Maximum words reached, starting fresh', 'info');
     }
@@ -117,12 +118,12 @@ export function TranscriptPanel() {
         // Get all words
         const allWords = (finalTranscript + ' ' + interimTranscript).trim().split(/\s+/);
 
-        // If word count exceeds maxWords, clear and start fresh
+        // If exceeding max words, clear everything and start fresh
         if (allWords.length > maxWords) {
           finalTranscriptRef.current = '';
           fullTranscriptRef.current = [];
+          interimTranscriptRef.current = '';
           setTranscript('');
-          addToast('Maximum words reached, starting fresh', 'info');
         } else {
           // Update transcript normally
           fullTranscriptRef.current = allWords;
@@ -134,12 +135,12 @@ export function TranscriptPanel() {
         // When speech recognition ends, update the final transcript
         const allWords = finalTranscriptRef.current.trim().split(/\s+/);
 
-        // If word count exceeds maxWords, clear and start fresh
+        // If exceeding max words, clear everything and start fresh
         if (allWords.length > maxWords) {
           finalTranscriptRef.current = '';
           fullTranscriptRef.current = [];
+          interimTranscriptRef.current = '';
           setTranscript('');
-          addToast('Maximum words reached, starting fresh', 'info');
         } else {
           // Update transcript normally
           fullTranscriptRef.current = allWords;
