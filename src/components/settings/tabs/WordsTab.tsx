@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useSettingsStore } from '../../../store/useSettingsStore';
 import type { Action } from '../../../store/useSettingsStore';
 import { EmojiPicker } from '../../shared/EmojiPicker';
+import { ActionCard } from '../../shared/ActionCard';
 
 export function WordsTab() {
-  const { actions, addWordAction, removeWordAction } = useSettingsStore();
+  const { actions, addWordAction, removeWordAction, updateWordActions } = useSettingsStore();
   const [newAction, setNewAction] = useState<Omit<Action, 'id'>>({
     name: '',
     url: '',
@@ -17,6 +18,22 @@ export function WordsTab() {
     if (newAction.name && newAction.url) {
       addWordAction(newAction);
       setNewAction({ name: '', url: '', icon: '🔗' });
+    }
+  };
+
+  const handleMoveUp = (index: number) => {
+    if (index > 0) {
+      const newActions = [...actions.word];
+      [newActions[index - 1], newActions[index]] = [newActions[index], newActions[index - 1]];
+      updateWordActions(newActions);
+    }
+  };
+
+  const handleMoveDown = (index: number) => {
+    if (index < actions.word.length - 1) {
+      const newActions = [...actions.word];
+      [newActions[index], newActions[index + 1]] = [newActions[index + 1], newActions[index]];
+      updateWordActions(newActions);
     }
   };
 
@@ -66,29 +83,19 @@ export function WordsTab() {
       </form>
 
       <div className="space-y-2">
-        {actions.word.map((action) => (
-          <div
+        {actions.word.map((action, index) => (
+          <ActionCard
             key={action.id}
-            className="flex flex-col gap-2 p-4 bg-gray-50 rounded-lg group"
-          >
-            <div className="flex items-center gap-2">
-              <EmojiPicker
-                value={action.icon}
-                onChange={() => { }}
-                readOnly
-              />
-              <span className="font-medium flex-1">{action.name}</span>
-              <button
-                onClick={() => removeWordAction(action.id)}
-                className="p-2 text-red-500 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <Trash2 size={20} />
-              </button>
-            </div>
-            <p className="text-sm text-gray-600 font-mono pl-10">
-              {action.url}
-            </p>
-          </div>
+            id={action.id}
+            icon={action.icon}
+            name={action.name}
+            content={action.url}
+            onDelete={removeWordAction}
+            onMoveUp={() => handleMoveUp(index)}
+            onMoveDown={() => handleMoveDown(index)}
+            isFirst={index === 0}
+            isLast={index === actions.word.length - 1}
+          />
         ))}
       </div>
     </section>

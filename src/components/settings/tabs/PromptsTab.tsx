@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useSettingsStore, VARIABLES_DOC } from '../../../store/useSettingsStore';
 import type { AIPrompt } from '../../../store/useSettingsStore';
 import { EmojiPicker } from '../../shared/EmojiPicker';
+import { ActionCard } from '../../shared/ActionCard';
 
 export function PromptsTab() {
   const { prompts, updatePrompts } = useSettingsStore();
@@ -32,9 +33,30 @@ export function PromptsTab() {
     }
   };
 
-  const handleRemove = (id: string) => {
+  const handleDelete = (id: string) => {
     const newPrompts = prompts.filter(p => p.id !== id);
     updatePrompts(newPrompts);
+  };
+
+  const handleMoveUp = (index: number, type: 'word' | 'text') => {
+    if (index > 0) {
+      const allPrompts = [...prompts];
+      const typeStartIndex = prompts.findIndex(p => p.type === type);
+      const actualIndex = typeStartIndex + index;
+      [allPrompts[actualIndex - 1], allPrompts[actualIndex]] = [allPrompts[actualIndex], allPrompts[actualIndex - 1]];
+      updatePrompts(allPrompts);
+    }
+  };
+
+  const handleMoveDown = (index: number, type: 'word' | 'text') => {
+    const typePrompts = prompts.filter(p => p.type === type);
+    if (index < typePrompts.length - 1) {
+      const allPrompts = [...prompts];
+      const typeStartIndex = prompts.findIndex(p => p.type === type);
+      const actualIndex = typeStartIndex + index;
+      [allPrompts[actualIndex], allPrompts[actualIndex + 1]] = [allPrompts[actualIndex + 1], allPrompts[actualIndex]];
+      updatePrompts(allPrompts);
+    }
   };
 
   const wordPrompts = prompts.filter(p => p.type === 'word');
@@ -92,29 +114,19 @@ export function PromptsTab() {
             <span className="text-sm text-gray-500">({wordPrompts.length})</span>
           </h4>
           <div className="space-y-2">
-            {wordPrompts.map((prompt) => (
-              <div
+            {wordPrompts.map((prompt, index) => (
+              <ActionCard
                 key={prompt.id}
-                className="flex flex-col gap-2 p-4 bg-gray-50 rounded-lg group"
-              >
-                <div className="flex items-center gap-2">
-                  <EmojiPicker
-                    value={prompt.icon}
-                    onChange={() => { }}
-                    readOnly
-                  />
-                  <span className="font-medium flex-1">{prompt.name}</span>
-                  <button
-                    onClick={() => handleRemove(prompt.id)}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                </div>
-                <p className="text-sm text-gray-600 font-mono pl-10">
-                  {prompt.prompt}
-                </p>
-              </div>
+                id={prompt.id}
+                icon={prompt.icon}
+                name={prompt.name}
+                content={prompt.prompt}
+                onDelete={handleDelete}
+                onMoveUp={() => handleMoveUp(index, 'word')}
+                onMoveDown={() => handleMoveDown(index, 'word')}
+                isFirst={index === 0}
+                isLast={index === wordPrompts.length - 1}
+              />
             ))}
             {wordPrompts.length === 0 && (
               <p className="text-center text-gray-500 py-4">
@@ -131,29 +143,19 @@ export function PromptsTab() {
             <span className="text-sm text-gray-500">({textPrompts.length})</span>
           </h4>
           <div className="space-y-2">
-            {textPrompts.map((prompt) => (
-              <div
+            {textPrompts.map((prompt, index) => (
+              <ActionCard
                 key={prompt.id}
-                className="flex flex-col gap-2 p-4 bg-gray-50 rounded-lg group"
-              >
-                <div className="flex items-center gap-2">
-                  <EmojiPicker
-                    value={prompt.icon}
-                    onChange={() => { }}
-                    readOnly
-                  />
-                  <span className="font-medium flex-1">{prompt.name}</span>
-                  <button
-                    onClick={() => handleRemove(prompt.id)}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                </div>
-                <p className="text-sm text-gray-600 font-mono pl-10">
-                  {prompt.prompt}
-                </p>
-              </div>
+                id={prompt.id}
+                icon={prompt.icon}
+                name={prompt.name}
+                content={prompt.prompt}
+                onDelete={handleDelete}
+                onMoveUp={() => handleMoveUp(index, 'text')}
+                onMoveDown={() => handleMoveDown(index, 'text')}
+                isFirst={index === 0}
+                isLast={index === textPrompts.length - 1}
+              />
             ))}
             {textPrompts.length === 0 && (
               <p className="text-center text-gray-500 py-4">

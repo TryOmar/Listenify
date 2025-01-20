@@ -46,6 +46,8 @@ interface SettingsState {
   removeTextAction: (id: string) => void;
   addWordAction: (action: Omit<Action, 'id'>) => void;
   removeWordAction: (id: string) => void;
+  updateWordActions: (actions: Action[]) => void;
+  updateTextActions: (actions: Action[]) => void;
   updatePrompts: (prompts: AIPrompt[]) => void;
   updateAIModels: (models: { id: string; name: string; model: string; apiKey: string; }[]) => void;
   setActiveModel: (id: string | null) => void;
@@ -440,6 +442,20 @@ export const useSettingsStore = create<SettingsState>()(
             word: state.actions.word.filter(a => a.id !== id),
           },
         })),
+
+      updateWordActions: (actions) => set((state) => ({
+        actions: {
+          ...state.actions,
+          word: actions,
+        },
+      })),
+
+      updateTextActions: (actions) => set((state) => ({
+        actions: {
+          ...state.actions,
+          text: actions,
+        },
+      })),
 
       updatePrompts: (prompts) =>
         set({ prompts }),
