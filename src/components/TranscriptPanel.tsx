@@ -198,6 +198,11 @@ export function TranscriptPanel() {
   }, [maxWords, setTranscript, setRecognition, speechLanguage]);
 
   const toggleListening = () => {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      addToast('Speech recognition unavailable. Please use Chrome or Edge or Safari or Opera for this feature.', 'error');
+      return;
+    }
+
     if (!recognition) return;
 
     if (isListening) {
