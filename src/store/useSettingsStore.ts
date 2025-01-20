@@ -44,11 +44,14 @@ interface SettingsState {
   updateGeneralSettings: (settings: Partial<GeneralSettings>) => void;
   addTextAction: (action: Omit<Action, 'id'>) => void;
   removeTextAction: (id: string) => void;
+  editTextAction: (id: string, updates: Partial<Omit<Action, 'id'>>) => void;
   addWordAction: (action: Omit<Action, 'id'>) => void;
   removeWordAction: (id: string) => void;
+  editWordAction: (id: string, updates: Partial<Omit<Action, 'id'>>) => void;
   updateWordActions: (actions: Action[]) => void;
   updateTextActions: (actions: Action[]) => void;
   updatePrompts: (prompts: AIPrompt[]) => void;
+  editPrompt: (id: string, updates: Partial<Omit<AIPrompt, 'id' | 'modelId'>>) => void;
   updateAIModels: (models: { id: string; name: string; model: string; apiKey: string; }[]) => void;
   setActiveModel: (id: string | null) => void;
   resetToDefaults: () => void;
@@ -427,6 +430,16 @@ export const useSettingsStore = create<SettingsState>()(
           },
         })),
 
+      editTextAction: (id, updates) =>
+        set((state) => ({
+          actions: {
+            ...state.actions,
+            text: state.actions.text.map(action =>
+              action.id === id ? { ...action, ...updates } : action
+            ),
+          },
+        })),
+
       addWordAction: (action) =>
         set((state) => ({
           actions: {
@@ -440,6 +453,16 @@ export const useSettingsStore = create<SettingsState>()(
           actions: {
             ...state.actions,
             word: state.actions.word.filter(a => a.id !== id),
+          },
+        })),
+
+      editWordAction: (id, updates) =>
+        set((state) => ({
+          actions: {
+            ...state.actions,
+            word: state.actions.word.map(action =>
+              action.id === id ? { ...action, ...updates } : action
+            ),
           },
         })),
 
@@ -459,6 +482,13 @@ export const useSettingsStore = create<SettingsState>()(
 
       updatePrompts: (prompts) =>
         set({ prompts }),
+
+      editPrompt: (id, updates) =>
+        set((state) => ({
+          prompts: state.prompts.map(prompt =>
+            prompt.id === id ? { ...prompt, ...updates } : prompt
+          ),
+        })),
 
       updateAIModels: (models) =>
         set({ aiModels: models }),

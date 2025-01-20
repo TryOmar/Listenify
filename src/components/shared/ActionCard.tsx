@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, ChevronUp, ChevronDown, Edit2, Maximize2, X } from 'lucide-react';
+import { Trash2, ChevronUp, ChevronDown, Edit2, Maximize2, X, Check, XCircle } from 'lucide-react';
 import { EmojiPicker } from './EmojiPicker';
 import { useToastStore } from '../../store/useToastStore';
 import { cn } from '../../lib/utils';
@@ -12,7 +12,7 @@ interface ActionCardProps {
     onDelete: (id: string) => void;
     onMoveUp?: () => void;
     onMoveDown?: () => void;
-    onEdit?: () => void;
+    onEdit?: (id: string, updates: { icon: string; name: string; content: string }) => void;
     isFirst?: boolean;
     isLast?: boolean;
 }
@@ -31,6 +31,8 @@ export function ActionCard({
 }: ActionCardProps) {
     const [isDeleting, setIsDeleting] = useState(false);
     const [isFullView, setIsFullView] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedValues, setEditedValues] = useState({ icon, name, content });
     const { addToast } = useToastStore();
 
     const handleDelete = () => {
@@ -43,6 +45,70 @@ export function ActionCard({
             setTimeout(() => setIsDeleting(false), 2000);
         }
     };
+
+    const handleEdit = () => {
+        setIsEditing(true);
+        setEditedValues({ icon, name, content });
+    };
+
+    const handleSave = () => {
+        if (onEdit && (editedValues.name.trim() && editedValues.content.trim())) {
+            onEdit(id, editedValues);
+            setIsEditing(false);
+            addToast('Changes saved successfully', 'success');
+        } else {
+            addToast('Name and content cannot be empty', 'error');
+        }
+    };
+
+    const handleCancel = () => {
+        setIsEditing(false);
+        setEditedValues({ icon, name, content });
+    };
+
+    if (isEditing) {
+        return (
+            <div className="flex flex-col gap-3 p-4 bg-white border border-blue-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 flex-1">
+                        <EmojiPicker
+                            value={editedValues.icon}
+                            onChange={(emoji) => setEditedValues({ ...editedValues, icon: emoji })}
+                        />
+                        <input
+                            type="text"
+                            value={editedValues.name}
+                            onChange={(e) => setEditedValues({ ...editedValues, name: e.target.value })}
+                            className="flex-1 px-2 py-1 border rounded focus:outline-none focus:border-blue-300"
+                            placeholder="Enter name"
+                        />
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={handleSave}
+                            className="p-1.5 text-green-600 hover:bg-green-50 rounded-md"
+                            title="Save changes"
+                        >
+                            <Check size={18} />
+                        </button>
+                        <button
+                            onClick={handleCancel}
+                            className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-md"
+                            title="Cancel editing"
+                        >
+                            <XCircle size={18} />
+                        </button>
+                    </div>
+                </div>
+                <textarea
+                    value={editedValues.content}
+                    onChange={(e) => setEditedValues({ ...editedValues, content: e.target.value })}
+                    className="w-full px-2 py-1 text-sm font-mono text-gray-600 border rounded focus:outline-none focus:border-blue-300 min-h-[60px]"
+                    placeholder="Enter content"
+                />
+            </div>
+        );
+    }
 
     return (
         <div
@@ -90,7 +156,7 @@ export function ActionCard({
                     {/* Edit button */}
                     {onEdit && (
                         <button
-                            onClick={onEdit}
+                            onClick={handleEdit}
                             className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-md"
                             title="Edit"
                         >

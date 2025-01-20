@@ -6,7 +6,7 @@ import { EmojiPicker } from '../../shared/EmojiPicker';
 import { ActionCard } from '../../shared/ActionCard';
 
 export function TextTab() {
-  const { actions, addTextAction, removeTextAction, updateTextActions } = useSettingsStore();
+  const { actions, addTextAction, removeTextAction, updateTextActions, editTextAction } = useSettingsStore();
   const [newAction, setNewAction] = useState<Omit<Action, 'id'>>({
     name: '',
     url: '',
@@ -93,6 +93,7 @@ export function TextTab() {
             onDelete={removeTextAction}
             onMoveUp={() => handleMoveUp(index)}
             onMoveDown={() => handleMoveDown(index)}
+            onEdit={(id, updates) => editTextAction(id, { ...updates, url: updates.content })}
             isFirst={index === 0}
             isLast={index === actions.text.length - 1}
           />

@@ -6,7 +6,7 @@ import { EmojiPicker } from '../../shared/EmojiPicker';
 import { ActionCard } from '../../shared/ActionCard';
 
 export function PromptsTab() {
-  const { prompts, updatePrompts } = useSettingsStore();
+  const { prompts, updatePrompts, editPrompt } = useSettingsStore();
   const [newPrompt, setNewPrompt] = useState<Omit<AIPrompt, 'id' | 'modelId'>>({
     name: '',
     prompt: '',
@@ -124,6 +124,7 @@ export function PromptsTab() {
                 onDelete={handleDelete}
                 onMoveUp={() => handleMoveUp(index, 'word')}
                 onMoveDown={() => handleMoveDown(index, 'word')}
+                onEdit={(id, updates) => editPrompt(id, { ...updates, prompt: updates.content })}
                 isFirst={index === 0}
                 isLast={index === wordPrompts.length - 1}
               />
@@ -153,6 +154,7 @@ export function PromptsTab() {
                 onDelete={handleDelete}
                 onMoveUp={() => handleMoveUp(index, 'text')}
                 onMoveDown={() => handleMoveDown(index, 'text')}
+                onEdit={(id, updates) => editPrompt(id, { ...updates, prompt: updates.content })}
                 isFirst={index === 0}
                 isLast={index === textPrompts.length - 1}
               />

@@ -6,7 +6,7 @@ import { EmojiPicker } from '../../shared/EmojiPicker';
 import { ActionCard } from '../../shared/ActionCard';
 
 export function WordsTab() {
-  const { actions, addWordAction, removeWordAction, updateWordActions } = useSettingsStore();
+  const { actions, addWordAction, removeWordAction, updateWordActions, editWordAction } = useSettingsStore();
   const [newAction, setNewAction] = useState<Omit<Action, 'id'>>({
     name: '',
     url: '',
@@ -93,6 +93,7 @@ export function WordsTab() {
             onDelete={removeWordAction}
             onMoveUp={() => handleMoveUp(index)}
             onMoveDown={() => handleMoveDown(index)}
+            onEdit={(id, updates) => editWordAction(id, { ...updates, url: updates.content })}
             isFirst={index === 0}
             isLast={index === actions.word.length - 1}
           />
