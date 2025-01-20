@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Info } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { useSettingsStore, VARIABLES_DOC } from '../../../store/useSettingsStore';
 import type { AIPrompt } from '../../../store/useSettingsStore';
+import { EmojiPicker } from '../../shared/EmojiPicker';
 
 export function PromptsTab() {
   const { prompts, updatePrompts } = useSettingsStore();
@@ -9,6 +10,7 @@ export function PromptsTab() {
     name: '',
     prompt: '',
     type: 'text',
+    icon: '📝',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -26,7 +28,7 @@ export function PromptsTab() {
         }
       ];
       updatePrompts(newPrompts);
-      setNewPrompt({ name: '', prompt: '', type: 'text' });
+      setNewPrompt({ name: '', prompt: '', type: 'text', icon: '📝' });
     }
   };
 
@@ -39,46 +41,48 @@ export function PromptsTab() {
   const textPrompts = prompts.filter(p => p.type === 'text');
 
   return (
-    <section className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold mb-4">AI Prompts</h3>
+    <section className="space-y-4">
+      <h3 className="text-lg font-semibold">AI Prompts</h3>
 
-        <div className="text-sm text-gray-500 mb-4">
-          <p>Available variables:</p>
-          <ul className="list-disc list-inside mt-1 space-y-1">
-            {Object.entries(VARIABLES_DOC).map(([key, desc]) => (
-              <li key={key}>
-                <code className="bg-gray-100 px-1 rounded">{`{${key}}`}</code> - {desc}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4 mb-8">
-          <div className="grid grid-cols-1 gap-4">
-            <input
-              type="text"
-              placeholder="Prompt Name (e.g., Translate to Spanish)"
-              value={newPrompt.name}
-              onChange={(e) => setNewPrompt({ ...newPrompt, name: e.target.value })}
-              className="px-3 py-2 border rounded-lg"
-            />
-            <textarea
-              placeholder="Prompt Template (use {text} for text selection or {word} for word popup)"
-              value={newPrompt.prompt}
-              onChange={(e) => setNewPrompt({ ...newPrompt, prompt: e.target.value })}
-              className="w-full h-24 px-3 py-2 border rounded-lg resize-none"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-          >
-            <Plus className="inline mr-2" size={20} />
-            Add Prompt
-          </button>
-        </form>
+      <div className="text-sm text-gray-500 mb-4">
+        <p>Available placeholders:</p>
+        <ul className="list-disc list-inside mt-1">
+          {Object.entries(VARIABLES_DOC).map(([key, desc]) => (
+            <li key={key}>
+              <code className="bg-gray-100 px-1 rounded">{`{${key}}`}</code> - {desc}
+            </li>
+          ))}
+        </ul>
       </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-[auto,1fr] gap-4">
+          <EmojiPicker
+            value={newPrompt.icon}
+            onChange={(emoji) => setNewPrompt({ ...newPrompt, icon: emoji })}
+          />
+          <input
+            type="text"
+            placeholder="Enter prompt name (e.g., 'Translate to Spanish', 'Define Word')"
+            value={newPrompt.name}
+            onChange={(e) => setNewPrompt({ ...newPrompt, name: e.target.value })}
+            className="px-3 py-2 border rounded-lg"
+          />
+        </div>
+        <textarea
+          placeholder="Enter prompt template using variables like {word} or {text}. Example: 'Translate this {text} from {speech_language} to {translation_language}'"
+          value={newPrompt.prompt}
+          onChange={(e) => setNewPrompt({ ...newPrompt, prompt: e.target.value })}
+          className="w-full h-24 px-3 py-2 border rounded-lg resize-none"
+        />
+        <button
+          type="submit"
+          className="w-full p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        >
+          <Plus className="inline mr-2" size={20} />
+          Add Prompt
+        </button>
+      </form>
 
       <div className="grid grid-cols-2 gap-6">
         {/* Word Prompts */}
@@ -91,23 +95,25 @@ export function PromptsTab() {
             {wordPrompts.map((prompt) => (
               <div
                 key={prompt.id}
-                className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg group"
+                className="flex flex-col gap-2 p-4 bg-gray-50 rounded-lg group"
               >
-                <span className="w-8 text-center mt-1">🤖</span>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="font-medium">{prompt.name}</span>
-                    <button
-                      onClick={() => handleRemove(prompt.id)}
-                      className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                  <p className="text-sm text-gray-600 font-mono bg-white p-2 rounded border border-gray-100">
-                    {prompt.prompt}
-                  </p>
+                <div className="flex items-center gap-2">
+                  <EmojiPicker
+                    value={prompt.icon}
+                    onChange={() => { }}
+                    readOnly
+                  />
+                  <span className="font-medium flex-1">{prompt.name}</span>
+                  <button
+                    onClick={() => handleRemove(prompt.id)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 size={20} />
+                  </button>
                 </div>
+                <p className="text-sm text-gray-600 font-mono pl-10">
+                  {prompt.prompt}
+                </p>
               </div>
             ))}
             {wordPrompts.length === 0 && (
@@ -128,23 +134,25 @@ export function PromptsTab() {
             {textPrompts.map((prompt) => (
               <div
                 key={prompt.id}
-                className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg group"
+                className="flex flex-col gap-2 p-4 bg-gray-50 rounded-lg group"
               >
-                <span className="w-8 text-center mt-1">🤖</span>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="font-medium">{prompt.name}</span>
-                    <button
-                      onClick={() => handleRemove(prompt.id)}
-                      className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                  <p className="text-sm text-gray-600 font-mono bg-white p-2 rounded border border-gray-100">
-                    {prompt.prompt}
-                  </p>
+                <div className="flex items-center gap-2">
+                  <EmojiPicker
+                    value={prompt.icon}
+                    onChange={() => { }}
+                    readOnly
+                  />
+                  <span className="font-medium flex-1">{prompt.name}</span>
+                  <button
+                    onClick={() => handleRemove(prompt.id)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 size={20} />
+                  </button>
                 </div>
+                <p className="text-sm text-gray-600 font-mono pl-10">
+                  {prompt.prompt}
+                </p>
               </div>
             ))}
             {textPrompts.length === 0 && (

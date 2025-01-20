@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useSettingsStore } from '../../../store/useSettingsStore';
 import type { Action } from '../../../store/useSettingsStore';
+import { EmojiPicker } from '../../shared/EmojiPicker';
 
 export function WordsTab() {
   const { actions, addWordAction, removeWordAction } = useSettingsStore();
@@ -35,29 +36,26 @@ export function WordsTab() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-[1fr,1fr,auto] gap-4">
+        <div className="grid grid-cols-[auto,1fr] gap-4">
+          <EmojiPicker
+            value={newAction.icon}
+            onChange={(emoji) => setNewAction({ ...newAction, icon: emoji })}
+          />
           <input
             type="text"
-            placeholder="Action Name"
+            placeholder="Enter action name (e.g., 'Google Translate', 'Dictionary Lookup')"
             value={newAction.name}
             onChange={(e) => setNewAction({ ...newAction, name: e.target.value })}
             className="px-3 py-2 border rounded-lg"
           />
-          <input
-            type="text"
-            placeholder="URL Template (use placeholders)"
-            value={newAction.url}
-            onChange={(e) => setNewAction({ ...newAction, url: e.target.value })}
-            className="px-3 py-2 border rounded-lg"
-          />
-          <input
-            type="text"
-            placeholder="Icon"
-            value={newAction.icon}
-            onChange={(e) => setNewAction({ ...newAction, icon: e.target.value })}
-            className="w-20 px-3 py-2 border rounded-lg"
-          />
         </div>
+        <input
+          type="text"
+          placeholder="Enter URL template using variables like {word}. Example: 'https://translate.google.com/?text={word}'"
+          value={newAction.url}
+          onChange={(e) => setNewAction({ ...newAction, url: e.target.value })}
+          className="w-full px-3 py-2 border rounded-lg"
+        />
         <button
           type="submit"
           className="w-full p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
@@ -71,17 +69,25 @@ export function WordsTab() {
         {actions.word.map((action) => (
           <div
             key={action.id}
-            className="flex items-center gap-2 p-4 bg-gray-50 rounded-lg"
+            className="flex flex-col gap-2 p-4 bg-gray-50 rounded-lg group"
           >
-            <span className="w-8 text-center">{action.icon}</span>
-            <span className="flex-1">{action.name}</span>
-            <span className="flex-1 text-gray-500 truncate">{action.url}</span>
-            <button
-              onClick={() => removeWordAction(action.id)}
-              className="p-2 text-red-500 hover:bg-red-50 rounded"
-            >
-              <Trash2 size={20} />
-            </button>
+            <div className="flex items-center gap-2">
+              <EmojiPicker
+                value={action.icon}
+                onChange={() => { }}
+                readOnly
+              />
+              <span className="font-medium flex-1">{action.name}</span>
+              <button
+                onClick={() => removeWordAction(action.id)}
+                className="p-2 text-red-500 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Trash2 size={20} />
+              </button>
+            </div>
+            <p className="text-sm text-gray-600 font-mono pl-10">
+              {action.url}
+            </p>
           </div>
         ))}
       </div>

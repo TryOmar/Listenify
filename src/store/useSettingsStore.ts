@@ -22,6 +22,7 @@ export interface AIPrompt {
   prompt: string;
   modelId: string;
   type: 'word' | 'text';  // Simplified type to clearly indicate where it should appear
+  icon: string;
 }
 
 interface SettingsState {
@@ -147,6 +148,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Translate the following text from {speech_language_code} to {translation_language_code}:\n\n{text}',
     modelId: '',
     type: 'text',
+    icon: '🌐',
   },
   {
     id: '2',
@@ -154,6 +156,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Summarize the following text in {speech_language_code}:\n\n{text}',
     modelId: '',
     type: 'text',
+    icon: '📝',
   },
   {
     id: '3',
@@ -161,6 +164,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Rephrase the following text in {speech_language_code} while maintaining its meaning:\n\n{text}',
     modelId: '',
     type: 'text',
+    icon: '🔄',
   },
   {
     id: '4',
@@ -168,6 +172,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Explain the following text in simple terms in {speech_language_code}:\n\n{text}',
     modelId: '',
     type: 'text',
+    icon: '💡',
   },
   // Word-based prompts (using {word})
   {
@@ -176,6 +181,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'What is the definition of \'{word}\' in {speech_language_code}?',
     modelId: '',
     type: 'word',
+    icon: '📚',
   },
   {
     id: '6',
@@ -183,6 +189,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Translate the word \'{word}\' from {speech_language_code} to {translation_language_code}.',
     modelId: '',
     type: 'word',
+    icon: '🌐',
   },
   {
     id: '7',
@@ -190,6 +197,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Provide 3 example sentences using the word \'{word}\' in {speech_language_code}.',
     modelId: '',
     type: 'word',
+    icon: '📝',
   },
   {
     id: '8',
@@ -197,6 +205,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'List the synonyms and antonyms of \'{word}\' in {speech_language_code}.',
     modelId: '',
     type: 'word',
+    icon: '🔄',
   },
   {
     id: '9',
@@ -204,6 +213,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Show all grammatical forms of the word \'{word}\' in {speech_language_code} (noun, verb, adjective, etc.).',
     modelId: '',
     type: 'word',
+    icon: '📊',
   },
   {
     id: '10',
@@ -211,6 +221,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Explain how to properly use \'{word}\' in {speech_language_code}, including common collocations and phrases.',
     modelId: '',
     type: 'word',
+    icon: '💭',
   },
   {
     id: '11',
@@ -218,6 +229,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Correct any grammatical errors in the following text in {speech_language_code}:\n\n{text}',
     modelId: '',
     type: 'text',
+    icon: '✍️',
   },
   {
     id: '12',
@@ -225,6 +237,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Rewrite the following text in a more formal tone in {speech_language_code}:\n\n{text}',
     modelId: '',
     type: 'text',
+    icon: '🎭',
   },
   {
     id: '13',
@@ -232,6 +245,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Generate comprehension questions based on the following text in {speech_language_code}:\n\n{text}',
     modelId: '',
     type: 'text',
+    icon: '❓',
   },
   {
     id: '14',
@@ -239,6 +253,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Identify and explain any idiomatic expressions in the following text in {speech_language_code}:\n\n{text}',
     modelId: '',
     type: 'text',
+    icon: '🗣️',
   },
   {
     id: '15',
@@ -246,6 +261,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Paraphrase the following text in a more casual style in {speech_language_code}:\n\n{text}',
     modelId: '',
     type: 'text',
+    icon: '🎨',
   },
 
   // Additional Word-based prompts (using {word})
@@ -255,6 +271,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Provide a pronunciation guide for \'{word}\' in {speech_language_code}, including phonetic transcription and audio references if possible.',
     modelId: '',
     type: 'word',
+    icon: '🔊',
   },
   {
     id: '17',
@@ -262,6 +279,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Explain the origin and historical development of the word \'{word}\' in {speech_language_code}.',
     modelId: '',
     type: 'word',
+    icon: '📜',
   },
   {
     id: '18',
@@ -269,6 +287,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'List common collocations for the word \'{word}\' in {speech_language_code}.',
     modelId: '',
     type: 'word',
+    icon: '🔗',
   },
   {
     id: '19',
@@ -276,6 +295,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'What are common mistakes made when using the word \'{word}\' in {speech_language_code}?',
     modelId: '',
     type: 'word',
+    icon: '⚠️',
   },
   {
     id: '20',
@@ -283,6 +303,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Provide idioms or phrases that include the word \'{word}\' in {speech_language_code}.',
     modelId: '',
     type: 'word',
+    icon: '💬',
   },
   {
     id: '21',
@@ -290,6 +311,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'List related words to \'{word}\' in {speech_language_code}, such as derivatives and compound words.',
     modelId: '',
     type: 'word',
+    icon: '👨‍👩‍👧‍👦',
   },
   {
     id: '22',
@@ -297,6 +319,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Explain any cultural nuances or contexts associated with the word \'{word}\' in {speech_language_code}.',
     modelId: '',
     type: 'word',
+    icon: '🌍',
   },
   {
     id: '23',
@@ -304,6 +327,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Provide idiomatic expressions that feature the word \'{word}\' in {speech_language_code} and explain their meanings.',
     modelId: '',
     type: 'word',
+    icon: '🎯',
   },
   {
     id: '24',
@@ -311,6 +335,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Create fill-in-the-blank sentences to practice using the word \'{word}\' in {speech_language_code}.',
     modelId: '',
     type: 'word',
+    icon: '✏️',
   },
   {
     id: '25',
@@ -318,6 +343,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Compare and contrast the word \'{word}\' with similar words in {speech_language_code}, highlighting differences in usage.',
     modelId: '',
     type: 'word',
+    icon: '⚖️',
   },
   // New Text-based prompt for suggesting a response
   {
@@ -326,6 +352,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Suggest a suitable response to the following text in {speech_language_code}:\n\n{text}',
     modelId: '',
     type: 'text',
+    icon: '💭',
   },
 
   // New Text-based prompt for rephrasing in 5 different ways
@@ -335,6 +362,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Rephrase the following sentence in 5 different ways using bullet points, while maintaining its meaning in {speech_language_code}:\n\n{text}',
     modelId: '',
     type: 'text',
+    icon: '🔄',
   },
 
   // New Text-based prompt for using advanced vocabulary
@@ -344,6 +372,7 @@ const defaultPrompts: AIPrompt[] = [
     prompt: 'Rewrite the following sentence using more advanced vocabulary in {speech_language_code}:\n\n{text}',
     modelId: '',
     type: 'text',
+    icon: '📚',
   }
 
 
