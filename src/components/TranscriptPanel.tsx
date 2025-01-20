@@ -74,7 +74,19 @@ export function TranscriptPanel() {
   const { isChatPanelOpen, openChatPanel } = usePanelStore();
   const { addToast } = useToastStore();
 
-  // Effect to update displayed transcript when maxWords changes
+  // Effect to handle maxWords changes from settings
+  useEffect(() => {
+    const allWords = transcript.split(/\s+/).filter(Boolean);
+    if (allWords.length > maxWords) {
+      finalTranscriptRef.current = '';
+      fullTranscriptRef.current = [];
+      interimTranscriptRef.current = '';
+      setTranscript('');
+      addToast(`Transcript cleared to match new ${maxWords} words limit`, 'info');
+    }
+  }, [maxWords, transcript, setTranscript, addToast]);
+
+  // Effect to update displayed transcript when words exceed limit
   useEffect(() => {
     // Get all words from current transcript
     const allWords = transcript.split(/\s+/).filter(Boolean);
@@ -87,7 +99,7 @@ export function TranscriptPanel() {
       setTranscript('');
       addToast('Maximum words reached, starting fresh', 'info');
     }
-  }, [maxWords, transcript, setTranscript, addToast]);
+  }, [transcript, setTranscript, addToast, maxWords]);
 
   useEffect(() => {
     if (window.SpeechRecognition || window.webkitSpeechRecognition) {
