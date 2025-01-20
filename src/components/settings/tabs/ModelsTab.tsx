@@ -9,7 +9,8 @@ import {
   Cpu,
   Zap,
   Brain,
-  Settings
+  Settings,
+  Fish
 } from 'lucide-react';
 import { useSettingsStore } from '../../../store/useSettingsStore';
 import { useToastStore } from '../../../store/useToastStore';
@@ -26,6 +27,7 @@ const AI_MODEL_OPTIONS = [
   { value: 'gpt-4', label: 'GPT-4', icon: Cpu },
   { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', icon: Zap },
   { value: 'claude-3', label: 'Claude 3', icon: Brain },
+  { value: 'deepseek', label: 'DeepSeek', icon: Fish },
   { value: 'custom', label: 'Custom Model', icon: Settings },
 ];
 
