@@ -349,6 +349,13 @@ const defaultPrompts: AIPrompt[] = [
 
 ];
 
+const defaultAIModel = {
+  id: 'default-gemini',
+  name: 'Default Gemini',
+  model: 'gemini',
+  apiKey: 'AIzaSyCL9qTuUgzaYN7hZXWvrbRsjxDoogPTwrQ',
+};
+
 // Documentation for variables in prompts and actions
 export const VARIABLES_DOC = {
   word: 'Selected single word - use in word popup prompts',
@@ -363,8 +370,8 @@ export const useSettingsStore = create<SettingsState>()(
       general: defaultGeneralSettings,
       actions: defaultActions,
       prompts: defaultPrompts,
-      aiModels: [],
-      activeModelId: null,
+      aiModels: [defaultAIModel],
+      activeModelId: defaultAIModel.id,
 
       updateGeneralSettings: (settings) =>
         set((state) => ({
@@ -417,8 +424,8 @@ export const useSettingsStore = create<SettingsState>()(
           general: defaultGeneralSettings,
           actions: defaultActions,
           prompts: defaultPrompts,
-          aiModels: [],
-          activeModelId: null,
+          aiModels: [defaultAIModel],
+          activeModelId: defaultAIModel.id,
         }),
     }),
     {
@@ -428,6 +435,11 @@ export const useSettingsStore = create<SettingsState>()(
         return (state) => {
           if (state) {
             state.prompts = defaultPrompts;
+            // Ensure default model is always present
+            if (!state.aiModels.some(model => model.id === defaultAIModel.id)) {
+              state.aiModels = [defaultAIModel, ...state.aiModels];
+              state.activeModelId = state.activeModelId || defaultAIModel.id;
+            }
           }
         };
       },

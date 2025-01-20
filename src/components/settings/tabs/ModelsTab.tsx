@@ -12,6 +12,7 @@ import {
   Settings
 } from 'lucide-react';
 import { useSettingsStore } from '../../../store/useSettingsStore';
+import { useToastStore } from '../../../store/useToastStore';
 
 interface AIModel {
   id: string;
@@ -39,6 +40,10 @@ export function ModelsTab() {
   const [showNewApiKey, setShowNewApiKey] = useState(false);
 
   const toggleKeyVisibility = (id: string) => {
+    if (id === 'default-gemini') {
+      useToastStore.getState().addToast('Cannot reveal the default model API key', 'error');
+      return;
+    }
     setVisibleKeys(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
@@ -57,6 +62,10 @@ export function ModelsTab() {
   };
 
   const handleRemoveModel = (id: string) => {
+    if (id === 'default-gemini') {
+      useToastStore.getState().addToast('Cannot delete the default model', 'error');
+      return;
+    }
     const updatedModels = aiModels.filter(model => model.id !== id);
     updateAIModels(updatedModels);
     if (activeModelId === id) {
