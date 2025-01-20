@@ -27,11 +27,17 @@ type SpeechRecognitionEvent = {
   };
 };
 
+interface SpeechRecognitionErrorEvent {
+  error: string;
+  message?: string;
+}
+
 interface SpeechRecognition {
   continuous: boolean;
   interimResults: boolean;
   onresult: (event: SpeechRecognitionEvent) => void;
   onend: () => void;
+  onerror: (event: SpeechRecognitionErrorEvent) => void;
   start: () => void;
   stop: () => void;
 }
@@ -68,7 +74,6 @@ export function TranscriptPanel() {
   const { addMessage } = useChatStore();
   const { isChatPanelOpen, openChatPanel } = usePanelStore();
   const { addToast } = useToastStore();
-  const [translatedText, setTranslatedText] = useState('');
 
   // Effect to update displayed transcript when maxWords changes
   useEffect(() => {
@@ -80,7 +85,6 @@ export function TranscriptPanel() {
       finalTranscriptRef.current = '';
       fullTranscriptRef.current = [];
       setTranscript('');
-      setTranslatedText('');
       addToast('Maximum words reached, starting fresh', 'info');
     }
   }, [maxWords, transcript, setTranscript, addToast]);
@@ -145,7 +149,47 @@ export function TranscriptPanel() {
 
         // Restart recognition if it's still supposed to be listening
         if (isListening) {
-          recognition.start();
+          try {
+            recognition.start();
+          } catch (error) {
+            console.error('Error restarting recognition:', error);
+            // Add a small delay before retrying
+            setTimeout(() => {
+              if (isListening) {
+                try {
+                  recognition.start();
+                } catch (retryError) {
+                  console.error('Error on retry:', retryError);
+                  setIsListening(false);
+                  addToast('Failed to restart recognition. Please try again.', 'error');
+                }
+              }
+            }, 1000);
+          }
+        }
+      };
+
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error('Recognition error:', event.error);
+        // Don't stop listening on error, let onend handler restart it
+        if (isListening) {
+          try {
+            recognition.start();
+          } catch (error) {
+            console.error('Error restarting recognition:', error);
+            // Add a small delay before retrying
+            setTimeout(() => {
+              if (isListening) {
+                try {
+                  recognition.start();
+                } catch (retryError) {
+                  console.error('Error on retry:', retryError);
+                  setIsListening(false);
+                  addToast('Failed to restart recognition. Please try again.', 'error');
+                }
+              }
+            }, 1000);
+          }
         }
       };
 
@@ -158,14 +202,20 @@ export function TranscriptPanel() {
 
     if (isListening) {
       recognition.stop();
+      setIsListening(false);
       addToast('Microphone stopped', 'info');
     } else {
       finalTranscriptRef.current = transcript;
       fullTranscriptRef.current = transcript.split(/\s+/).filter(Boolean);
-      recognition.start();
-      addToast('Microphone started', 'success');
+      try {
+        recognition.start();
+        setIsListening(true);
+        addToast('Microphone started', 'success');
+      } catch (error) {
+        console.error('Error starting recognition:', error);
+        addToast('Failed to start recognition. Please try again.', 'error');
+      }
     }
-    setIsListening(!isListening);
   };
 
   const handleClearTranscript = () => {
@@ -173,7 +223,6 @@ export function TranscriptPanel() {
     interimTranscriptRef.current = '';
     finalTranscriptRef.current = '';
     fullTranscriptRef.current = [];
-    setTranslatedText('');
     addToast('Transcript cleared', 'info');
   };
 
