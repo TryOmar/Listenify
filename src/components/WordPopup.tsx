@@ -151,7 +151,7 @@ export function WordPopup({ word, preventSave = false }: WordPopupProps) {
                   onClick={() => handleAIPromptClick(prompt.prompt)}
                   className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded transition-colors w-full text-left"
                 >
-                  <span>🤖</span>
+                  <span>{prompt.icon}</span>
                   <span className="flex-1">{prompt.name}</span>
                 </button>
               ))}

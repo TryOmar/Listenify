@@ -97,7 +97,7 @@ export function TextSelectionPopup({ selectedText, onAIPromptClick, onClose, pre
                             onClick={(e) => handleAIPromptClick(prompt.prompt, e)}
                             className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded transition-colors w-full text-left"
                         >
-                            <span>🤖</span>
+                            <span>{prompt.icon}</span>
                             <span className="flex-1">{prompt.name}</span>
                         </button>
                     ))}
