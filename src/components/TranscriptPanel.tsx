@@ -9,7 +9,6 @@ import { useChatStore } from '../store/useChatStore';
 import { usePanelStore } from '../store/usePanelStore';
 import { useToastStore } from '../store/useToastStore';
 import { generateGeminiResponse } from '../services/geminiService';
-import { cn, isRTL } from '../lib/utils';
 import DiscordIcon from '../icons/discord.svg';
 import { TranslationPanel } from './TranslationPanel';
 
@@ -388,13 +387,10 @@ export function TranscriptPanel() {
           }}
         >
           <div
-            className={cn(
-              "space-x-1",
-              isRTL(speechLanguage) && "text-right"
-            )}
+            className="space-x-1"
+            dir="auto"
             style={{
-              fontSize: `${fontSize}px`,
-              direction: isRTL(speechLanguage) ? 'rtl' : 'ltr'
+              fontSize: `${fontSize}px`
             }}
           >
             {renderTranscript()}
