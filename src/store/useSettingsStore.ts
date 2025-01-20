@@ -7,8 +7,6 @@ export interface GeneralSettings {
   theme: 'light' | 'dark';
   fontSize: number;
   maxWords: number;
-  audioDeviceId: string;
-  audioDeviceLabel: string;
 }
 
 export interface Action {
@@ -60,8 +58,6 @@ const defaultGeneralSettings: GeneralSettings = {
   theme: 'light',
   fontSize: 16,
   maxWords: 100,
-  audioDeviceId: 'default',
-  audioDeviceLabel: 'Default Microphone',
 };
 
 const defaultActions = {
