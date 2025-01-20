@@ -30,14 +30,13 @@ export function EmojiPicker({ value, onChange, readOnly }: EmojiPickerProps) {
 
     return (
         <div className="relative" ref={pickerRef}>
-            <input
-                type="text"
-                value={value}
-                readOnly
+            <button
+                type="button"
                 onClick={() => !readOnly && setShowPicker(!showPicker)}
-                className={`w-12 text-center px-3 py-2 border rounded-lg ${readOnly ? 'bg-transparent cursor-default' : 'cursor-pointer hover:bg-gray-50'
-                    }`}
-            />
+                className={`text-2xl ${readOnly ? 'cursor-default' : 'cursor-pointer hover:opacity-80'}`}
+            >
+                {value}
+            </button>
             {showPicker && !readOnly && (
                 <div className="absolute z-50 top-full left-0 mt-1">
                     <EmojiPickerReact onEmojiClick={handleEmojiClick} />

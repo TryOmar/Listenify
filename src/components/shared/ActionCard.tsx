@@ -51,9 +51,11 @@ export function ActionCard({
                 isDeleting ? 'bg-red-50 border border-red-200' : 'bg-white border border-gray-200 hover:border-blue-200 hover:shadow-sm'
             )}
         >
-            <div className="flex items-center gap-2">
-                <EmojiPicker value={icon} onChange={() => { }} readOnly />
-                <span className="font-medium flex-1">{name}</span>
+            <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 flex-1">
+                    <EmojiPicker value={icon} onChange={() => { }} readOnly />
+                    <span className="font-medium">{name}</span>
+                </div>
 
                 <div className="flex items-center gap-1">
                     {/* Move Up/Down buttons */}
