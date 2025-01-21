@@ -6,6 +6,7 @@ export interface GeneralSettings {
   translationLanguage: string;
   theme: 'light' | 'dark';
   fontSize: number;
+  aiChatFontSize: number;
   maxWords: number;
   breakSentences: boolean;
   lineBreakStyle: 'single' | 'double';
@@ -65,6 +66,7 @@ const defaultGeneralSettings: GeneralSettings = {
   translationLanguage: 'ar',
   theme: 'light',
   fontSize: 16,
+  aiChatFontSize: 12,
   maxWords: 100,
   breakSentences: false,
   lineBreakStyle: 'single',

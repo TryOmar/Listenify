@@ -11,7 +11,7 @@ import DiscordIcon from '../../icons/discord.svg';
 
 export function ChatPanel() {
     const { messages, addMessage, clearMessages } = useChatStore();
-    const { aiModels, activeModelId } = useSettingsStore();
+    const { aiModels, activeModelId, general } = useSettingsStore();
     const { addToast } = useToastStore();
     const [newMessage, setNewMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -105,11 +105,12 @@ export function ChatPanel() {
                                         ? 'bg-blue-500 text-white rounded-br-none'
                                         : 'bg-gray-100 text-gray-700 rounded-bl-none'
                                 )}
+                                style={{ fontSize: `${general.aiChatFontSize}px` }}
                             >
                                 {message.sender === 'user' ? (
-                                    <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                                    <p className="whitespace-pre-wrap">{message.text}</p>
                                 ) : (
-                                    <div className="prose prose-sm dark:prose-invert max-w-none [&>ul]:pl-6 [&>ol]:pl-6 [&>ul]:list-disc [&>ol]:list-decimal [&>ul>li]:my-0 [&>ol>li]:my-0 [&>p]:my-1">
+                                    <div className="prose dark:prose-invert max-w-none [&>ul]:pl-6 [&>ol]:pl-6 [&>ul]:list-disc [&>ol]:list-decimal [&>ul>li]:my-0 [&>ol>li]:my-0 [&>p]:my-1" style={{ fontSize: 'inherit' }}>
                                         <ReactMarkdown
                                             remarkPlugins={[remarkGfm]}
                                             components={{

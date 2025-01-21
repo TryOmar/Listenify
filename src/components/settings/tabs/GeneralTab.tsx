@@ -95,14 +95,32 @@ export function GeneralTab() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Font Size ({general.fontSize}px)</label>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium">Live Transcript Font Size ({general.fontSize}px)</label>
+          </div>
           <input
             type="range"
-            min="12"
+            min="6"
             max="60"
             value={general.fontSize}
             onChange={(e) => updateGeneralSettings({
               fontSize: parseInt(e.target.value)
+            })}
+            className="w-full"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium">AI Chat Font Size ({general.aiChatFontSize || 16}px)</label>
+          </div>
+          <input
+            type="range"
+            min="6"
+            max="60"
+            value={general.aiChatFontSize || 16}
+            onChange={(e) => updateGeneralSettings({
+              aiChatFontSize: parseInt(e.target.value)
             })}
             className="w-full"
           />
