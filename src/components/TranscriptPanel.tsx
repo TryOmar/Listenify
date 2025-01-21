@@ -150,13 +150,69 @@ export function TranscriptPanel() {
   useEffect(() => {
     if (window.SpeechRecognition || window.webkitSpeechRecognition) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
+      const newRecognition = new SpeechRecognition();
 
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = general.speechLanguage;
+      // Configure for continuous recognition
+      newRecognition.continuous = true;
+      newRecognition.interimResults = true;
+      newRecognition.maxAlternatives = 1;
+      newRecognition.lang = general.speechLanguage;
 
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
+      // Initialize state from sessionStorage or defaults
+      const getSessionState = () => ({
+        manualStop: sessionStorage.getItem('recognitionManualStop') === 'true',
+        lastRestartTime: parseInt(sessionStorage.getItem('recognitionLastRestart') || '0'),
+      });
+
+      const updateSessionState = (updates: { manualStop?: boolean; lastRestartTime?: number }) => {
+        const currentState = getSessionState();
+        const newState = { ...currentState, ...updates };
+
+        if (updates.manualStop !== undefined) {
+          sessionStorage.setItem('recognitionManualStop', updates.manualStop.toString());
+        }
+        if (updates.lastRestartTime !== undefined) {
+          sessionStorage.setItem('recognitionLastRestart', updates.lastRestartTime.toString());
+        }
+        return newState;
+      };
+
+      const MIN_RESTART_DELAY = 50; // Minimum delay between restarts
+
+      const safeRestart = () => {
+        const state = getSessionState();
+        const now = Date.now();
+        const timeSinceLastRestart = now - state.lastRestartTime;
+
+        if (!isListening || state.manualStop) {
+          console.log('Not restarting - microphone is off or manual stop', {
+            isListening,
+            manualStop: state.manualStop,
+            lastRestart: new Date(state.lastRestartTime).toISOString()
+          });
+          return;
+        }
+
+        // Prevent rapid restarts
+        if (timeSinceLastRestart < MIN_RESTART_DELAY) {
+          console.log('Delaying restart to prevent rapid cycling');
+          setTimeout(safeRestart, MIN_RESTART_DELAY - timeSinceLastRestart);
+          return;
+        }
+
+        try {
+          console.log('Attempting safe restart', new Date().toISOString());
+          newRecognition.start();
+          updateSessionState({ lastRestartTime: now });
+        } catch (error) {
+          console.error('Error during safe restart:', error);
+          // If we fail to restart, wait a bit longer
+          setTimeout(safeRestart, 1000);
+        }
+      };
+
+      newRecognition.onresult = (event: SpeechRecognitionEvent) => {
+        console.log('Recognition result received', new Date().toISOString());
         let interimTranscript = '';
         let finalTranscript = finalTranscriptRef.current;
 
@@ -189,88 +245,97 @@ export function TranscriptPanel() {
         }
       };
 
-      // Shared retry logic
-      const retryWithBackoff = (attempt = 1, source = 'unknown') => {
-        console.log('Retrying with backoff', attempt, source);
-        console.log('isListening', isListening);
-        if (!isListening) return;
+      newRecognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error('Recognition error:', event.error, event.message, new Date().toISOString());
 
-        const backoffTime = Math.min(1000 * Math.pow(1.5, attempt - 1), 10000);
+        // Don't restart for these errors
+        if (event.error === 'not-allowed' || event.error === 'audio-capture') {
+          setIsListening(false);
+          localStorage.setItem('microphoneState', 'false');
+          addToast(`Microphone error: ${event.error}. Please check your microphone permissions.`, 'error');
+          return;
+        }
 
-        setTimeout(() => {
-          if (!isListening) return;
+        // For other errors, try to restart if we're supposed to be listening
+        if (isListening && !getSessionState().manualStop) {
+          console.log('Error recovery restart');
+          safeRestart();
+        }
+      };
 
+      // Handle no match event
+      newRecognition.onnomatch = () => {
+        console.log('No match detected', new Date().toISOString());
+        if (isListening && !getSessionState().manualStop) {
+          console.log('Restarting after no match');
+          safeRestart();
+        }
+      };
+
+      // Handle speech end
+      newRecognition.onspeechend = () => {
+        console.log('Speech ended', new Date().toISOString());
+        console.log('Session state:', getSessionState());
+        console.log('isListening:', isListening);
+        if (isListening && !getSessionState().manualStop) {
+          console.log('Restarting after speech end');
+          safeRestart();
+        }
+      };
+
+      // Handle recognition end
+      newRecognition.onend = () => {
+        const now = new Date().toISOString();
+        const shouldBeListening = localStorage.getItem('microphoneState') === 'true';
+
+        console.log('Recognition ended - State Debug:', {
+          timestamp: now,
+          shouldBeListening,
+          actualIsListening: isListening, // for debugging comparison
+        });
+
+        if (shouldBeListening) {
+          console.log('Auto-restart based on localStorage state');
           try {
-            recognition.start();
-            console.log(`Recognition restarted after ${source}`);
+            setTimeout(() => {
+              if (localStorage.getItem('microphoneState') === 'true') {
+                newRecognition.start();
+                console.log('Recognition restarted successfully');
+              }
+            }, 100);
           } catch (error) {
-            console.error(`Error restarting recognition (attempt ${attempt}):`, error);
-            retryWithBackoff(attempt + 1, source);
+            console.error('Error during restart:', error);
+            setTimeout(() => {
+              try {
+                newRecognition.start();
+              } catch (retryError) {
+                console.error('Retry failed:', retryError);
+                setIsListening(false);
+                localStorage.setItem('microphoneState', 'false');
+                addToast('Failed to restart recognition', 'error');
+              }
+            }, 1000);
           }
-        }, backoffTime);
-      };
-
-      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        console.error('Recognition error:', event.error);
-        retryWithBackoff(1, 'error');
-      };
-
-      recognition.onend = () => {
-        // When speech recognition ends, update the final transcript
-        const allWords = finalTranscriptRef.current.trim().split(/\s+/);
-
-        // If exceeding max words, clear everything and start fresh
-        if (allWords.length > general.maxWords) {
-          finalTranscriptRef.current = '';
-          fullTranscriptRef.current = [];
-          interimTranscriptRef.current = '';
-          setTranscript('');
         } else {
-          // Update transcript normally
-          fullTranscriptRef.current = allWords;
-          setTranscript(allWords.join(' '));
-        }
-
-        // If still listening but recognition ended, restart it
-        if (isListening) {
-          try {
-            recognition.start();
-          } catch (error) {
-            console.error('Error in onend handler:', error);
-            retryWithBackoff(1, 'end');
-          }
+          console.log('Not restarting - microphone should be off according to localStorage');
         }
       };
 
-      setRecognition(recognition);
-    }
-  }, [general.maxWords, setTranscript, setRecognition, general.speechLanguage]);
+      setRecognition(newRecognition);
 
-  const toggleListening = () => {
-    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
-      addToast('Speech recognition unavailable. Please use Chrome or Edge or Safari or Opera for this feature.', 'error');
-      return;
+      // Clear session state when component unmounts
+      return () => {
+        sessionStorage.removeItem('recognitionManualStop');
+        sessionStorage.removeItem('recognitionLastRestart');
+      };
     }
+  }, [general.maxWords, setTranscript, setRecognition, general.speechLanguage, isListening, addToast, transcript]);
 
-    if (!recognition) return;
-
-    if (isListening) {
-      recognition.stop();
-      setIsListening(false);
-      addToast('Microphone stopped', 'info');
-    } else {
-      finalTranscriptRef.current = transcript;
-      fullTranscriptRef.current = transcript.split(/\s+/).filter(Boolean);
-      try {
-        recognition.start();
-        setIsListening(true);
-        addToast('Microphone started', 'success');
-      } catch (error) {
-        console.error('Error starting recognition:', error);
-        addToast('Failed to start recognition. Please try again.', 'error');
-      }
-    }
-  };
+  // Effect to sync microphone state with localStorage
+  useEffect(() => {
+    localStorage.setItem('microphoneState', isListening.toString());
+    console.log('Microphone state updated:', isListening, new Date().toISOString());
+  }, [isListening]);
 
   const handleClearTranscript = () => {
     clearTranscript();
@@ -400,6 +465,38 @@ export function TranscriptPanel() {
     const newHeight = isFullscreen ? window.innerHeight * 0.95 : window.innerHeight * 0.65; // Changed from 0.75 to 0.85
     setTranscriptHeight(newHeight);
   }, [isFullscreen]);
+
+  const toggleListening = () => {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      addToast('Speech recognition unavailable. Please use Chrome or Edge or Safari or Opera for this feature.', 'error');
+      return;
+    }
+
+    if (!recognition) return;
+
+    if (isListening) {
+      console.log('Manual stop requested');
+      sessionStorage.setItem('recognitionManualStop', 'true');
+      recognition.stop();
+      setIsListening(false);
+      localStorage.setItem('microphoneState', 'false');
+      addToast('Microphone stopped', 'info');
+    } else {
+      console.log('Starting microphone');
+      sessionStorage.setItem('recognitionManualStop', 'false');
+      finalTranscriptRef.current = transcript;
+      fullTranscriptRef.current = transcript.split(/\s+/).filter(Boolean);
+      try {
+        recognition.start();
+        setIsListening(true);
+        localStorage.setItem('microphoneState', 'true');
+        addToast('Microphone started', 'success');
+      } catch (error) {
+        console.error('Error starting recognition:', error);
+        addToast('Failed to start recognition. Please try again.', 'error');
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-white transcript-panel">
