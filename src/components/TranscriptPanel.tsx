@@ -392,20 +392,27 @@ export function TranscriptPanel() {
             </span>
           </div>
           <div className="flex gap-3 flex-shrink-0 flex-wrap">
-            <a
-              href="https://discord.gg/c3pxrhTCAB"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-full bg-[#5865F2] hover:bg-[#4752C4] text-white transition-colors"
-              title="Join our Discord community"
-            >
-              <img src={DiscordIcon} alt="Discord" width="20" height="20" />
-            </a>
             <button
               onClick={toggleListening}
               className={`p-2 rounded-full ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
             >
               {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+            </button>
+            <a
+              href="https://discord.gg/c3pxrhTCAB"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+              title="Join our Discord community"
+            >
+              <img src={DiscordIcon} alt="Discord" width="20" height="20" style={{ filter: 'invert(1)' }} />
+            </a>
+            <button
+              onClick={handleClearTranscript}
+              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+              title="Clear transcript"
+            >
+              <Trash2 size={20} />
             </button>
             <button
               onClick={handleCopyTranscript}
@@ -413,12 +420,6 @@ export function TranscriptPanel() {
               title="Copy transcript"
             >
               <Copy size={20} />
-            </button>
-            <button
-              onClick={handleClearTranscript}
-              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
-            >
-              <Trash2 size={20} />
             </button>
             <SettingsDialog />
           </div>
