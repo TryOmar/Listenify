@@ -18,8 +18,9 @@ export function ResizableSplitter({
     const [startY, setStartY] = useState(0);
     const [startHeight, setStartHeight] = useState(0);
 
-    // Calculate dynamic max height based on fullscreen state
-    const effectiveMaxHeight = isFullscreen ? window.innerHeight * 0.95 : maxHeight;
+    // Calculate dynamic height constraints based on fullscreen state
+    const effectiveMinHeight = isFullscreen ? 200 : minHeight;
+    const effectiveMaxHeight = isFullscreen ? window.innerHeight * 0.99 : maxHeight;
 
     const handleMouseDown = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -37,7 +38,7 @@ export function ResizableSplitter({
             if (!isResizing) return;
 
             const diff = e.clientY - startY;
-            let newHeight = Math.max(minHeight, startHeight + diff);
+            let newHeight = Math.max(effectiveMinHeight, startHeight + diff);
             newHeight = Math.min(newHeight, effectiveMaxHeight);
 
             onResize(newHeight);
@@ -57,7 +58,7 @@ export function ResizableSplitter({
             document.removeEventListener('mouseup', handleMouseUp);
             document.body.style.cursor = '';
         };
-    }, [startY, startHeight, minHeight, effectiveMaxHeight, onResize, isResizing]);
+    }, [startY, startHeight, effectiveMinHeight, effectiveMaxHeight, onResize, isResizing]);
 
     return (
         <div

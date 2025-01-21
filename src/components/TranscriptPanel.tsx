@@ -395,6 +395,12 @@ export function TranscriptPanel() {
     }
   };
 
+  // Update initial height when fullscreen changes
+  useEffect(() => {
+    const newHeight = isFullscreen ? window.innerHeight * 0.95 : window.innerHeight * 0.65; // Changed from 0.75 to 0.85
+    setTranscriptHeight(newHeight);
+  }, [isFullscreen]);
+
   return (
     <div className="flex flex-col h-full bg-white transcript-panel">
       <div
