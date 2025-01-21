@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Mic, MicOff, Trash2, Copy, Maximize, Minimize } from 'lucide-react';
+import { Mic, Trash2, Copy, Maximize, Minimize } from 'lucide-react';
 import { useTranscriptStore } from '../store/useTranscriptStore';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { WordPopup } from './WordPopup';
@@ -11,6 +11,9 @@ import { useToastStore } from '../store/useToastStore';
 import { generateGeminiResponse } from '../services/geminiService';
 import DiscordIcon from '../icons/discord.svg';
 import { TranslationPanel } from './TranslationPanel';
+import { useLayoutStore } from '../store/useLayoutStore';
+import { cn } from '../lib/utils';
+import { ResizableSplitter } from './layout/ResizableSplitter';
 
 type SpeechRecognitionResult = {
   isFinal: boolean;
@@ -81,7 +84,8 @@ export function TranscriptPanel() {
   const { addMessage } = useChatStore();
   const { isChatPanelOpen, openChatPanel } = usePanelStore();
   const { addToast } = useToastStore();
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const { isFullscreen, setFullscreen } = useLayoutStore();
+  const [transcriptHeight, setTranscriptHeight] = useState(window.innerHeight * 0.45); // 45vh default
 
   // Handle scroll events to determine if we should auto-scroll
   const handleScroll = () => {
@@ -383,7 +387,7 @@ export function TranscriptPanel() {
   };
 
   const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
+    setFullscreen(!isFullscreen);
     if (!isFullscreen) {
       document.documentElement.requestFullscreen();
     } else if (document.fullscreenElement) {
@@ -392,11 +396,17 @@ export function TranscriptPanel() {
   };
 
   return (
-    <div className="flex flex-col space-y-4 h-full bg-white">
-      <div className="flex flex-col h-[45vh] bg-white">
+    <div className="flex flex-col h-full bg-white transcript-panel">
+      <div
+        className="flex flex-col bg-white transcript-content"
+        style={{ height: `${transcriptHeight}px` }}
+      >
         <div className="flex justify-between items-center p-4 border-b flex-wrap">
           <div className="flex items-center gap-4 flex-grow mb-2">
-            <h2 className="text-lg font-semibold">Live Transcription</h2>
+            <h2 className={cn(
+              "font-semibold",
+              isFullscreen ? "text-2xl" : "text-lg"
+            )}>Live Transcription</h2>
             <span className="text-sm text-gray-500">
               {transcript.split(/\s+/).filter(Boolean).length} / {general.maxWords} words
             </span>
@@ -406,7 +416,7 @@ export function TranscriptPanel() {
               onClick={toggleListening}
               className={`p-2 rounded-full ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
             >
-              <Mic size={20} />
+              <Mic size={isFullscreen ? 24 : 20} />
             </button>
             <a
               href="https://discord.gg/c3pxrhTCAB"
@@ -415,21 +425,21 @@ export function TranscriptPanel() {
               className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
               title="Join our Discord community"
             >
-              <img src={DiscordIcon} alt="Discord" width="20" height="20" style={{ filter: 'invert(1)' }} />
+              <img src={DiscordIcon} alt="Discord" width={isFullscreen ? 24 : 20} height={isFullscreen ? 24 : 20} style={{ filter: 'invert(1)' }} />
             </a>
             <button
               onClick={handleClearTranscript}
               className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
               title="Clear transcript"
             >
-              <Trash2 size={20} />
+              <Trash2 size={isFullscreen ? 24 : 20} />
             </button>
             <button
               onClick={handleCopyTranscript}
               className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
               title="Copy transcript"
             >
-              <Copy size={20} />
+              <Copy size={isFullscreen ? 24 : 20} />
             </button>
             <SettingsDialog />
             <button
@@ -437,7 +447,7 @@ export function TranscriptPanel() {
               className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
               title={isFullscreen ? "Minimize screen" : "Fullscreen"}
             >
-              {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+              {isFullscreen ? <Minimize size={24} /> : <Maximize size={20} />}
             </button>
           </div>
         </div>
@@ -457,7 +467,7 @@ export function TranscriptPanel() {
             className="transcript-container"
             dir="auto"
             style={{
-              fontSize: `${general.fontSize}px`,
+              fontSize: isFullscreen ? `${general.fontSize * 1.2}px` : `${general.fontSize}px`,
               lineHeight: '1.5',
               whiteSpace: 'pre-wrap'
             }}
@@ -487,7 +497,21 @@ export function TranscriptPanel() {
           )}
         </div>
       </div>
-      <TranslationPanel textToTranslate={transcript} speechLanguage={general.speechLanguage} translationLanguage={general.translationLanguage} />
+
+      <ResizableSplitter
+        onResize={setTranscriptHeight}
+        minHeight={100}
+        maxHeight={window.innerHeight * 0.9}
+        isFullscreen={isFullscreen}
+      />
+
+      <div className="flex-1 min-h-0">
+        <TranslationPanel
+          textToTranslate={transcript}
+          speechLanguage={general.speechLanguage}
+          translationLanguage={general.translationLanguage}
+        />
+      </div>
     </div>
   );
 }

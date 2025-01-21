@@ -4,6 +4,7 @@ import { SavedItemsPanel } from './SavedItemsPanel';
 import { ChatPanel } from './ChatPanel';
 import { CollapsiblePanel } from './CollapsiblePanel';
 import { cn } from '../../lib/utils';
+import { useLayoutStore } from '../../store/useLayoutStore';
 
 const MIN_MAIN_PANEL_WIDTH = 200; // Minimum width before hiding main panel
 const MIN_GAP = 24; // Increased minimum gap between panels
@@ -11,8 +12,14 @@ const TITLE_BAR_WIDTH = 44; // Width of the title bar (11 * 4px Tailwind units)
 const PANEL_SPACING = 16; // Spacing between panels when both are visible
 
 export function MainLayout() {
-    const [leftPanelWidth, setLeftPanelWidth] = useState(0);
-    const [rightPanelWidth, setRightPanelWidth] = useState(0);
+    const {
+        isFullscreen,
+        leftPanelWidth,
+        rightPanelWidth,
+        setLeftPanelWidth,
+        setRightPanelWidth,
+    } = useLayoutStore();
+
     const [isMainPanelVisible, setIsMainPanelVisible] = useState(true);
     const [lastModifiedPanel, setLastModifiedPanel] = useState<'left' | 'right' | null>(null);
 
@@ -43,7 +50,7 @@ export function MainLayout() {
         }
 
         setLeftPanelWidth(adjustedWidth);
-    }, [getMaxLeftWidth, rightPanelWidth]);
+    }, [getMaxLeftWidth, rightPanelWidth, setLeftPanelWidth, setRightPanelWidth]);
 
     // Handle right panel width changes with collision prevention
     const handleRightPanelWidth = useCallback((width: number) => {
@@ -58,7 +65,7 @@ export function MainLayout() {
         }
 
         setRightPanelWidth(adjustedWidth);
-    }, [getMaxRightWidth, leftPanelWidth]);
+    }, [getMaxRightWidth, leftPanelWidth, setLeftPanelWidth, setRightPanelWidth]);
 
     // Calculate available space and handle main panel visibility
     useEffect(() => {
@@ -86,10 +93,13 @@ export function MainLayout() {
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [leftPanelWidth, rightPanelWidth, lastModifiedPanel]);
+    }, [leftPanelWidth, rightPanelWidth, lastModifiedPanel, setLeftPanelWidth, setRightPanelWidth]);
 
     return (
-        <div className="relative h-full">
+        <div className={cn(
+            "relative h-full",
+            isFullscreen && "fixed inset-0 bg-white z-50"
+        )}>
             {/* Main Transcription Panel */}
             <div
                 className={cn(
@@ -102,7 +112,10 @@ export function MainLayout() {
                     minWidth: `${MIN_MAIN_PANEL_WIDTH}px`,
                 }}
             >
-                <div className="max-w-4xl mx-auto h-full px-4 pb-8">
+                <div className={cn(
+                    "mx-auto h-full px-4 pb-8",
+                    isFullscreen ? "max-w-[98%] lg:max-w-[96%] xl:max-w-[94%]" : "max-w-4xl"
+                )}>
                     <TranscriptPanel />
                 </div>
             </div>
