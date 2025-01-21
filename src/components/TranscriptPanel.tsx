@@ -82,7 +82,7 @@ export function TranscriptPanel() {
   const [selectedText, setSelectedText] = useState('');
   const [selectionPosition, setSelectionPosition] = useState<{ x: number; y: number } | null>(null);
   const { addMessage } = useChatStore();
-  const { isChatPanelOpen, openChatPanel } = usePanelStore();
+  const { isChatPanelOpen, toggleChatPanel } = usePanelStore();
   const { addToast } = useToastStore();
   const { isFullscreen, setFullscreen } = useLayoutStore();
   const [transcriptHeight, setTranscriptHeight] = useState(window.innerHeight * 0.65); // Changed from 0.45 to 0.65
@@ -352,7 +352,7 @@ export function TranscriptPanel() {
 
   const handleAIPromptClick = async (prompt: string) => {
     if (!isChatPanelOpen) {
-      openChatPanel();
+      toggleChatPanel();
     }
 
     // Add user's prompt to chat

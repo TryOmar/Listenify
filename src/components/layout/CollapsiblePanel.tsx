@@ -7,20 +7,17 @@ interface CollapsiblePanelProps {
     children: React.ReactNode;
     side: 'left' | 'right';
     title: string;
-    storageKey: string;
     onWidthChange: (width: number) => void;
     maxAllowedWidth: number;
 }
 
-const MIN_VISIBLE_WIDTH = 50;
+const AUTO_HIDE_THRESHOLD = 150;
 const DEFAULT_WIDTH = 400;
-const AUTO_HIDE_THRESHOLD = 150; // Width threshold for auto-hiding
 
 export function CollapsiblePanel({
     children,
     side,
     title,
-    storageKey,
     onWidthChange,
     maxAllowedWidth,
 }: CollapsiblePanelProps) {
@@ -30,15 +27,27 @@ export function CollapsiblePanel({
     const [isHovered, setIsHovered] = useState(false);
     const [startX, setStartX] = useState(0);
     const [startWidth, setStartWidth] = useState(0);
-    const { isChatPanelOpen, toggleChatPanel } = usePanelStore();
+    const {
+        isChatPanelOpen,
+        chatPanelWidth,
+        toggleChatPanel,
+        setWidthChangeCallback
+    } = usePanelStore();
+
+    // Register the width change callback
+    useEffect(() => {
+        if (side === 'right') {
+            setWidthChangeCallback(onWidthChange);
+        }
+    }, [side, onWidthChange, setWidthChangeCallback]);
 
     // Sync chat panel state
     useEffect(() => {
         if (side === 'right') {
             setIsVisible(isChatPanelOpen);
-            setWidth(isChatPanelOpen ? DEFAULT_WIDTH : 0);
+            setWidth(chatPanelWidth);
         }
-    }, [side, isChatPanelOpen]);
+    }, [side, isChatPanelOpen, chatPanelWidth]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         e.preventDefault();

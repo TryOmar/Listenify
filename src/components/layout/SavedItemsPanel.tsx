@@ -16,7 +16,7 @@ export function SavedItemsPanel() {
     const [selectionPosition, setSelectionPosition] = useState<{ x: number; y: number } | null>(null);
 
     const { addMessage } = useChatStore();
-    const { isChatPanelOpen, openChatPanel } = usePanelStore();
+    const { isChatPanelOpen, toggleChatPanel } = usePanelStore();
     const { addToast } = useToastStore();
 
     useEffect(() => {
@@ -69,7 +69,7 @@ export function SavedItemsPanel() {
 
     const handleAIPromptClick = async (prompt: string) => {
         if (!isChatPanelOpen) {
-            openChatPanel();
+            toggleChatPanel();
         }
 
         addMessage(prompt, 'user');
