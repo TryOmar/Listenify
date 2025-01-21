@@ -38,7 +38,7 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
     };
 
     return (
-        <div className="flex flex-col h-[50vh] bg-gray-100">
+        <div className="flex flex-col flex-1 bg-gray-100">
             <div className="flex justify-between items-center p-4 border-b flex-wrap">
                 <h2 className="text-lg font-semibold">Translate with AI</h2>
                 <div className="flex gap-2">
