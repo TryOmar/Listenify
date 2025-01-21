@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSettingsStore } from '../../../store/useSettingsStore';
+import { Sun, Moon } from 'lucide-react';
 
 const LANGUAGES = [
   { value: 'en', label: 'English' },
@@ -68,11 +69,16 @@ export function GeneralTab() {
         <div className="space-y-4">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Break Sentences</label>
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium">Break Sentences</label>
+                  <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 border border-gray-200 text-gray-500 rounded">Edge Recommended</span>
+                </div>
+                <span className="text-sm text-gray-600">Break text into lines by punctuation</span>
+              </div>
               <button
                 onClick={() => updateGeneralSettings({ breakSentences: !general.breakSentences })}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${general.breakSentences ? 'bg-blue-500' : 'bg-gray-200'
-                  }`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${general.breakSentences ? 'bg-blue-500' : 'bg-gray-200'}`}
                 role="switch"
                 aria-checked={general.breakSentences}
               >
@@ -82,37 +88,52 @@ export function GeneralTab() {
                 />
               </button>
             </div>
-            <span className="text-sm text-gray-600">Break text into lines by punctuation</span>
-            <span className="text-sm text-gray-500 italic">Note: Speech recognition punctuation varies by browser. Microsoft Edge adds more punctuation than Chrome.</span>
           </div>
 
-          <div className={`transition-all duration-300 ease-in-out ${general.breakSentences ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium">Line Break Style</label>
-              <select
-                value={general.lineBreakStyle}
-                onChange={(e) => updateGeneralSettings({ lineBreakStyle: e.target.value as 'single' | 'double' })}
-                className="px-3 py-2 border rounded-lg"
-                disabled={!general.breakSentences}
-              >
-                <option value="single">Single Line Break</option>
-                <option value="double">Double Line Break</option>
-              </select>
-              <span className="text-sm text-gray-600">Choose spacing between sentences</span>
+          <div className={`transition-all duration-300 ease-in-out ${general.breakSentences ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 h-0 overflow-hidden'}`}>
+            <div className="ml-4 pl-4 border-l-2 border-blue-100">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium">Line Break Style</label>
+                  <span className="text-sm text-gray-600">Choose spacing between sentences</span>
+                </div>
+                <select
+                  value={general.lineBreakStyle}
+                  onChange={(e) => updateGeneralSettings({ lineBreakStyle: e.target.value as 'single' | 'double' })}
+                  className="px-3 py-1.5 border rounded-lg text-sm bg-white"
+                  disabled={!general.breakSentences}
+                >
+                  <option value="single">Single Line Break</option>
+                  <option value="double">Double Line Break</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">Theme</label>
-          <button
-            onClick={() => updateGeneralSettings({
-              theme: general.theme === 'light' ? 'dark' : 'light'
-            })}
-            className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200"
-          >
-            {general.theme === 'light' ? '🌞 Light' : '🌙 Dark'}
-          </button>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium">Theme</label>
+            <span className="text-sm text-gray-600">Choose between light and dark mode</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Sun size={16} className={`transition-colors ${general.theme === 'light' ? 'text-blue-500' : 'text-gray-400'}`} />
+            <button
+              onClick={() => updateGeneralSettings({
+                theme: general.theme === 'light' ? 'dark' : 'light'
+              })}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${general.theme === 'dark' ? 'bg-blue-500' : 'bg-gray-200'}`}
+              role="switch"
+              aria-checked={general.theme === 'dark'}
+            >
+              <span className="sr-only">Toggle theme</span>
+              <span
+                className={`${general.theme === 'dark' ? 'translate-x-6' : 'translate-x-1'
+                  } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+              />
+            </button>
+            <Moon size={16} className={`transition-colors ${general.theme === 'dark' ? 'text-blue-500' : 'text-gray-400'}`} />
+          </div>
         </div>
 
         <div className="space-y-2">
