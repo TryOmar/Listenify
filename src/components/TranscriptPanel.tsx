@@ -85,7 +85,7 @@ export function TranscriptPanel() {
   const { isChatPanelOpen, openChatPanel } = usePanelStore();
   const { addToast } = useToastStore();
   const { isFullscreen, setFullscreen } = useLayoutStore();
-  const [transcriptHeight, setTranscriptHeight] = useState(window.innerHeight * 0.45); // 45vh default
+  const [transcriptHeight, setTranscriptHeight] = useState(window.innerHeight * 0.65); // Changed from 0.45 to 0.65
 
   // Handle scroll events to determine if we should auto-scroll
   const handleScroll = () => {
@@ -401,54 +401,56 @@ export function TranscriptPanel() {
         className="flex flex-col bg-white transcript-content"
         style={{ height: `${transcriptHeight}px` }}
       >
-        <div className="flex justify-between items-center p-4 border-b flex-wrap">
-          <div className="flex items-center gap-4 flex-grow mb-2">
-            <h2 className={cn(
-              "font-semibold",
-              isFullscreen ? "text-2xl" : "text-lg"
-            )}>Live Transcription</h2>
-            <span className="text-sm text-gray-500">
-              {transcript.split(/\s+/).filter(Boolean).length} / {general.maxWords} words
-            </span>
-          </div>
-          <div className="flex gap-3 flex-shrink-0 flex-wrap">
-            <button
-              onClick={toggleListening}
-              className={`p-2 rounded-full ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
-            >
-              <Mic size={isFullscreen ? 24 : 20} />
-            </button>
-            <a
-              href="https://discord.gg/c3pxrhTCAB"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
-              title="Join our Discord community"
-            >
-              <img src={DiscordIcon} alt="Discord" width={isFullscreen ? 24 : 20} height={isFullscreen ? 24 : 20} style={{ filter: 'invert(1)' }} />
-            </a>
-            <button
-              onClick={handleClearTranscript}
-              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
-              title="Clear transcript"
-            >
-              <Trash2 size={isFullscreen ? 24 : 20} />
-            </button>
-            <button
-              onClick={handleCopyTranscript}
-              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
-              title="Copy transcript"
-            >
-              <Copy size={isFullscreen ? 24 : 20} />
-            </button>
-            <SettingsDialog />
-            <button
-              onClick={toggleFullscreen}
-              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
-              title={isFullscreen ? "Minimize screen" : "Fullscreen"}
-            >
-              {isFullscreen ? <Minimize size={24} /> : <Maximize size={20} />}
-            </button>
+        <div className="sticky top-0 z-10 bg-white border-b">
+          <div className="flex justify-between items-center p-4 flex-wrap">
+            <div className="flex items-center gap-4 flex-grow mb-2">
+              <h2 className={cn(
+                "font-semibold",
+                isFullscreen ? "text-2xl" : "text-lg"
+              )}>Live Transcription</h2>
+              <span className="text-sm text-gray-500">
+                {transcript.split(/\s+/).filter(Boolean).length} / {general.maxWords} words
+              </span>
+            </div>
+            <div className="flex gap-3 flex-shrink-0 flex-wrap">
+              <button
+                onClick={toggleListening}
+                className={`p-2 rounded-full ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
+              >
+                <Mic size={isFullscreen ? 24 : 20} />
+              </button>
+              <a
+                href="https://discord.gg/c3pxrhTCAB"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+                title="Join our Discord community"
+              >
+                <img src={DiscordIcon} alt="Discord" width={isFullscreen ? 24 : 20} height={isFullscreen ? 24 : 20} style={{ filter: 'invert(1)' }} />
+              </a>
+              <button
+                onClick={handleClearTranscript}
+                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+                title="Clear transcript"
+              >
+                <Trash2 size={isFullscreen ? 24 : 20} />
+              </button>
+              <button
+                onClick={handleCopyTranscript}
+                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+                title="Copy transcript"
+              >
+                <Copy size={isFullscreen ? 24 : 20} />
+              </button>
+              <SettingsDialog />
+              <button
+                onClick={toggleFullscreen}
+                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+                title={isFullscreen ? "Minimize screen" : "Fullscreen"}
+              >
+                {isFullscreen ? <Minimize size={24} /> : <Maximize size={20} />}
+              </button>
+            </div>
           </div>
         </div>
         <div
