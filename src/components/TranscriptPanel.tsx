@@ -145,6 +145,8 @@ export function TranscriptPanel() {
 
       // Shared retry logic
       const retryWithBackoff = (attempt = 1, source = 'unknown') => {
+        console.log('Retrying with backoff', attempt, source);
+        console.log('isListening', isListening);
         if (!isListening) return;
 
         const backoffTime = Math.min(1000 * Math.pow(1.5, attempt - 1), 10000);
@@ -238,16 +240,21 @@ export function TranscriptPanel() {
   };
 
   const renderTranscript = () => {
-    // Split by spaces but keep the spaces in the array
-    const words = transcript.match(/\S+|\s+/g) || [];
-    return words.map((word, index) => {
-      // If it's a space, render it directly
-      if (/^\s+$/.test(word)) {
-        return <span key={`space-${index}`}>{word}</span>;
-      }
-      // Otherwise render the word with popup
-      return <WordPopup key={`${word}-${index}`} word={word} />;
-    });
+    // Split text into words but preserve natural spacing
+    const words = transcript.split(/(\s+)/g).filter(Boolean);
+
+    return (
+      <div className="transcript-text" style={{ display: 'inline', whiteSpace: 'pre-wrap' }}>
+        {words.map((word, index) => {
+          if (/^\s+$/.test(word)) {
+            // Render spaces without any wrapper to maintain natural text flow
+            return word;
+          }
+          // For actual words, wrap in WordPopup with no extra spacing
+          return <WordPopup key={`word-${index}`} word={word} />;
+        })}
+      </div>
+    );
   };
 
   // Scroll to bottom when transcript updates
@@ -389,10 +396,12 @@ export function TranscriptPanel() {
           }}
         >
           <div
-            className="space-x-1"
+            className="transcript-container"
             dir="auto"
             style={{
-              fontSize: `${fontSize}px`
+              fontSize: `${fontSize}px`,
+              lineHeight: '1.5',
+              whiteSpace: 'pre-wrap'
             }}
           >
             {renderTranscript()}

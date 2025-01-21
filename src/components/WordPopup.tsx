@@ -113,7 +113,7 @@ export function WordPopup({ word, preventSave = false }: WordPopupProps) {
   return (
     <Popover.Root>
       <Popover.Trigger asChild>
-        <button className="inline-block px-1 py-0.5 hover:bg-blue-100 rounded transition-colors" onClick={handleWordClick}>
+        <button className="inline hover:bg-blue-100 rounded transition-colors" style={{ padding: 0, margin: 0, border: 'none' }} onClick={handleWordClick}>
           {word}
         </button>
       </Popover.Trigger>
@@ -121,8 +121,8 @@ export function WordPopup({ word, preventSave = false }: WordPopupProps) {
         <Popover.Content
           className="bg-white rounded-lg shadow-lg p-2 w-64 max-h-80 overflow-y-auto animate-in fade-in-0 zoom-in-95"
           sideOffset={5}
-          side="right"
-          align="start"
+          side="top"
+          align="center"
           alignOffset={0}
         >
           <div className="flex flex-col gap-1">
