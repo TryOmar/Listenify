@@ -406,7 +406,7 @@ export function TranscriptPanel() {
               onClick={toggleListening}
               className={`p-2 rounded-full ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
             >
-              {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+              <Mic size={20} />
             </button>
             <a
               href="https://discord.gg/c3pxrhTCAB"
