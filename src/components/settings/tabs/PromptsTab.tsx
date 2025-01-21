@@ -7,6 +7,7 @@ import { ActionCard } from '../../shared/ActionCard';
 
 export function PromptsTab() {
   const { prompts, updatePrompts, editPrompt } = useSettingsStore();
+  const [activeType, setActiveType] = useState<'word' | 'text'>('word');
   const [newPrompt, setNewPrompt] = useState<Omit<AIPrompt, 'id' | 'modelId'>>({
     name: '',
     prompt: '',
@@ -39,22 +40,41 @@ export function PromptsTab() {
   };
 
   const handleMoveUp = (index: number, type: 'word' | 'text') => {
+    const allPrompts = [...prompts];
+    const typePrompts = allPrompts.filter(p => p.type === type);
+
     if (index > 0) {
-      const allPrompts = [...prompts];
-      const typeStartIndex = prompts.findIndex(p => p.type === type);
-      const actualIndex = typeStartIndex + index;
-      [allPrompts[actualIndex - 1], allPrompts[actualIndex]] = [allPrompts[actualIndex], allPrompts[actualIndex - 1]];
+      // Find the actual indices in the full array for the items we want to swap
+      const currentPrompt = typePrompts[index];
+      const previousPrompt = typePrompts[index - 1];
+
+      const currentIndex = allPrompts.findIndex(p => p.id === currentPrompt.id);
+      const previousIndex = allPrompts.findIndex(p => p.id === previousPrompt.id);
+
+      // Swap the items
+      [allPrompts[previousIndex], allPrompts[currentIndex]] =
+        [allPrompts[currentIndex], allPrompts[previousIndex]];
+
       updatePrompts(allPrompts);
     }
   };
 
   const handleMoveDown = (index: number, type: 'word' | 'text') => {
-    const typePrompts = prompts.filter(p => p.type === type);
+    const allPrompts = [...prompts];
+    const typePrompts = allPrompts.filter(p => p.type === type);
+
     if (index < typePrompts.length - 1) {
-      const allPrompts = [...prompts];
-      const typeStartIndex = prompts.findIndex(p => p.type === type);
-      const actualIndex = typeStartIndex + index;
-      [allPrompts[actualIndex], allPrompts[actualIndex + 1]] = [allPrompts[actualIndex + 1], allPrompts[actualIndex]];
+      // Find the actual indices in the full array for the items we want to swap
+      const currentPrompt = typePrompts[index];
+      const nextPrompt = typePrompts[index + 1];
+
+      const currentIndex = allPrompts.findIndex(p => p.id === currentPrompt.id);
+      const nextIndex = allPrompts.findIndex(p => p.id === nextPrompt.id);
+
+      // Swap the items
+      [allPrompts[currentIndex], allPrompts[nextIndex]] =
+        [allPrompts[nextIndex], allPrompts[currentIndex]];
+
       updatePrompts(allPrompts);
     }
   };
@@ -106,15 +126,27 @@ export function PromptsTab() {
         </button>
       </form>
 
-      <div className="grid grid-cols-2 gap-6">
-        {/* Word Prompts */}
-        <div>
-          <h4 className="font-medium flex items-center gap-2 mb-4">
-            Word Prompts
-            <span className="text-sm text-gray-500">({wordPrompts.length})</span>
-          </h4>
-          <div className="space-y-2">
-            {wordPrompts.map((prompt, index) => (
+      <div className="flex gap-2 border-b mb-4">
+        <button
+          onClick={() => setActiveType('word')}
+          className={`py-2 px-4 relative ${activeType === 'word' ? 'text-blue-600 font-medium' : 'text-gray-600'}`}
+        >
+          Word Prompts ({wordPrompts.length})
+          {activeType === 'word' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></div>}
+        </button>
+        <button
+          onClick={() => setActiveType('text')}
+          className={`py-2 px-4 relative ${activeType === 'text' ? 'text-blue-600 font-medium' : 'text-gray-600'}`}
+        >
+          Text Prompts ({textPrompts.length})
+          {activeType === 'text' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></div>}
+        </button>
+      </div>
+
+      <div className="space-y-2">
+        {activeType === 'word' ? (
+          wordPrompts.length > 0 ? (
+            wordPrompts.map((prompt, index) => (
               <ActionCard
                 key={prompt.id}
                 id={prompt.id}
@@ -128,23 +160,15 @@ export function PromptsTab() {
                 isFirst={index === 0}
                 isLast={index === wordPrompts.length - 1}
               />
-            ))}
-            {wordPrompts.length === 0 && (
-              <p className="text-center text-gray-500 py-4">
-                No word prompts yet
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Text Prompts */}
-        <div>
-          <h4 className="font-medium flex items-center gap-2 mb-4">
-            Text Prompts
-            <span className="text-sm text-gray-500">({textPrompts.length})</span>
-          </h4>
-          <div className="space-y-2">
-            {textPrompts.map((prompt, index) => (
+            ))
+          ) : (
+            <p className="text-center text-gray-500 py-4">
+              No word prompts yet
+            </p>
+          )
+        ) : (
+          textPrompts.length > 0 ? (
+            textPrompts.map((prompt, index) => (
               <ActionCard
                 key={prompt.id}
                 id={prompt.id}
@@ -158,14 +182,13 @@ export function PromptsTab() {
                 isFirst={index === 0}
                 isLast={index === textPrompts.length - 1}
               />
-            ))}
-            {textPrompts.length === 0 && (
-              <p className="text-center text-gray-500 py-4">
-                No text prompts yet
-              </p>
-            )}
-          </div>
-        </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-500 py-4">
+              No text prompts yet
+            </p>
+          )
+        )}
       </div>
     </section>
   );
