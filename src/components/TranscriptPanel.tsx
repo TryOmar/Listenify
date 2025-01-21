@@ -72,6 +72,7 @@ export function TranscriptPanel() {
 
   const { general } = useSettingsStore();
   const transcriptRef = useRef<HTMLDivElement>(null);
+  const shouldScrollRef = useRef(true);
   const interimTranscriptRef = useRef<string>('');
   const finalTranscriptRef = useRef<string>('');
   const fullTranscriptRef = useRef<string[]>([]);
@@ -80,6 +81,39 @@ export function TranscriptPanel() {
   const { addMessage } = useChatStore();
   const { isChatPanelOpen, openChatPanel } = usePanelStore();
   const { addToast } = useToastStore();
+
+  // Handle scroll events to determine if we should auto-scroll
+  const handleScroll = () => {
+    if (!transcriptRef.current) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = transcriptRef.current;
+    // Consider "at bottom" if within 10 pixels of the bottom
+    const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 10;
+    shouldScrollRef.current = isAtBottom;
+  };
+
+  // Smart scroll to bottom that respects user position
+  const scrollToBottomIfNeeded = () => {
+    if (!transcriptRef.current || !shouldScrollRef.current) return;
+
+    transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
+  };
+
+  // Effect to handle transcript updates and scrolling
+  useEffect(() => {
+    scrollToBottomIfNeeded();
+  }, [transcript]);
+
+  // Add scroll event listener
+  useEffect(() => {
+    const transcriptElement = transcriptRef.current;
+    if (!transcriptElement) return;
+
+    transcriptElement.addEventListener('scroll', handleScroll);
+    return () => {
+      transcriptElement.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   // Effect to handle maxWords changes from settings
   useEffect(() => {
@@ -269,13 +303,6 @@ export function TranscriptPanel() {
       </div>
     );
   };
-
-  // Scroll to bottom when transcript updates
-  useEffect(() => {
-    if (transcriptRef.current) {
-      transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
-    }
-  }, [transcript]);
 
   // Add click away handler
   useEffect(() => {
