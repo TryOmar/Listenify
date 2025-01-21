@@ -83,6 +83,7 @@ export function GeneralTab() {
               </button>
             </div>
             <span className="text-sm text-gray-600">Break text into lines by punctuation</span>
+            <span className="text-sm text-gray-500 italic">Note: Speech recognition punctuation varies by browser. Microsoft Edge adds more punctuation than Chrome.</span>
           </div>
 
           <div className={`transition-all duration-300 ease-in-out ${general.breakSentences ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
