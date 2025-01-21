@@ -3,16 +3,14 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { Settings as SettingsIcon, X, RotateCcw } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { GeneralTab } from './tabs/GeneralTab';
-import { WordsTab } from './tabs/WordsTab';
-import { TextTab } from './tabs/TextTab';
+import { ActionsTab } from './tabs/ActionsTab';
 import { PromptsTab } from './tabs/PromptsTab';
 import { ModelsTab } from './tabs/ModelsTab';
 import { SettingsNavButton } from './SettingsNavButton';
 
 const TABS = [
   { id: 'general', label: 'General', icon: SettingsIcon, component: GeneralTab },
-  { id: 'words', label: 'Words', icon: SettingsIcon, component: WordsTab },
-  { id: 'text', label: 'Text', icon: SettingsIcon, component: TextTab },
+  { id: 'actions', label: 'Actions', icon: SettingsIcon, component: ActionsTab },
   { id: 'prompts', label: 'Prompts', icon: SettingsIcon, component: PromptsTab },
   { id: 'models', label: 'Models', icon: SettingsIcon, component: ModelsTab },
 ] as const;
