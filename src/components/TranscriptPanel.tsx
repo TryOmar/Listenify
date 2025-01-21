@@ -143,6 +143,30 @@ export function TranscriptPanel() {
         }
       };
 
+      // Shared retry logic
+      const retryWithBackoff = (attempt = 1, source = 'unknown') => {
+        if (!isListening) return;
+
+        const backoffTime = Math.min(1000 * Math.pow(1.5, attempt - 1), 10000);
+
+        setTimeout(() => {
+          if (!isListening) return;
+
+          try {
+            recognition.start();
+            console.log(`Recognition restarted after ${source}`);
+          } catch (error) {
+            console.error(`Error restarting recognition (attempt ${attempt}):`, error);
+            retryWithBackoff(attempt + 1, source);
+          }
+        }, backoffTime);
+      };
+
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error('Recognition error:', event.error);
+        retryWithBackoff(1, 'error');
+      };
+
       recognition.onend = () => {
         // When speech recognition ends, update the final transcript
         const allWords = finalTranscriptRef.current.trim().split(/\s+/);
@@ -159,48 +183,13 @@ export function TranscriptPanel() {
           setTranscript(allWords.join(' '));
         }
 
-        // Restart recognition if it's still supposed to be listening
+        // If still listening but recognition ended, restart it
         if (isListening) {
           try {
             recognition.start();
           } catch (error) {
-            console.error('Error restarting recognition:', error);
-            // Add a small delay before retrying
-            setTimeout(() => {
-              if (isListening) {
-                try {
-                  recognition.start();
-                } catch (retryError) {
-                  console.error('Error on retry:', retryError);
-                  setIsListening(false);
-                  addToast('Failed to restart recognition. Please try again.', 'error');
-                }
-              }
-            }, 1000);
-          }
-        }
-      };
-
-      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        console.error('Recognition error:', event.error);
-        // Don't stop listening on error, let onend handler restart it
-        if (isListening) {
-          try {
-            recognition.start();
-          } catch (error) {
-            console.error('Error restarting recognition:', error);
-            // Add a small delay before retrying
-            setTimeout(() => {
-              if (isListening) {
-                try {
-                  recognition.start();
-                } catch (retryError) {
-                  console.error('Error on retry:', retryError);
-                  setIsListening(false);
-                  addToast('Failed to restart recognition. Please try again.', 'error');
-                }
-              }
-            }, 1000);
+            console.error('Error in onend handler:', error);
+            retryWithBackoff(1, 'end');
           }
         }
       };
