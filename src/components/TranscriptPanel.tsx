@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Mic, MicOff, Trash2, Copy } from 'lucide-react';
+import { Mic, MicOff, Trash2, Copy, Maximize, Minimize } from 'lucide-react';
 import { useTranscriptStore } from '../store/useTranscriptStore';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { WordPopup } from './WordPopup';
@@ -81,6 +81,7 @@ export function TranscriptPanel() {
   const { addMessage } = useChatStore();
   const { isChatPanelOpen, openChatPanel } = usePanelStore();
   const { addToast } = useToastStore();
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Handle scroll events to determine if we should auto-scroll
   const handleScroll = () => {
@@ -381,6 +382,15 @@ export function TranscriptPanel() {
     }, 100);
   };
 
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+    if (!isFullscreen) {
+      document.documentElement.requestFullscreen();
+    } else if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+  };
+
   return (
     <div className="flex flex-col space-y-4 h-full bg-white">
       <div className="flex flex-col h-[45vh] bg-white">
@@ -422,6 +432,13 @@ export function TranscriptPanel() {
               <Copy size={20} />
             </button>
             <SettingsDialog />
+            <button
+              onClick={toggleFullscreen}
+              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+              title={isFullscreen ? "Minimize screen" : "Fullscreen"}
+            >
+              {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+            </button>
           </div>
         </div>
         <div
