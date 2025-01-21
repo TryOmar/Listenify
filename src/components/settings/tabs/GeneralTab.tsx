@@ -65,6 +65,43 @@ export function GeneralTab() {
           </div>
         </div>
 
+        <div className="space-y-4">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Break Sentences</label>
+              <button
+                onClick={() => updateGeneralSettings({ breakSentences: !general.breakSentences })}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${general.breakSentences ? 'bg-blue-500' : 'bg-gray-200'
+                  }`}
+                role="switch"
+                aria-checked={general.breakSentences}
+              >
+                <span
+                  className={`${general.breakSentences ? 'translate-x-6' : 'translate-x-1'
+                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                />
+              </button>
+            </div>
+            <span className="text-sm text-gray-600">Break text into lines by punctuation</span>
+          </div>
+
+          <div className={`transition-all duration-300 ease-in-out ${general.breakSentences ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">Line Break Style</label>
+              <select
+                value={general.lineBreakStyle}
+                onChange={(e) => updateGeneralSettings({ lineBreakStyle: e.target.value as 'single' | 'double' })}
+                className="px-3 py-2 border rounded-lg"
+                disabled={!general.breakSentences}
+              >
+                <option value="single">Single Line Break</option>
+                <option value="double">Double Line Break</option>
+              </select>
+              <span className="text-sm text-gray-600">Choose spacing between sentences</span>
+            </div>
+          </div>
+        </div>
+
         <div className="flex items-center justify-between">
           <label className="text-sm font-medium">Theme</label>
           <button

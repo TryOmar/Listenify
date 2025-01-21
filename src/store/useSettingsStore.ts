@@ -7,6 +7,8 @@ export interface GeneralSettings {
   theme: 'light' | 'dark';
   fontSize: number;
   maxWords: number;
+  breakSentences: boolean;
+  lineBreakStyle: 'single' | 'double';
 }
 
 export interface Action {
@@ -64,6 +66,8 @@ const defaultGeneralSettings: GeneralSettings = {
   theme: 'light',
   fontSize: 16,
   maxWords: 100,
+  breakSentences: false,
+  lineBreakStyle: 'single',
 };
 
 const defaultActions = {

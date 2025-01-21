@@ -52,6 +52,13 @@ declare global {
   }
 }
 
+const breakTextIntoSentences = (text: string, lineBreakStyle: 'single' | 'double'): string => {
+  if (!text) return '';
+  // Split by sentence endings (.!?) but keep the punctuation
+  const breakChar = lineBreakStyle === 'single' ? '\n' : '\n\n';
+  return text.replace(/([.!?])\s+/g, `$1${breakChar}`);
+};
+
 export function TranscriptPanel() {
   const {
     transcript,
@@ -63,7 +70,7 @@ export function TranscriptPanel() {
     clearTranscript,
   } = useTranscriptStore();
 
-  const { general: { maxWords, fontSize, speechLanguage, translationLanguage } } = useSettingsStore();
+  const { general } = useSettingsStore();
   const transcriptRef = useRef<HTMLDivElement>(null);
   const interimTranscriptRef = useRef<string>('');
   const finalTranscriptRef = useRef<string>('');
@@ -77,14 +84,14 @@ export function TranscriptPanel() {
   // Effect to handle maxWords changes from settings
   useEffect(() => {
     const allWords = transcript.split(/\s+/).filter(Boolean);
-    if (allWords.length > maxWords) {
+    if (allWords.length > general.maxWords) {
       finalTranscriptRef.current = '';
       fullTranscriptRef.current = [];
       interimTranscriptRef.current = '';
       setTranscript('');
-      addToast(`Transcript cleared to match new ${maxWords} words limit`, 'info');
+      addToast(`Transcript cleared to match new ${general.maxWords} words limit`, 'info');
     }
-  }, [maxWords, transcript, setTranscript, addToast]);
+  }, [general.maxWords, transcript, setTranscript, addToast]);
 
   // Effect to update displayed transcript when words exceed limit
   useEffect(() => {
@@ -92,14 +99,14 @@ export function TranscriptPanel() {
     const allWords = transcript.split(/\s+/).filter(Boolean);
 
     // If word count exceeds maxWords, clear and start fresh
-    if (allWords.length > maxWords) {
+    if (allWords.length > general.maxWords) {
       finalTranscriptRef.current = '';
       fullTranscriptRef.current = [];
       interimTranscriptRef.current = '';
       setTranscript('');
       addToast('Maximum words reached, starting fresh', 'info');
     }
-  }, [transcript, setTranscript, addToast, maxWords]);
+  }, [transcript, setTranscript, addToast, general.maxWords]);
 
   useEffect(() => {
     if (window.SpeechRecognition || window.webkitSpeechRecognition) {
@@ -108,7 +115,7 @@ export function TranscriptPanel() {
 
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = speechLanguage;
+      recognition.lang = general.speechLanguage;
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
         let interimTranscript = '';
@@ -131,7 +138,7 @@ export function TranscriptPanel() {
         const allWords = (finalTranscript + ' ' + interimTranscript).trim().split(/\s+/);
 
         // If exceeding max words, clear everything and start fresh
-        if (allWords.length > maxWords) {
+        if (allWords.length > general.maxWords) {
           finalTranscriptRef.current = '';
           fullTranscriptRef.current = [];
           interimTranscriptRef.current = '';
@@ -174,7 +181,7 @@ export function TranscriptPanel() {
         const allWords = finalTranscriptRef.current.trim().split(/\s+/);
 
         // If exceeding max words, clear everything and start fresh
-        if (allWords.length > maxWords) {
+        if (allWords.length > general.maxWords) {
           finalTranscriptRef.current = '';
           fullTranscriptRef.current = [];
           interimTranscriptRef.current = '';
@@ -198,7 +205,7 @@ export function TranscriptPanel() {
 
       setRecognition(recognition);
     }
-  }, [maxWords, setTranscript, setRecognition, speechLanguage]);
+  }, [general.maxWords, setTranscript, setRecognition, general.speechLanguage]);
 
   const toggleListening = () => {
     if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
@@ -240,11 +247,17 @@ export function TranscriptPanel() {
   };
 
   const renderTranscript = () => {
+    if (!transcript) return null;
+
+    const displayText = general.breakSentences
+      ? breakTextIntoSentences(transcript, general.lineBreakStyle)
+      : transcript;
+
     // Split text into words but preserve natural spacing
-    const words = transcript.split(/(\s+)/g).filter(Boolean);
+    const words = displayText.split(/(\s+)/g).filter(Boolean);
 
     return (
-      <div className="transcript-text" style={{ display: 'inline', whiteSpace: 'pre-wrap' }}>
+      <div className="transcript-text whitespace-pre-wrap break-words" onMouseUp={handleTextSelection}>
         {words.map((word, index) => {
           if (/^\s+$/.test(word)) {
             // Render spaces without any wrapper to maintain natural text flow
@@ -348,7 +361,7 @@ export function TranscriptPanel() {
           <div className="flex items-center gap-4 flex-grow mb-2">
             <h2 className="text-lg font-semibold">Live Transcription</h2>
             <span className="text-sm text-gray-500">
-              {transcript.split(/\s+/).filter(Boolean).length} / {maxWords} words
+              {transcript.split(/\s+/).filter(Boolean).length} / {general.maxWords} words
             </span>
           </div>
           <div className="flex gap-3 flex-shrink-0 flex-wrap">
@@ -399,7 +412,7 @@ export function TranscriptPanel() {
             className="transcript-container"
             dir="auto"
             style={{
-              fontSize: `${fontSize}px`,
+              fontSize: `${general.fontSize}px`,
               lineHeight: '1.5',
               whiteSpace: 'pre-wrap'
             }}
@@ -429,7 +442,7 @@ export function TranscriptPanel() {
           )}
         </div>
       </div>
-      <TranslationPanel textToTranslate={transcript} speechLanguage={speechLanguage} translationLanguage={translationLanguage} />
+      <TranslationPanel textToTranslate={transcript} speechLanguage={general.speechLanguage} translationLanguage={general.translationLanguage} />
     </div>
   );
 }
