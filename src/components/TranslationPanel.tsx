@@ -42,11 +42,11 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
             <div className="flex justify-between items-center p-4 border-b flex-wrap">
                 <h2 className="text-lg font-semibold">Translate with AI</h2>
                 <div className="flex gap-2">
-                    <button onClick={translateText} className="p-2 bg-blue-500 text-white rounded">
-                        <RefreshCw size={20} />
-                    </button>
-                    <button onClick={clearTranslation} className="p-2 bg-gray-300 rounded">
+                    <button onClick={clearTranslation} className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors">
                         <Trash2 size={20} />
+                    </button>
+                    <button onClick={translateText} className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors">
+                        <RefreshCw size={20} />
                     </button>
                 </div>
             </div>
