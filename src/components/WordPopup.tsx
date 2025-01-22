@@ -6,6 +6,7 @@ import { useChatStore } from '../store/useChatStore';
 import { usePanelStore } from '../store/usePanelStore';
 import { useToastStore } from '../store/useToastStore';
 import { generateGeminiResponse } from '../services/geminiService';
+import { LANGUAGES } from '../constants/languages';
 
 interface WordPopupProps {
   word: string;
@@ -31,11 +32,17 @@ export function WordPopup({ word, preventSave = false }: WordPopupProps) {
     return () => window.removeEventListener('blur', handleWindowBlur);
   }, []);
 
+  const getLanguageLabel = (code: string) => {
+    return LANGUAGES.find(lang => lang.value === code)?.label || code;
+  };
+
   const getProcessedUrl = (url: string) => {
     return url
-      .replace('{word}', encodeURIComponent(word))
-      .replace('{speech_language_code}', general.speechLanguage)
-      .replace('{translation_language_code}', general.translationLanguage);
+      .replaceAll('{word}', encodeURIComponent(word))
+      .replaceAll('{speech_language}', getLanguageLabel(general.speechLanguage))
+      .replaceAll('{translation_language}', getLanguageLabel(general.translationLanguage))
+      .replaceAll('{speech_language_code}', general.speechLanguage)
+      .replaceAll('{translation_language_code}', general.translationLanguage);
   };
 
   const handleAIPromptClick = async (prompt: string) => {
@@ -52,9 +59,11 @@ export function WordPopup({ word, preventSave = false }: WordPopupProps) {
 
     // Process and send the prompt
     const processedPrompt = prompt
-      .replace('{word}', word)
-      .replace('{speech_language_code}', general.speechLanguage)
-      .replace('{translation_language_code}', general.translationLanguage);
+      .replaceAll('{word}', word)
+      .replaceAll('{speech_language}', getLanguageLabel(general.speechLanguage))
+      .replaceAll('{translation_language}', getLanguageLabel(general.translationLanguage))
+      .replaceAll('{speech_language_code}', general.speechLanguage)
+      .replaceAll('{translation_language_code}', general.translationLanguage);
 
     // Add user's prompt to chat
     addMessage(processedPrompt, 'user');

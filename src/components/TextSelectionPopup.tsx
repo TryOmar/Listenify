@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { LANGUAGES } from '../constants/languages';
 
 interface TextSelectionPopupProps {
     selectedText: string;
@@ -11,6 +12,10 @@ interface TextSelectionPopupProps {
 
 export function TextSelectionPopup({ selectedText, onAIPromptClick, onClose, preventSave = false }: TextSelectionPopupProps) {
     const { actions, prompts, general } = useSettingsStore();
+
+    const getLanguageLabel = (code: string) => {
+        return LANGUAGES.find(lang => lang.value === code)?.label || code;
+    };
 
     // Add window blur handler
     useEffect(() => {
@@ -24,18 +29,22 @@ export function TextSelectionPopup({ selectedText, onAIPromptClick, onClose, pre
 
     const getProcessedUrl = (url: string) => {
         return url
-            .replace('{text}', encodeURIComponent(selectedText))
-            .replace('{speech_language_code}', general.speechLanguage)
-            .replace('{translation_language_code}', general.translationLanguage);
+            .replaceAll('{text}', encodeURIComponent(selectedText))
+            .replaceAll('{speech_language}', getLanguageLabel(general.speechLanguage))
+            .replaceAll('{translation_language}', getLanguageLabel(general.translationLanguage))
+            .replaceAll('{speech_language_code}', general.speechLanguage)
+            .replaceAll('{translation_language_code}', general.translationLanguage);
     };
 
     const handleAIPromptClick = (prompt: string, e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
         const processedPrompt = prompt
-            .replace('{text}', selectedText)
-            .replace('{speech_language_code}', general.speechLanguage)
-            .replace('{translation_language_code}', general.translationLanguage);
+            .replaceAll('{text}', selectedText)
+            .replaceAll('{speech_language}', getLanguageLabel(general.speechLanguage))
+            .replaceAll('{translation_language}', getLanguageLabel(general.translationLanguage))
+            .replaceAll('{speech_language_code}', general.speechLanguage)
+            .replaceAll('{translation_language_code}', general.translationLanguage);
         onAIPromptClick(processedPrompt);
         onClose();
     };

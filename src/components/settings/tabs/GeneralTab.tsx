@@ -1,30 +1,7 @@
 import React from 'react';
 import { useSettingsStore } from '../../../store/useSettingsStore';
 import { Sun, Moon } from 'lucide-react';
-
-const LANGUAGES = [
-  { value: 'en', label: 'English' },
-  { value: 'es', label: 'Spanish' },
-  { value: 'fr', label: 'French' },
-  { value: 'de', label: 'German' },
-  { value: 'it', label: 'Italian' },
-  { value: 'pt', label: 'Portuguese' },
-  { value: 'ru', label: 'Russian' },
-  { value: 'zh', label: 'Chinese' },
-  { value: 'ja', label: 'Japanese' },
-  { value: 'ko', label: 'Korean' },
-  { value: 'ar', label: 'Arabic' },
-  { value: 'hi', label: 'Hindi' },
-  { value: 'bn', label: 'Bengali' },
-  { value: 'tr', label: 'Turkish' },
-  { value: 'nl', label: 'Dutch' },
-  { value: 'pl', label: 'Polish' },
-  { value: 'vi', label: 'Vietnamese' },
-  { value: 'th', label: 'Thai' },
-  { value: 'id', label: 'Indonesian' },
-  { value: 'ms', label: 'Malay' },
-  { value: 'fa', label: 'Persian' },
-];
+import { LANGUAGES } from '../../../constants/languages';
 
 export function GeneralTab() {
   const { general, updateGeneralSettings } = useSettingsStore();
