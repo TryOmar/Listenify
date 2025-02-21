@@ -1,13 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSettingsStore } from '../../../store/useSettingsStore';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Mic, Settings, Copy, Link, Info, ExternalLink, CheckCircle } from 'lucide-react';
 import { LANGUAGES } from '../../../constants/languages';
 
 export function GeneralTab() {
   const { general, updateGeneralSettings } = useSettingsStore();
+  const [showMessage, setShowMessage] = useState(false);
+  const [currentMic, setCurrentMic] = useState('');
+
+  // Function to detect the current browser
+  const getBrowserInfo = () => {
+    const userAgent = navigator.userAgent;
+    if (userAgent.includes("Edg")) {
+      return { name: "Edge", settingsUrl: "edge://settings/content/microphone" };
+    } else if (userAgent.includes("Firefox")) {
+      return { name: "Firefox", settingsUrl: "about:preferences#privacy" };
+    } else if (userAgent.includes("Chrome")) {
+      return { name: "Chrome", settingsUrl: "chrome://settings/content/microphone" };
+    } else if (userAgent.includes("Safari")) {
+      return { name: "Safari", settingsUrl: "x-apple.systempreferences:com.apple.preference.security?Privacy" };
+    } else if (userAgent.includes("Opera")) {
+      return { name: "Opera", settingsUrl: "opera://settings/content/microphone" };
+    }
+    return { name: "Unknown", settingsUrl: "#" };
+  };
+
+  const browserInfo = getBrowserInfo();
+
+  // Effect to get the currently selected microphone
+  useEffect(() => {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        const track = stream.getAudioTracks()[0];
+        const deviceId = track.getSettings().deviceId;
+
+        navigator.mediaDevices.enumerateDevices()
+          .then(devices => {
+            const mic = devices.find(device => device.deviceId === deviceId);
+            setCurrentMic(mic ? mic.label : 'No microphone found');
+          });
+      })
+      .catch(error => {
+        console.error('Error accessing microphone:', error);
+      });
+  }, []);
 
   return (
     <section className="space-y-6">
+      {/* Existing General Settings Section */}
       <h3 className="text-lg font-semibold">General Settings</h3>
 
       <div className="space-y-4">
@@ -163,6 +203,78 @@ export function GeneralTab() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Moved Microphone Configuration Section */}
+        <div className="bg-white shadow rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Mic className="text-gray-700 text-lg" />
+            <h3 className="text-lg font-semibold">Microphone Settings</h3>
+          </div>
+
+          <div className="flex items-center justify-between mb-4 bg-gray-50 p-3 rounded-md">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <i className={`lucide-${browserInfo.name.toLowerCase()} text-gray-600`} />
+                <span className="text-sm">
+                  <span className="text-gray-500">Browser:</span>{' '}
+                  <span className="font-medium">{browserInfo.name}</span>
+                </span>
+              </div>
+              <div className="w-px h-4 bg-gray-300" /> {/* Vertical divider */}
+              <div className="flex items-center gap-2">
+                <Mic className="text-gray-600" />
+                <span className="text-sm">
+                  <span className="text-gray-500">Input:</span>{' '}
+                  <span className="font-medium">{currentMic || 'Your Selected Microphone'}</span>
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowMessage(!showMessage)}
+              className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition text-sm flex items-center gap-1"
+            >
+              <Settings className="text-sm" />
+              Configure
+            </button>
+          </div>
+
+          {showMessage && (
+            <div className="bg-blue-50 rounded-md p-3">
+              <div className="text-sm text-gray-700 space-y-3">
+                <div className="flex items-center gap-2 text-blue-700">
+                  <Info />
+                  <span className="font-medium">How to configure:</span>
+                </div>
+                <ul className="list-none space-y-1.5 ml-6">
+                  <li className="flex items-center gap-2">
+                    <Copy className="text-gray-500 text-sm" />
+                    Copy the settings URL
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <ExternalLink className="text-gray-500 text-sm" />
+                    Open it in your browser
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="text-gray-500 text-sm" />
+                    Select your preferred microphone
+                  </li>
+                </ul>
+                <div className="bg-white text-gray-800 p-2 rounded flex items-center justify-between mt-2">
+                  <div className="flex items-center gap-2">
+                    <Link className="text-gray-500" />
+                    <span className="text-sm font-mono">{browserInfo.settingsUrl}</span>
+                  </div>
+                  <button 
+                    className="text-blue-600 hover:text-blue-700 p-1.5 rounded-md hover:bg-blue-50 transition"
+                    onClick={() => navigator.clipboard.writeText(browserInfo.settingsUrl)}
+                  >
+                    <Copy className="text-sm" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>
