@@ -243,6 +243,37 @@ export function GeneralTab() {
             <div className="bg-blue-50 rounded-md p-3">
               <div className="text-sm text-gray-700 space-y-3">
                 <div className="flex items-center gap-2 text-blue-700">
+                    <Info />
+                    <span className="font-medium">Tips for Audio Input:</span>
+                </div>
+                <div className="space-y-3 text-sm text-gray-700">
+                    <div className="space-y-1.5">
+                        <p className="font-medium">Option 1: Using Microphone</p>
+                        <ul className="ml-4 list-disc text-gray-600">
+                            <li>Select your microphone as input to capture your voice</li>
+                            <li>If your microphone is near speakers, it can capture both your voice and device audio</li>
+                        </ul>
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                        <p className="font-medium">Option 2: Using Stereo Mix</p>
+                        <ul className="ml-4 list-disc text-gray-600">
+                            <li>Select "Stereo Mix" to capture all device audio output</li>
+                            <li>Not available on all devices by default</li>
+                            <li>Check your sound settings to enable if available</li>
+                        </ul>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <p className="font-medium">Option 3: Virtual Audio Cable</p>
+                        <ul className="ml-4 list-disc text-gray-600">
+                            <li>Install virtual audio cable software to route device audio to input</li>
+                            <li>Recommended options: VB-Cable, Voicemeeter</li>
+                            <li>Provides most reliable way to capture system audio</li>
+                        </ul>
+                    </div>
+                </div>
+                <div className="flex items-center gap-2 text-blue-700">
                   <Info />
                   <span className="font-medium">How to configure:</span>
                 </div>
