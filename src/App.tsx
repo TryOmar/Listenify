@@ -13,7 +13,10 @@ function App() {
             <span className="text-sm text-gray-500 mt-6">by Omar Abbas</span>
           </div>
           <p className="text-gray-600 mt-2">
-            Improve your English listening skills with real-time transcription
+            Improve your English listening skills with real-time transcription.
+          </p>
+          <p className="text-xs text-gray-500 opacity-75">
+            Free access link available in Ameer Joy's Discord profile, #release channel
           </p>
         </header>
         <main className="flex-1 overflow-hidden">
