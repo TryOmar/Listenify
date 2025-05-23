@@ -128,7 +128,8 @@ export function TranscriptPanel() {
   // Effect to handle maxWords changes from settings
   useEffect(() => {
     const allWords = transcript.split(/\s+/).filter(Boolean);
-    if (allWords.length > general.maxWords) {
+    const latestMaxWords = useSettingsStore.getState().general.maxWords;
+    if (allWords.length > latestMaxWords) {
       if (autoClearingRef.current) return;
       autoClearingRef.current = true;
       const latestEnableSaving = useSettingsStore.getState().general.enableTranscriptSaving;
@@ -148,10 +149,10 @@ export function TranscriptPanel() {
       interimTranscriptRef.current = '';
       setTranscript('');
       autoClearingRef.current = false;
-      addToast(`Transcript cleared to match new ${general.maxWords} words limit`, 'info');
+      addToast('Maximum words reached, starting fresh', 'info');
     }
     if (transcript === '') autoClearingRef.current = false;
-  }, [general.maxWords, transcript, setTranscript, addToast]);
+  }, [transcript, setTranscript, addToast]);
 
   // Effect to update displayed transcript when words exceed limit
   useEffect(() => {
