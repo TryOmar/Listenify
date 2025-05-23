@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { getTranscripts, TranscriptEntry, downloadTranscript, updateTranscript, getFolders, addFolder, FolderEntry, deleteTranscript, deleteFolder, updateFolder } from '../../lib/transcriptDb';
-import { FolderPlus, Trash2, X, Download, Edit, Plus, Folder, FileText, Save, ArrowLeft, MoreVertical } from 'lucide-react';
+import { FolderPlus, Trash2, X, Download, Edit, Plus, Folder, FileText, Save, ArrowLeft, MoreVertical, FileArchive } from 'lucide-react';
 import JSZip from 'jszip';
 
 interface TranscriptHistoryPanelProps {
@@ -36,6 +36,7 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
   const [renamingFolderId, setRenamingFolderId] = useState<string | null>(null);
   const [renameFolderName, setRenameFolderName] = useState('');
   const [openFolderMenuId, setOpenFolderMenuId] = useState<string | null>(null);
+  const [showBulkDownloadModal, setShowBulkDownloadModal] = useState(false);
 
   // Load all folders and all transcripts on mount and after any change
   useEffect(() => {
@@ -259,6 +260,57 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
     return () => window.removeEventListener('mousedown', handle);
   }, [openFolderMenuId]);
 
+  const handleBulkDownloadMerged = () => {
+    const selected = allTranscripts.filter(t => selectedTranscripts.includes(t.transcriptId));
+    if (selected.length === 0) return;
+    const mergedText = selected.map(t => `--- ${t.title} ---\n${t.text}`).join('\n\n');
+    const blob = new Blob([mergedText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `transcripts_merged.txt`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+    setShowBulkDownloadModal(false);
+  };
+
+  const handleBulkDownloadZip = async () => {
+    const selected = allTranscripts.filter(t => selectedTranscripts.includes(t.transcriptId));
+    if (selected.length === 0) return;
+    const zip = new JSZip();
+    // Group by folderId
+    const byFolder: Record<string, TranscriptEntry[]> = {};
+    selected.forEach(t => {
+      const folderKey = t.folderId || 'Uncategorized';
+      if (!byFolder[folderKey]) byFolder[folderKey] = [];
+      byFolder[folderKey].push(t);
+    });
+    Object.entries(byFolder).forEach(([folderId, transcripts]) => {
+      if (transcripts.length === 0) return;
+      const folderName = folderId === 'Uncategorized' ? 'Uncategorized' : (folders.find(f => f.folderId === folderId)?.folderName || 'Folder');
+      const folder = zip.folder(folderName);
+      transcripts.forEach(t => {
+        folder?.file(`${t.title.replace(/[^a-z0-9]/gi, '_')}.txt`, t.text);
+      });
+    });
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `transcripts_selected.zip`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+    setShowBulkDownloadModal(false);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 z-[100] flex items-center justify-center">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[80vh] flex z-[101] border border-gray-200">
@@ -386,10 +438,10 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
           </div>
           {/* Bulk move bar */}
           {selectionMode && selectedTranscripts.length > 0 && (
-            <div className="flex items-center gap-3 px-4 py-3 bg-blue-100 border-b border-blue-200 shadow-sm rounded-t-md relative">
+            <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 border-b border-blue-200 shadow-sm rounded-t-md relative">
               <span className="text-blue-800 font-semibold text-sm">{selectedTranscripts.length} selected</span>
               <select
-                className="px-3 py-2 border border-blue-300 rounded text-sm bg-white shadow-sm hover:border-blue-500 focus:border-blue-500 transition"
+                className="px-2 py-1.5 border border-blue-300 rounded-md text-sm bg-white shadow-sm hover:border-blue-500 focus:border-blue-500 transition"
                 defaultValue=""
                 title="Move selected transcripts to folder"
                 onChange={e => { if (e.target.value) handleBulkMove(e.target.value); }}
@@ -401,11 +453,18 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
                 ))}
               </select>
               <button
-                className="px-3 py-2 rounded bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition flex items-center gap-2"
+                className="px-2 py-1.5 rounded-md bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition flex items-center gap-1.5"
+                onClick={() => setShowBulkDownloadModal(true)}
+                title="Download selected transcripts"
+              >
+                <Download className="w-4 h-4" /> Download
+              </button>
+              <button
+                className="px-2 py-1.5 rounded-md bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition flex items-center gap-1.5"
                 onClick={handleBulkDelete}
                 title="Delete selected transcripts"
               >
-                <Trash2 className="w-4 h-4" /> Delete Selected
+                <Trash2 className="w-4 h-4" /> Delete
               </button>
               <button className="ml-2 text-xs text-blue-700 hover:text-blue-900 underline px-2 py-1 rounded transition" onClick={handleCancelSelection}>Clear</button>
               {bulkMoveMessage && (
@@ -631,6 +690,40 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
             <button
               className="mt-6 text-gray-500 hover:text-gray-700 text-sm px-4 py-2 rounded transition"
               onClick={() => { setShowDownloadModal(false); setDownloadFolderId(null); }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+      {showBulkDownloadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 z-[130] flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm flex flex-col p-6 items-center">
+            <div className="flex items-center justify-between w-full mb-4">
+              <h4 className="text-lg font-bold flex items-center gap-2"><Download className="w-6 h-6" />Download Selected</h4>
+              <button onClick={() => setShowBulkDownloadModal(false)} className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition" title="Close"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="text-gray-600 text-center mb-6 w-full">How would you like to download the selected transcripts?</div>
+            <div className="flex flex-col gap-4 w-full">
+              <button
+                className="flex items-center justify-center gap-3 w-full py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-base font-semibold shadow transition"
+                onClick={handleBulkDownloadZip}
+              >
+                <FileArchive className="w-5 h-5" /> ZIP (folders & files)
+              </button>
+              <div className="w-full flex items-center gap-2 text-gray-300">
+                <div className="flex-1 h-px bg-gray-200" />or<div className="flex-1 h-px bg-gray-200" />
+              </div>
+              <button
+                className="flex items-center justify-center gap-3 w-full py-3 rounded-lg bg-green-500 hover:bg-green-600 text-white text-base font-semibold shadow transition"
+                onClick={handleBulkDownloadMerged}
+              >
+                <Download className="w-5 h-5" /> Merge to one .txt
+              </button>
+            </div>
+            <button
+              className="mt-6 text-gray-500 hover:text-gray-700 text-sm px-4 py-2 rounded transition"
+              onClick={() => setShowBulkDownloadModal(false)}
             >
               Cancel
             </button>
