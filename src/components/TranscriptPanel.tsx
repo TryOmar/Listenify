@@ -269,9 +269,11 @@ export function TranscriptPanel() {
 
         // Get all words
         const allWords = (finalTranscript + ' ' + interimTranscript).trim().split(/\s+/);
+        // Always get the latest maxWords from the store
+        const latestMaxWords = useSettingsStore.getState().general.maxWords;
 
         // If exceeding max words, clear everything and start fresh
-        if (allWords.length > general.maxWords) {
+        if (allWords.length > latestMaxWords) {
           if (autoClearingRef.current) return;
           autoClearingRef.current = true;
           const latestEnableSaving = useSettingsStore.getState().general.enableTranscriptSaving;
