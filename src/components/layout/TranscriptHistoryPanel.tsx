@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getTranscripts, TranscriptEntry, downloadTranscript, updateTranscript, getFolders, addFolder, FolderEntry, deleteTranscript, deleteFolder } from '../../lib/transcriptDb';
 import { FolderPlus, Trash2, X, Download, Edit, Plus, Folder, FileText, Save, ArrowLeft } from 'lucide-react';
+import JSZip from 'jszip';
 
 interface TranscriptHistoryPanelProps {
   onClose: () => void;
@@ -23,6 +24,9 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
   const [newFolderName, setNewFolderName] = useState('');
   const [showDeleteTranscriptId, setShowDeleteTranscriptId] = useState<string | null>(null);
   const [showDeleteFolderId, setShowDeleteFolderId] = useState<string | null>(null);
+  const [downloadFolderId, setDownloadFolderId] = useState<string | null>(null);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [downloadFolderName, setDownloadFolderName] = useState('');
 
   // Load all folders and all transcripts on mount and after any change
   useEffect(() => {
@@ -110,6 +114,57 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
     await loadAllData();
   };
 
+  const handleDownloadFolder = (folderId: string, folderName: string) => {
+    setDownloadFolderId(folderId);
+    setDownloadFolderName(folderName);
+    setShowDownloadModal(true);
+  };
+
+  const handleDownloadFolderAsZip = async () => {
+    if (!downloadFolderId) return;
+    const transcripts = downloadFolderId === UNCATEGORIZED_ID
+      ? allTranscripts.filter(t => !t.folderId)
+      : allTranscripts.filter(t => t.folderId === downloadFolderId);
+    const zip = new JSZip();
+    transcripts.forEach(t => {
+      zip.file(`${t.title.replace(/[^a-z0-9]/gi, '_')}.txt`, t.text);
+    });
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${downloadFolderName || 'folder'}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+    setShowDownloadModal(false);
+    setDownloadFolderId(null);
+  };
+
+  const handleDownloadFolderMerged = () => {
+    if (!downloadFolderId) return;
+    const transcripts = downloadFolderId === UNCATEGORIZED_ID
+      ? allTranscripts.filter(t => !t.folderId)
+      : allTranscripts.filter(t => t.folderId === downloadFolderId);
+    const mergedText = transcripts.map(t => `--- ${t.title} ---\n${t.text}`).join('\n\n');
+    const blob = new Blob([mergedText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${downloadFolderName || 'folder'}_merged.txt`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+    setShowDownloadModal(false);
+    setDownloadFolderId(null);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 z-[100] flex items-center justify-center">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[80vh] flex z-[101] border border-gray-200">
@@ -139,6 +194,13 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
             >
               <Folder className="w-4 h-4 opacity-60" /> Uncategorized
               <span className="ml-auto text-xs text-gray-500">{uncategorizedCount}</span>
+              <button
+                className="ml-2 p-1 rounded-full hover:bg-blue-100 text-blue-500 hover:text-blue-700 transition"
+                title="Download Folder"
+                onClick={e => { e.stopPropagation(); handleDownloadFolder(UNCATEGORIZED_ID, 'Uncategorized'); }}
+              >
+                <Download className="w-4 h-4" />
+              </button>
             </div>
             {folders.map(folder => (
               <div
@@ -152,6 +214,13 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
                 <span className="flex items-center gap-2"><Folder className="w-4 h-4" />{folder.folderName}</span>
                 <span className="flex items-center gap-1">
                   <span className="text-xs text-gray-500">{folderCounts[folder.folderId] || 0}</span>
+                  <button
+                    className="ml-1 p-1 rounded-full hover:bg-blue-100 text-blue-500 hover:text-blue-700 transition"
+                    title="Download Folder"
+                    onClick={e => { e.stopPropagation(); handleDownloadFolder(folder.folderId, folder.folderName); }}
+                  >
+                    <Download className="w-4 h-4" />
+                  </button>
                   <button
                     className="delete-folder-btn text-red-400 hover:text-red-600 ml-2 p-1 rounded-full hover:bg-red-100 transition"
                     title="Delete Folder"
@@ -334,6 +403,40 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+      {showDownloadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 z-[120] flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm flex flex-col p-6 items-center">
+            <div className="flex items-center justify-between w-full mb-4">
+              <h4 className="text-lg font-bold flex items-center gap-2"><Download className="w-6 h-6" />Download Folder</h4>
+              <button onClick={() => { setShowDownloadModal(false); setDownloadFolderId(null); }} className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition" title="Close"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="text-gray-600 text-center mb-6 w-full">How would you like to download <span className="font-semibold text-gray-800">{downloadFolderName}</span>?</div>
+            <div className="flex flex-col gap-4 w-full">
+              <button
+                className="flex items-center justify-center gap-3 w-full py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-base font-semibold shadow transition"
+                onClick={handleDownloadFolderAsZip}
+              >
+                <Download className="w-5 h-5" /> ZIP (separate files)
+              </button>
+              <div className="w-full flex items-center gap-2 text-gray-300">
+                <div className="flex-1 h-px bg-gray-200" />or<div className="flex-1 h-px bg-gray-200" />
+              </div>
+              <button
+                className="flex items-center justify-center gap-3 w-full py-3 rounded-lg bg-green-500 hover:bg-green-600 text-white text-base font-semibold shadow transition"
+                onClick={handleDownloadFolderMerged}
+              >
+                <Download className="w-5 h-5" /> Merge to one .txt
+              </button>
+            </div>
+            <button
+              className="mt-6 text-gray-500 hover:text-gray-700 text-sm px-4 py-2 rounded transition"
+              onClick={() => { setShowDownloadModal(false); setDownloadFolderId(null); }}
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
