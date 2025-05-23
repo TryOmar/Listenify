@@ -10,6 +10,7 @@ export interface GeneralSettings {
   maxWords: number;
   breakSentences: boolean;
   lineBreakStyle: 'single' | 'double';
+  enableTranscriptSaving: boolean;
 }
 
 export interface Action {
@@ -70,6 +71,7 @@ const defaultGeneralSettings: GeneralSettings = {
   maxWords: 100,
   breakSentences: false,
   lineBreakStyle: 'single',
+  enableTranscriptSaving: false,
 };
 
 const defaultActions = {

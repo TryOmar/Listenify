@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Mic, Trash2, Copy, Maximize, Minimize } from 'lucide-react';
+import { Mic, Trash2, Copy, Maximize, Minimize, History } from 'lucide-react';
 import { useTranscriptStore } from '../store/useTranscriptStore';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { WordPopup } from './WordPopup';
@@ -14,6 +14,8 @@ import { TranslationPanel } from './TranslationPanel';
 import { useLayoutStore } from '../store/useLayoutStore';
 import { cn } from '../lib/utils';
 import { ResizableSplitter } from './layout/ResizableSplitter';
+import { saveTranscript } from '../lib/transcriptDb';
+import { TranscriptHistoryPanel } from './layout/TranscriptHistoryPanel';
 
 type SpeechRecognitionResult = {
   isFinal: boolean;
@@ -86,6 +88,9 @@ export function TranscriptPanel() {
   const { addToast } = useToastStore();
   const { isFullscreen, setFullscreen } = useLayoutStore();
   const [transcriptHeight, setTranscriptHeight] = useState(window.innerHeight * 0.65); // Changed from 0.45 to 0.65
+  const [showHistoryPanel, setShowHistoryPanel] = useState(false);
+  const autoClearingRef = useRef(false);
+  const lastAutoSaveTimeRef = useRef(0); // Timestamp of last auto-save
 
   // Handle scroll events to determine if we should auto-scroll
   const handleScroll = () => {
@@ -124,12 +129,27 @@ export function TranscriptPanel() {
   useEffect(() => {
     const allWords = transcript.split(/\s+/).filter(Boolean);
     if (allWords.length > general.maxWords) {
+      if (autoClearingRef.current) return;
+      autoClearingRef.current = true;
+      const latestEnableSaving = useSettingsStore.getState().general.enableTranscriptSaving;
+      const now = Date.now();
+      const canSave = now - lastAutoSaveTimeRef.current > 10000;
+      if (latestEnableSaving && transcript.trim() && canSave) {
+        saveTranscript({
+          title: '',
+          text: transcript,
+          wordCount: allWords.length,
+        });
+        lastAutoSaveTimeRef.current = now;
+      }
       finalTranscriptRef.current = '';
       fullTranscriptRef.current = [];
       interimTranscriptRef.current = '';
       setTranscript('');
+      autoClearingRef.current = false;
       addToast(`Transcript cleared to match new ${general.maxWords} words limit`, 'info');
     }
+    if (transcript === '') autoClearingRef.current = false;
   }, [general.maxWords, transcript, setTranscript, addToast]);
 
   // Effect to update displayed transcript when words exceed limit
@@ -139,12 +159,27 @@ export function TranscriptPanel() {
 
     // If word count exceeds maxWords, clear and start fresh
     if (allWords.length > general.maxWords) {
+      if (autoClearingRef.current) return;
+      autoClearingRef.current = true;
+      const latestEnableSaving = useSettingsStore.getState().general.enableTranscriptSaving;
+      const now = Date.now();
+      const canSave = now - lastAutoSaveTimeRef.current > 10000;
+      if (latestEnableSaving && transcript.trim() && canSave) {
+        saveTranscript({
+          title: '',
+          text: transcript,
+          wordCount: allWords.length,
+        });
+        lastAutoSaveTimeRef.current = now;
+      }
       finalTranscriptRef.current = '';
       fullTranscriptRef.current = [];
       interimTranscriptRef.current = '';
       setTranscript('');
+      autoClearingRef.current = false;
       addToast('Maximum words reached, starting fresh', 'info');
     }
+    if (transcript === '') autoClearingRef.current = false;
   }, [transcript, setTranscript, addToast, general.maxWords]);
 
   useEffect(() => {
@@ -234,10 +269,24 @@ export function TranscriptPanel() {
 
         // If exceeding max words, clear everything and start fresh
         if (allWords.length > general.maxWords) {
+          if (autoClearingRef.current) return;
+          autoClearingRef.current = true;
+          const latestEnableSaving = useSettingsStore.getState().general.enableTranscriptSaving;
+          const now = Date.now();
+          const canSave = now - lastAutoSaveTimeRef.current > 10000;
+          if (latestEnableSaving && (finalTranscript + ' ' + interimTranscript).trim() && canSave) {
+            saveTranscript({
+              title: '',
+              text: (finalTranscript + ' ' + interimTranscript).trim(),
+              wordCount: allWords.length,
+            });
+            lastAutoSaveTimeRef.current = now;
+          }
           finalTranscriptRef.current = '';
           fullTranscriptRef.current = [];
           interimTranscriptRef.current = '';
           setTranscript('');
+          autoClearingRef.current = false;
         } else {
           // Update transcript normally
           fullTranscriptRef.current = allWords;
@@ -337,7 +386,19 @@ export function TranscriptPanel() {
     console.log('Microphone state updated:', isListening, new Date().toISOString());
   }, [isListening]);
 
-  const handleClearTranscript = () => {
+  const handleClearTranscript = async () => {
+    if (general.enableTranscriptSaving && transcript.trim()) {
+      try {
+        await saveTranscript({
+          title: '',
+          text: transcript,
+          wordCount: transcript.split(/\s+/).filter(Boolean).length,
+        });
+        addToast('Transcript saved to history', 'success');
+      } catch {
+        addToast('Failed to save transcript', 'error');
+      }
+    }
     clearTranscript();
     interimTranscriptRef.current = '';
     finalTranscriptRef.current = '';
@@ -545,6 +606,15 @@ export function TranscriptPanel() {
               >
                 <Copy size={isFullscreen ? 24 : 20} />
               </button>
+              {general.enableTranscriptSaving && (
+                <button
+                  onClick={() => setShowHistoryPanel((v) => !v)}
+                  className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+                  title="Transcript History"
+                >
+                  <History size={isFullscreen ? 24 : 20} />
+                </button>
+              )}
               <SettingsDialog />
               <button
                 onClick={toggleFullscreen}
@@ -617,6 +687,12 @@ export function TranscriptPanel() {
           translationLanguage={general.translationLanguage}
         />
       </div>
+
+      {showHistoryPanel && (
+        <TranscriptHistoryPanel
+          onClose={() => setShowHistoryPanel(false)}
+        />
+      )}
     </div>
   );
 }

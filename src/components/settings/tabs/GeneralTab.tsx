@@ -205,6 +205,21 @@ export function GeneralTab() {
           </div>
         </div>
 
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium">Enable Transcript Saving</label>
+            <span className="text-sm text-gray-600">Automatically save transcript chunks to history</span>
+          </div>
+          <button
+            onClick={() => updateGeneralSettings({ enableTranscriptSaving: !general.enableTranscriptSaving })}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${general.enableTranscriptSaving ? 'bg-blue-500' : 'bg-gray-200'}`}
+            role="switch"
+            aria-checked={general.enableTranscriptSaving}
+          >
+            <span className={`${general.enableTranscriptSaving ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition-transform`} />
+          </button>
+        </div>
+
         {/* Moved Microphone Configuration Section */}
         <div className="bg-white shadow rounded-lg p-4">
           <div className="flex items-center gap-2 mb-4">
