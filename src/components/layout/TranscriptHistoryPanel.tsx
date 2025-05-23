@@ -159,7 +159,9 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
     const transcripts = downloadFolderId === UNCATEGORIZED_ID
       ? allTranscripts.filter(t => !t.folderId)
       : allTranscripts.filter(t => t.folderId === downloadFolderId);
-    const mergedText = transcripts.map(t => `--- ${t.title} ---\n${t.text}`).join('\n\n');
+    // Sort by createdAt ascending (oldest to newest)
+    const sortedTranscripts = [...transcripts].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    const mergedText = sortedTranscripts.map(t => `--- ${t.title} ---\n${t.text}`).join('\n\n');
     const blob = new Blob([mergedText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -263,7 +265,9 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
   const handleBulkDownloadMerged = () => {
     const selected = allTranscripts.filter(t => selectedTranscripts.includes(t.transcriptId));
     if (selected.length === 0) return;
-    const mergedText = selected.map(t => `--- ${t.title} ---\n${t.text}`).join('\n\n');
+    // Sort by createdAt ascending (oldest to newest)
+    const sortedSelected = [...selected].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    const mergedText = sortedSelected.map(t => `--- ${t.title} ---\n${t.text}`).join('\n\n');
     const blob = new Blob([mergedText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
