@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { getTranscripts, TranscriptEntry, downloadTranscript, updateTranscript, getFolders, addFolder, FolderEntry, deleteTranscript, deleteFolder } from '../../lib/transcriptDb';
-import { FolderPlus, Trash2, X, Download, Edit, Plus, Folder, FileText, Save, ArrowLeft } from 'lucide-react';
+import { getTranscripts, TranscriptEntry, downloadTranscript, updateTranscript, getFolders, addFolder, FolderEntry, deleteTranscript, deleteFolder, updateFolder } from '../../lib/transcriptDb';
+import { FolderPlus, Trash2, X, Download, Edit, Plus, Folder, FileText, Save, ArrowLeft, MoreVertical } from 'lucide-react';
 import JSZip from 'jszip';
 
 interface TranscriptHistoryPanelProps {
@@ -33,6 +33,9 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
   const bulkMoveTimeout = useRef<number | null>(null);
   const [selectionMode, setSelectionMode] = useState(false);
   const [lastCheckedIndex, setLastCheckedIndex] = useState<number | null>(null);
+  const [renamingFolderId, setRenamingFolderId] = useState<string | null>(null);
+  const [renameFolderName, setRenameFolderName] = useState('');
+  const [openFolderMenuId, setOpenFolderMenuId] = useState<string | null>(null);
 
   // Load all folders and all transcripts on mount and after any change
   useEffect(() => {
@@ -221,6 +224,32 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
     setLastCheckedIndex(idx);
   };
 
+  const handleRenameFolder = (folderId: string, currentName: string) => {
+    setRenamingFolderId(folderId);
+    setRenameFolderName(currentName);
+  };
+
+  const handleRenameFolderSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!renamingFolderId || !renameFolderName.trim()) return;
+    await updateFolder(renamingFolderId, { folderName: renameFolderName.trim() });
+    setRenamingFolderId(null);
+    setRenameFolderName('');
+    await loadAllData();
+  };
+
+  // Close popover on outside click
+  useEffect(() => {
+    if (!openFolderMenuId) return;
+    const handle = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest('.folder-action-menu')) {
+        setOpenFolderMenuId(null);
+      }
+    };
+    window.addEventListener('mousedown', handle);
+    return () => window.removeEventListener('mousedown', handle);
+  }, [openFolderMenuId]);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 z-[100] flex items-center justify-center">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[80vh] flex z-[101] border border-gray-200">
@@ -263,27 +292,59 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
                 key={folder.folderId}
                 className={`flex items-center justify-between cursor-pointer px-3 py-2 rounded mb-1 ${selectedFolder === folder.folderId ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-200'}`}
                 onClick={e => {
-                  if ((e.target as HTMLElement).closest('.delete-folder-btn')) return;
+                  if ((e.target as HTMLElement).closest('.folder-action-menu, form')) return;
                   setSelectedFolder(folder.folderId);
                 }}
               >
-                <span className="flex items-center gap-2"><Folder className="w-4 h-4" />{folder.folderName}</span>
-                <span className="flex items-center gap-1">
-                  <span className="text-xs text-gray-500">{folderCounts[folder.folderId] || 0}</span>
+                <span className="flex items-center gap-2">
+                  <Folder className="w-4 h-4" />
+                  {renamingFolderId === folder.folderId ? (
+                    <form onSubmit={handleRenameFolderSubmit} className="flex items-center gap-1">
+                      <input
+                        className="border rounded px-1 py-0.5 text-sm w-28 focus:outline-none focus:ring focus:border-blue-400"
+                        value={renameFolderName}
+                        onChange={e => setRenameFolderName(e.target.value)}
+                        autoFocus
+                        maxLength={50}
+                        onClick={e => e.stopPropagation()}
+                      />
+                      <button type="submit" className="text-blue-600 hover:text-blue-800 px-1" title="Save"><Save className="w-4 h-4" /></button>
+                      <button type="button" className="text-gray-400 hover:text-gray-700 px-1" title="Cancel" onClick={e => { e.stopPropagation(); setRenamingFolderId(null); }}><X className="w-4 h-4" /></button>
+                    </form>
+                  ) : (
+                    <span>{folder.folderName}</span>
+                  )}
+                </span>
+                <span className="relative folder-action-menu">
                   <button
-                    className="ml-1 p-1 rounded-full hover:bg-blue-100 text-blue-500 hover:text-blue-700 transition"
-                    title="Download Folder"
-                    onClick={e => { e.stopPropagation(); handleDownloadFolder(folder.folderId, folder.folderName); }}
+                    className="p-1 rounded-full hover:bg-gray-200 text-gray-500 hover:text-blue-700 transition"
+                    title="More actions"
+                    onClick={e => { e.stopPropagation(); setOpenFolderMenuId(folder.folderId === openFolderMenuId ? null : folder.folderId); }}
                   >
-                    <Download className="w-4 h-4" />
+                    <MoreVertical className="w-5 h-5" />
                   </button>
-                  <button
-                    className="delete-folder-btn text-red-400 hover:text-red-600 ml-2 p-1 rounded-full hover:bg-red-100 transition"
-                    title="Delete Folder"
-                    onClick={e => { e.stopPropagation(); setShowDeleteFolderId(folder.folderId); }}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {openFolderMenuId === folder.folderId && (
+                    <div className="absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-50 folder-action-menu animate-fade-in">
+                      <button
+                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded-t-lg"
+                        onClick={e => { e.stopPropagation(); handleRenameFolder(folder.folderId, folder.folderName); setOpenFolderMenuId(null); }}
+                      >
+                        <Edit className="w-4 h-4" /> Rename
+                      </button>
+                      <button
+                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-blue-50"
+                        onClick={e => { e.stopPropagation(); handleDownloadFolder(folder.folderId, folder.folderName); setOpenFolderMenuId(null); }}
+                      >
+                        <Download className="w-4 h-4" /> Download
+                      </button>
+                      <button
+                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-lg"
+                        onClick={e => { e.stopPropagation(); setShowDeleteFolderId(folder.folderId); setOpenFolderMenuId(null); }}
+                      >
+                        <Trash2 className="w-4 h-4" /> Delete
+                      </button>
+                    </div>
+                  )}
                 </span>
               </div>
             ))}
