@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { getTranscripts, TranscriptEntry, downloadTranscript, updateTranscript, getFolders, addFolder, FolderEntry, deleteTranscript, deleteFolder } from '../../lib/transcriptDb';
 import { FolderPlus, Trash2, X, Download, Edit, Plus, Folder, FileText, Save, ArrowLeft } from 'lucide-react';
 import JSZip from 'jszip';
@@ -27,6 +27,12 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
   const [downloadFolderId, setDownloadFolderId] = useState<string | null>(null);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadFolderName, setDownloadFolderName] = useState('');
+  const [selectedTranscripts, setSelectedTranscripts] = useState<string[]>([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [bulkMoveMessage, setBulkMoveMessage] = useState<string | null>(null);
+  const bulkMoveTimeout = useRef<number | null>(null);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [lastCheckedIndex, setLastCheckedIndex] = useState<number | null>(null);
 
   // Load all folders and all transcripts on mount and after any change
   useEffect(() => {
@@ -165,6 +171,56 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
     setDownloadFolderId(null);
   };
 
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedTranscripts([]);
+      setSelectAll(false);
+    } else {
+      setSelectedTranscripts(filteredTranscripts.map((t) => t.transcriptId));
+      setSelectAll(true);
+    }
+  };
+
+  const handleBulkMove = async (targetFolderId: string) => {
+    await Promise.all(selectedTranscripts.map((id) => updateTranscript(id, { folderId: targetFolderId === UNCATEGORIZED_ID ? null : targetFolderId })));
+    setBulkMoveMessage(`Moved ${selectedTranscripts.length} transcript${selectedTranscripts.length > 1 ? 's' : ''}!`);
+    setSelectedTranscripts([]);
+    setSelectAll(false);
+    await loadAllData();
+    if (bulkMoveTimeout.current) clearTimeout(bulkMoveTimeout.current);
+    bulkMoveTimeout.current = window.setTimeout(() => setBulkMoveMessage(null), 2000);
+  };
+
+  const handleCancelSelection = () => {
+    setSelectionMode(false);
+    setSelectedTranscripts([]);
+    setSelectAll(false);
+  };
+
+  const handleCheckboxClick = (e: React.ChangeEvent<HTMLInputElement>, id: string, idx: number) => {
+    const isChecked = e.target.checked;
+    if (e.nativeEvent instanceof PointerEvent && e.nativeEvent.shiftKey && lastCheckedIndex !== null) {
+      // Shift is held, select range
+      const start = Math.min(lastCheckedIndex, idx);
+      const end = Math.max(lastCheckedIndex, idx);
+      const idsInRange = filteredTranscripts.slice(start, end + 1).map(t => t.transcriptId);
+      setSelectedTranscripts(prev => {
+        const set = new Set(prev);
+        idsInRange.forEach(idInRange => {
+          if (isChecked) set.add(idInRange);
+          else set.delete(idInRange);
+        });
+        return Array.from(set);
+      });
+    } else {
+      // Normal click
+      setSelectedTranscripts(prev =>
+        isChecked ? [...prev, id] : prev.filter(tid => tid !== id)
+      );
+    }
+    setLastCheckedIndex(idx);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 z-[100] flex items-center justify-center">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[80vh] flex z-[101] border border-gray-200">
@@ -237,8 +293,48 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
         <div className="flex-1 flex flex-col">
           <div className="flex items-center justify-between p-4 border-b">
             <h3 className="text-lg font-semibold flex items-center gap-2"><ArrowLeft className="w-5 h-5" />Transcript History</h3>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-200 transition" title="Close"><X className="w-5 h-5" /></button>
+            <div className="flex items-center gap-2">
+              {!selectionMode && filteredTranscripts.length > 0 && (
+                <button
+                  className="px-3 py-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm font-medium transition"
+                  onClick={() => setSelectionMode(true)}
+                >
+                  Select
+                </button>
+              )}
+              {selectionMode && (
+                <button
+                  className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium transition"
+                  onClick={handleCancelSelection}
+                >
+                  Cancel
+                </button>
+              )}
+              <button onClick={onClose} className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-200 transition" title="Close"><X className="w-5 h-5" /></button>
+            </div>
           </div>
+          {/* Bulk move bar */}
+          {selectionMode && selectedTranscripts.length > 0 && (
+            <div className="flex items-center gap-3 px-4 py-3 bg-blue-100 border-b border-blue-200 shadow-sm rounded-t-md relative">
+              <span className="text-blue-800 font-semibold text-sm">{selectedTranscripts.length} selected</span>
+              <select
+                className="px-3 py-2 border border-blue-300 rounded text-sm bg-white shadow-sm hover:border-blue-500 focus:border-blue-500 transition"
+                defaultValue=""
+                title="Move selected transcripts to folder"
+                onChange={e => { if (e.target.value) handleBulkMove(e.target.value); }}
+              >
+                <option value="" disabled>Move to folder...</option>
+                <option value={UNCATEGORIZED_ID}>Uncategorized</option>
+                {folders.map(folder => (
+                  <option key={folder.folderId} value={folder.folderId}>{folder.folderName}</option>
+                ))}
+              </select>
+              <button className="ml-2 text-xs text-blue-700 hover:text-blue-900 underline px-2 py-1 rounded transition" onClick={handleCancelSelection}>Clear</button>
+              {bulkMoveMessage && (
+                <span className="absolute right-4 text-green-600 font-medium bg-green-50 px-3 py-1 rounded shadow-sm animate-fade-in">{bulkMoveMessage}</span>
+              )}
+            </div>
+          )}
           <div className="flex-1 overflow-y-auto p-4">
             {loading ? (
               <div className="text-gray-400 text-center py-8">Loading...</div>
@@ -246,11 +342,34 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
               <div className="text-gray-400 text-center py-8">Transcript history will appear here.</div>
             ) : (
               <ul className="space-y-4">
-                {filteredTranscripts.map((t) => (
-                  <li key={t.transcriptId} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2 bg-gray-50 hover:bg-gray-100 transition-colors shadow-sm">
-                    <div className="flex-1 min-w-0 cursor-pointer" onClick={() => handleView(t)}>
-                      <div className="font-semibold truncate">{t.title}</div>
-                      <div className="text-xs text-gray-500">{new Date(t.createdAt).toLocaleString()} &bull; {t.wordCount} words</div>
+                {selectionMode && (
+                  <li className="flex items-center gap-2 mb-3">
+                    <input
+                      type="checkbox"
+                      checked={selectAll}
+                      onChange={handleSelectAll}
+                      className="accent-blue-500 w-4 h-4 rounded cursor-pointer"
+                      title={selectAll ? 'Deselect all' : 'Select all'}
+                    />
+                    <span className="text-xs text-gray-600 cursor-pointer select-none">{selectAll ? 'Deselect All' : 'Select All'}</span>
+                  </li>
+                )}
+                {filteredTranscripts.map((t, idx) => (
+                  <li key={t.transcriptId} className={`border rounded-lg p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-gray-50 transition-colors shadow-sm ${selectionMode && selectedTranscripts.includes(t.transcriptId) ? 'ring-2 ring-blue-400 bg-blue-50 hover:bg-blue-100' : selectionMode ? 'hover:bg-gray-100' : ''}`}>
+                    <div className="flex items-center gap-3">
+                      {selectionMode && (
+                        <input
+                          type="checkbox"
+                          checked={selectedTranscripts.includes(t.transcriptId)}
+                          onChange={e => handleCheckboxClick(e, t.transcriptId, idx)}
+                          className="accent-blue-500 w-4 h-4 rounded cursor-pointer"
+                          title="Select transcript"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0 cursor-pointer" onClick={() => handleView(t)}>
+                        <div className="font-semibold truncate text-base">{t.title}</div>
+                        <div className="text-xs text-gray-500">{new Date(t.createdAt).toLocaleString()} &bull; {t.wordCount} words</div>
+                      </div>
                     </div>
                     <div className="flex gap-2 flex-shrink-0 items-center">
                       <button className="p-2 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 transition" title="Download" onClick={() => handleDownload(t)}><Download className="w-4 h-4" /></button>
