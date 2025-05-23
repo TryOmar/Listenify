@@ -139,6 +139,7 @@ export function TranscriptPanel() {
           title: '',
           text: transcript,
           wordCount: allWords.length,
+          folderId: null,
         });
         lastAutoSaveTimeRef.current = now;
       }
@@ -169,6 +170,7 @@ export function TranscriptPanel() {
           title: '',
           text: transcript,
           wordCount: allWords.length,
+          folderId: null,
         });
         lastAutoSaveTimeRef.current = now;
       }
@@ -279,6 +281,7 @@ export function TranscriptPanel() {
               title: '',
               text: (finalTranscript + ' ' + interimTranscript).trim(),
               wordCount: allWords.length,
+              folderId: null,
             });
             lastAutoSaveTimeRef.current = now;
           }
@@ -393,6 +396,7 @@ export function TranscriptPanel() {
           title: '',
           text: transcript,
           wordCount: transcript.split(/\s+/).filter(Boolean).length,
+          folderId: null,
         });
         addToast('Transcript saved to history', 'success');
       } catch {
