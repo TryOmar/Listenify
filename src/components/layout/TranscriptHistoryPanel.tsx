@@ -296,7 +296,7 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
                   setSelectedFolder(folder.folderId);
                 }}
               >
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-2 flex-1 min-w-0">
                   <Folder className="w-4 h-4" />
                   {renamingFolderId === folder.folderId ? (
                     <form onSubmit={handleRenameFolderSubmit} className="flex items-center gap-1">
@@ -312,10 +312,11 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
                       <button type="button" className="text-gray-400 hover:text-gray-700 px-1" title="Cancel" onClick={e => { e.stopPropagation(); setRenamingFolderId(null); }}><X className="w-4 h-4" /></button>
                     </form>
                   ) : (
-                    <span>{folder.folderName}</span>
+                    <span className="truncate">{folder.folderName}</span>
                   )}
+                  <span className="ml-auto text-xs text-gray-500 bg-gray-100 rounded px-2 py-0.5 flex-shrink-0">{folderCounts[folder.folderId] || 0}</span>
                 </span>
-                <span className="relative folder-action-menu">
+                <span className="relative folder-action-menu ml-2 flex-shrink-0">
                   <button
                     className="p-1 rounded-full hover:bg-gray-200 text-gray-500 hover:text-blue-700 transition"
                     title="More actions"
