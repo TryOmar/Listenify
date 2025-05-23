@@ -194,6 +194,15 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
     bulkMoveTimeout.current = window.setTimeout(() => setBulkMoveMessage(null), 2000);
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedTranscripts.length === 0) return;
+    if (!window.confirm(`Are you sure you want to delete ${selectedTranscripts.length} transcript(s)? This cannot be undone.`)) return;
+    await Promise.all(selectedTranscripts.map(id => deleteTranscript(id)));
+    setSelectedTranscripts([]);
+    setSelectAll(false);
+    await loadAllData();
+  };
+
   const handleCancelSelection = () => {
     setSelectionMode(false);
     setSelectedTranscripts([]);
@@ -391,6 +400,13 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
                   <option key={folder.folderId} value={folder.folderId}>{folder.folderName}</option>
                 ))}
               </select>
+              <button
+                className="px-3 py-2 rounded bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition flex items-center gap-2"
+                onClick={handleBulkDelete}
+                title="Delete selected transcripts"
+              >
+                <Trash2 className="w-4 h-4" /> Delete Selected
+              </button>
               <button className="ml-2 text-xs text-blue-700 hover:text-blue-900 underline px-2 py-1 rounded transition" onClick={handleCancelSelection}>Clear</button>
               {bulkMoveMessage && (
                 <span className="absolute right-4 text-green-600 font-medium bg-green-50 px-3 py-1 rounded shadow-sm animate-fade-in">{bulkMoveMessage}</span>
