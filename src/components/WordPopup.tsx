@@ -11,9 +11,10 @@ import { LANGUAGES } from '../constants/languages';
 interface WordPopupProps {
   word: string;
   preventSave?: boolean;
+  onOpen?: () => void;
 }
 
-export function WordPopup({ word, preventSave = false }: WordPopupProps) {
+export function WordPopup({ word, preventSave = false, onOpen }: WordPopupProps) {
   const { actions, prompts, general } = useSettingsStore();
   const { addMessage } = useChatStore();
   const { isChatPanelOpen, openChatPanel } = usePanelStore();
@@ -120,7 +121,7 @@ export function WordPopup({ word, preventSave = false }: WordPopupProps) {
   };
 
   return (
-    <Popover.Root>
+    <Popover.Root onOpenChange={open => { if (open && onOpen) onOpen(); }}>
       <Popover.Trigger asChild>
         <button className="inline hover:bg-blue-100 rounded transition-colors" style={{ padding: 0, margin: 0, border: 'none' }} onClick={handleWordClick}>
           {word}

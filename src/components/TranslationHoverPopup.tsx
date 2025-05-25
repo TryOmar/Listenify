@@ -83,10 +83,10 @@ export const TranslationHoverPopup: React.FC<TranslationHoverPopupProps> = ({
     // eslint-disable-next-line
   }, [word, setCache, cache, langpair]);
 
-  // Handle scroll to cycle translations (prevent page scroll)
+  // Global mouse wheel: cycle translations as long as popup is visible
   useEffect(() => {
+    if (!translations.length) return;
     const handleWheel = (e: WheelEvent) => {
-      if (!translations.length) return;
       e.preventDefault();
       e.stopPropagation();
       let newIndex = index;
@@ -97,13 +97,8 @@ export const TranslationHoverPopup: React.FC<TranslationHoverPopupProps> = ({
       }
       setIndex(newIndex);
     };
-    const node = popupRef.current;
-    if (node) {
-      node.addEventListener('wheel', handleWheel, { passive: false });
-    }
-    return () => {
-      if (node) node.removeEventListener('wheel', handleWheel);
-    };
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    return () => window.removeEventListener('wheel', handleWheel);
   }, [translations, setIndex, index]);
 
   // Keyboard navigation: left/right arrows and A/D keys

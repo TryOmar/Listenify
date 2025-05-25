@@ -467,6 +467,12 @@ export function TranscriptPanel() {
               setHoverPosition({ x: e.clientX, y: e.clientY });
             }
           };
+          const handleWordPopupOpen = () => {
+            setHoveredWord(null);
+            setHoverPosition(null);
+            setHoveredWordRect(undefined);
+            setTranslationIndex(0);
+          };
           return (
             <span
               key={`word-${index}`}
@@ -475,7 +481,7 @@ export function TranscriptPanel() {
               onMouseMove={handleMouseMove}
               style={{ position: 'relative', zIndex: 1 }}
             >
-              <WordPopup word={word} />
+              <WordPopup word={word} onOpen={handleWordPopupOpen} />
             </span>
           );
         })}
