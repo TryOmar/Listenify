@@ -79,7 +79,20 @@ export function TextSelectionPopup({ selectedText, onAIPromptClick, onClose, pre
     }, [selectedText]);
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-2 w-64 max-h-80 overflow-y-auto animate-in fade-in-0 zoom-in-95">
+        <div
+            className="bg-white rounded-lg shadow-lg animate-in fade-in-0 zoom-in-95"
+            style={{
+                maxWidth: '50vw',
+                minWidth: '6em',
+                width: 'auto',
+                maxHeight: '35vh',
+                fontSize: '0.9em',
+                padding: '0.4em 0.6em',
+                overflow: 'auto',
+                boxSizing: 'border-box',
+                position: 'relative',
+            }}
+        >
             <div className="flex flex-col gap-1">
                 <div className="border-b pb-2 mb-2">
                     <h3 className="font-medium text-sm text-gray-600 mb-1">Text Actions</h3>
@@ -112,7 +125,14 @@ export function TextSelectionPopup({ selectedText, onAIPromptClick, onClose, pre
                     ))}
                 </div>
             </div>
-            <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 rotate-45 w-4 h-4 bg-white"></div>
+            <div
+                className="absolute left-1/2 transform -translate-x-1/2 rotate-45 bg-white"
+                style={{
+                    top: '-0.7em',
+                    width: '1.2em',
+                    height: '1.2em',
+                }}
+            ></div>
         </div>
     );
 } 
