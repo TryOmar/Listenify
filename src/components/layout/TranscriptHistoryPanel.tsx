@@ -37,6 +37,7 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
   const [renameFolderName, setRenameFolderName] = useState('');
   const [openFolderMenuId, setOpenFolderMenuId] = useState<string | null>(null);
   const [showBulkDownloadModal, setShowBulkDownloadModal] = useState(false);
+  const [isCreatingAndMoving, setIsCreatingAndMoving] = useState(false);
 
   // Load all folders and all transcripts on mount and after any change
   useEffect(() => {
@@ -90,9 +91,17 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
 
   const handleNewFolder = async () => {
     if (!newFolderName.trim()) return;
-    await addFolder(newFolderName.trim());
-    setShowNewFolderPrompt(false);
+    const folderName = newFolderName.trim();
     setNewFolderName('');
+    setShowNewFolderPrompt(false);
+
+    const newFolder = await addFolder(folderName);
+
+    if (isCreatingAndMoving && newFolder?.folderId) {
+      await handleBulkMove(newFolder.folderId);
+      setIsCreatingAndMoving(false);
+    }
+
     await loadAllData();
   };
 
@@ -448,13 +457,22 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
                 className="px-2 py-1.5 border border-blue-300 rounded-md text-sm bg-white shadow-sm hover:border-blue-500 focus:border-blue-500 transition"
                 defaultValue=""
                 title="Move selected transcripts to folder"
-                onChange={e => { if (e.target.value) handleBulkMove(e.target.value); }}
+                onChange={e => {
+                  const targetValue = e.target.value;
+                  if (targetValue === 'create-new') {
+                    setIsCreatingAndMoving(true);
+                    setShowNewFolderPrompt(true);
+                  } else if (targetValue) {
+                    handleBulkMove(targetValue);
+                  }
+                }}
               >
                 <option value="" disabled>Move to folder...</option>
                 <option value={UNCATEGORIZED_ID}>Uncategorized</option>
                 {folders.map(folder => (
                   <option key={folder.folderId} value={folder.folderId}>{folder.folderName}</option>
                 ))}
+                <option value="create-new">+ Create New Folder</option>
               </select>
               <button
                 className="px-2 py-1.5 rounded-md bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition flex items-center gap-1.5"
@@ -541,7 +559,10 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
           <div className="bg-white rounded-lg shadow-lg w-full max-w-xs flex flex-col">
             <div className="flex items-center justify-between p-4 border-b">
               <h4 className="text-base font-semibold flex items-center gap-2"><FolderPlus className="w-5 h-5" />New Folder</h4>
-              <button onClick={() => setShowNewFolderPrompt(false)} className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-200 transition" title="Close"><X className="w-5 h-5" /></button>
+              <button onClick={() => {
+                setShowNewFolderPrompt(false);
+                if (isCreatingAndMoving) setIsCreatingAndMoving(false);
+              }} className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-200 transition" title="Close"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-4">
               <input
