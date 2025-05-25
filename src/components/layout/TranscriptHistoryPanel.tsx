@@ -330,7 +330,7 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
               <FolderPlus className="w-5 h-5" />
             </button>
           </div>
-          <div>
+          <div className="flex flex-col p-2 space-y-1 flex-grow overflow-y-auto">
             <div
               className={`cursor-pointer px-3 py-2 rounded mb-1 flex items-center gap-2 ${selectedFolder === ALL_ID ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-200'}`}
               onClick={() => setSelectedFolder(ALL_ID)}
