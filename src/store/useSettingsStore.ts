@@ -11,6 +11,7 @@ export interface GeneralSettings {
   breakSentences: boolean;
   lineBreakStyle: 'single' | 'double';
   enableTranscriptSaving: boolean;
+  enableTranslationOnHover: boolean;
 }
 
 export interface Action {
@@ -72,6 +73,7 @@ const defaultGeneralSettings: GeneralSettings = {
   breakSentences: false,
   lineBreakStyle: 'single',
   enableTranscriptSaving: false,
+  enableTranslationOnHover: false,
 };
 
 const defaultActions = {

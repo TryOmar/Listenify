@@ -16,6 +16,7 @@ import { cn } from '../lib/utils';
 import { ResizableSplitter } from './layout/ResizableSplitter';
 import { saveTranscript } from '../lib/transcriptDb';
 import { TranscriptHistoryPanel } from './layout/TranscriptHistoryPanel';
+import { TranslationHoverPopup } from './TranslationHoverPopup';
 
 type SpeechRecognitionResult = {
   isFinal: boolean;
@@ -91,6 +92,13 @@ export function TranscriptPanel() {
   const [showHistoryPanel, setShowHistoryPanel] = useState(false);
   const autoClearingRef = useRef(false);
   const lastAutoSaveTimeRef = useRef(0); // Timestamp of last auto-save
+  const [hoveredWord, setHoveredWord] = useState<string | null>(null);
+  const [hoverPosition, setHoverPosition] = useState<{ x: number; y: number } | null>(null);
+  const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [hoveredWordRect, setHoveredWordRect] = useState<DOMRect | undefined>(undefined);
+  const [translationCache, setTranslationCache] = useState<Record<string, { matches: { translation: string }[] }>>({});
+  const [translationIndex, setTranslationIndex] = useState<number>(0);
+  const { enableTranslationOnHover } = general;
 
   // Handle scroll events to determine if we should auto-scroll
   const handleScroll = () => {
@@ -435,9 +443,59 @@ export function TranscriptPanel() {
             // Render spaces without any wrapper to maintain natural text flow
             return word;
           }
-          // For actual words, wrap in WordPopup with no extra spacing
-          return <WordPopup key={`word-${index}`} word={word} />;
+          // Only trigger translation on hover if enabled and not punctuation
+          const isPunctuation = /^[.,!?;:()[\]{}'"-]+$/.test(word);
+          const handleMouseEnter = (e: React.MouseEvent) => {
+            if (!enableTranslationOnHover || isPunctuation) return;
+            if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+            const { clientX, clientY } = e;
+            hoverTimeout.current = setTimeout(() => {
+              setHoveredWord(word);
+              setHoverPosition({ x: clientX, y: clientY });
+              setHoveredWordRect((e.target as HTMLElement).getBoundingClientRect());
+              setTranslationIndex(0);
+            }, 300); // debounce 300ms
+          };
+          const handleMouseLeave = () => {
+            if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+            setHoveredWord(null);
+            setHoverPosition(null);
+            setHoveredWordRect(undefined);
+          };
+          const handleMouseMove = (e: React.MouseEvent) => {
+            if (hoveredWord === word && hoverPosition) {
+              setHoverPosition({ x: e.clientX, y: e.clientY });
+            }
+          };
+          return (
+            <span
+              key={`word-${index}`}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onMouseMove={handleMouseMove}
+              style={{ position: 'relative', zIndex: 1 }}
+            >
+              <WordPopup word={word} />
+            </span>
+          );
         })}
+        {/* Floating translation popup */}
+        {enableTranslationOnHover && hoveredWord && hoverPosition && (
+          <TranslationHoverPopup
+            word={hoveredWord}
+            position={hoverPosition}
+            cache={translationCache}
+            setCache={setTranslationCache}
+            index={translationIndex}
+            setIndex={setTranslationIndex}
+            onClose={() => {
+              setHoveredWord(null);
+              setHoverPosition(null);
+              setHoveredWordRect(undefined);
+            }}
+            wordRect={hoveredWordRect}
+          />
+        )}
       </div>
     );
   };
@@ -565,6 +623,28 @@ export function TranscriptPanel() {
       }
     }
   };
+
+  // Ensure wheel always cycles translations when popup is visible
+  useEffect(() => {
+    if (!hoveredWord) return;
+    const handleGlobalWheel = (e: WheelEvent) => {
+      // Only act if popup is visible
+      if (!hoveredWord) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (!translationCache[hoveredWord] || !translationCache[hoveredWord].matches?.length) return;
+      let newIndex = translationIndex;
+      const translations = translationCache[hoveredWord].matches.filter((item: { translation: string }, idx: number, arr: { translation: string }[]) => arr.findIndex((t: { translation: string }) => t.translation === item.translation) === idx);
+      if (e.deltaY > 0) {
+        newIndex = (translationIndex + 1) % translations.length;
+      } else if (e.deltaY < 0) {
+        newIndex = (translationIndex - 1 + translations.length) % translations.length;
+      }
+      setTranslationIndex(newIndex);
+    };
+    window.addEventListener('wheel', handleGlobalWheel, { passive: false });
+    return () => window.removeEventListener('wheel', handleGlobalWheel);
+  }, [hoveredWord, translationCache, translationIndex]);
 
   return (
     <div className="flex flex-col h-full bg-white transcript-panel">

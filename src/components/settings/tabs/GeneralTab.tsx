@@ -220,6 +220,21 @@ export function GeneralTab() {
           </button>
         </div>
 
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium">Translation on Hover</label>
+            <span className="text-sm text-gray-600">Show translation popup when hovering over a word in the transcript</span>
+          </div>
+          <button
+            onClick={() => updateGeneralSettings({ enableTranslationOnHover: !general.enableTranslationOnHover })}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${general.enableTranslationOnHover ? 'bg-blue-500' : 'bg-gray-200'}`}
+            role="switch"
+            aria-checked={general.enableTranslationOnHover}
+          >
+            <span className={`${general.enableTranslationOnHover ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition-transform`} />
+          </button>
+        </div>
+
         {/* Moved Microphone Configuration Section */}
         <div className="bg-white shadow rounded-lg p-4">
           <div className="flex items-center gap-2 mb-4">
