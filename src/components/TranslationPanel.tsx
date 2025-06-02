@@ -32,7 +32,7 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
                 general.lineBreakStyle
             );
             setOriginalSnapshot(formattedText);
-            const prompt = `Translate the following text from ${speechLanguage} to ${translationLanguage}. Return ONLY the translation, preserving the same number of lines and line breaks as the original. Each line in the translation should correspond to the same line in the original. Do not add or remove lines.\n\n${formattedText}`;
+            const prompt = `Translate the following text from ${speechLanguage} to ${translationLanguage}. Return ONLY the translation, preserving the same number of lines and line breaks as the original. Each line in the translation should correspond to the same line in the original. Do not add or remove lines. If the original text has no punctuation and is a single long line, break the translation into lines that match the same word chunks as the original (e.g., every 10 words per line).\n\n${formattedText}`;
             const response = await generateGeminiResponse(prompt, activeModel.apiKey);
             setShowTranslation(true);
             const originalLines = formattedText.split(/\n{1,2}/);
