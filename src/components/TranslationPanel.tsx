@@ -57,11 +57,27 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
                 </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4" dir="auto">
-                {translatedText
-                  .split(/\n{1,2}/)
-                  .map((line, idx) => (
-                    <div key={idx}>{line}</div>
-                  ))}
+                {/* Side-by-side original and translation */}
+                <div className="grid grid-cols-2 gap-4 w-full">
+                  <div className="font-semibold text-gray-600 border-b pb-2">Original</div>
+                  <div className="font-semibold text-gray-600 border-b pb-2">Translation</div>
+                  {(() => {
+                    const formattedOriginal = formatTranscriptWithLineBreaks(
+                      textToTranslate,
+                      general.breakSentences,
+                      general.lineBreakStyle
+                    );
+                    const originalLines = formattedOriginal.split(/\n{1,2}/);
+                    const translatedLines = translatedText.split(/\n{1,2}/);
+                    const maxLines = Math.max(originalLines.length, translatedLines.length);
+                    return Array.from({ length: maxLines }).map((_, idx) => (
+                      <React.Fragment key={idx}>
+                        <div className="whitespace-pre-wrap text-gray-800 pr-4 border-r min-h-[1.5em]">{originalLines[idx] || ''}</div>
+                        <div className="whitespace-pre-wrap text-blue-900 pl-4 min-h-[1.5em]">{translatedLines[idx] || ''}</div>
+                      </React.Fragment>
+                    ));
+                  })()}
+                </div>
             </div>
         </div>
     );
