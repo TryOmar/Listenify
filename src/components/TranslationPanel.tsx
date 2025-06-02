@@ -15,9 +15,22 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
     const [showTranslation, setShowTranslation] = useState(false);
     const [originalSnapshot, setOriginalSnapshot] = useState('');
     const [translatedLines, setTranslatedLines] = useState<string[]>([]);
+    const [numSentences, setNumSentences] = useState(10);
     const { aiModels, activeModelId, general } = useSettingsStore();
     const { addToast } = useToastStore();
     const activeModel = aiModels.find(model => model.id === activeModelId);
+
+    function getLastNSentences(text: string, n: number): string {
+        const sentences = text.match(/[^.!?؟]+[.!?؟]?/g);
+        if (sentences && sentences.length > 1) {
+            return sentences.slice(-n).join(' ').trim();
+        } else {
+            const words = text.split(/\s+/).filter(Boolean);
+            const wordsPerSentence = 10;
+            const totalWords = Math.min(words.length, n * wordsPerSentence);
+            return words.slice(-totalWords).join(' ');
+        }
+    }
 
     const translateText = async () => {
         if (!activeModel || !activeModel.apiKey) {
@@ -26,13 +39,14 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
         }
 
         try {
+            const selectedText = getLastNSentences(textToTranslate, numSentences);
             const formattedText = formatTranscriptWithLineBreaks(
-                textToTranslate,
+                selectedText,
                 general.breakSentences,
                 general.lineBreakStyle
             );
             setOriginalSnapshot(formattedText);
-            const prompt = `Translate the following text from ${speechLanguage} to ${translationLanguage}. Return ONLY the translation, preserving the same number of lines and line breaks as the original. Each line in the translation should correspond to the same line in the original. Do not add or remove lines. If the original text has no punctuation and is a single long line, break the translation into lines that match the same word chunks as the original (e.g., every 10 words per line).\n\n${formattedText}`;
+            const prompt = `Translate ONLY the following text from ${speechLanguage} to ${translationLanguage}. Return ONLY the translation, preserving the same number of lines and line breaks as the original. Each line in the translation should correspond to the same line in the original. Do not add or remove lines. If the original text has no punctuation and is a single long line, break the translation into lines that match the same word chunks as the original (e.g., every 10 words per line).\n\n${formattedText}`;
             const response = await generateGeminiResponse(prompt, activeModel.apiKey);
             setShowTranslation(true);
             const originalLines = formattedText.split(/\n{1,2}/);
@@ -66,7 +80,21 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
         <div className="flex flex-col flex-1 bg-gray-100">
             <div className="flex justify-between items-center p-4 border-b flex-wrap">
                 <h2 className="text-lg font-semibold">Translate with AI</h2>
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
+                    <select
+                        className="p-2 rounded bg-gray-200 text-sm mr-2"
+                        value={numSentences}
+                        onChange={e => setNumSentences(Number(e.target.value))}
+                        title="Select how much to translate"
+                    >
+                        <option value={5}>Last 5 sentences (~50 words)</option>
+                        <option value={10}>Last 10 sentences (~100 words)</option>
+                        <option value={20}>Last 20 sentences (~200 words)</option>
+                        <option value={30}>Last 30 sentences (~300 words)</option>
+                        <option value={40}>Last 40 sentences (~400 words)</option>
+                        <option value={50}>Last 50 sentences (~500 words)</option>
+                        <option value={100}>Last 100 sentences (~1000 words)</option>
+                    </select>
                     <button onClick={clearTranslation} className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors">
                         <Trash2 size={20} />
                     </button>
