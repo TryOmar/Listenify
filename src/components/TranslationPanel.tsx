@@ -3,6 +3,7 @@ import { RefreshCw, Trash2 } from 'lucide-react';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { generateGeminiResponse } from '../services/geminiService';
 import { useToastStore } from '../store/useToastStore';
+import { formatTranscriptWithLineBreaks } from '../lib/textFormat';
 
 interface TranslationPanelProps {
     textToTranslate: string;
@@ -12,7 +13,7 @@ interface TranslationPanelProps {
 
 export function TranslationPanel({ textToTranslate, speechLanguage, translationLanguage }: TranslationPanelProps) {
     const [translatedText, setTranslatedText] = useState('');
-    const { aiModels, activeModelId } = useSettingsStore();
+    const { aiModels, activeModelId, general } = useSettingsStore();
     const { addToast } = useToastStore();
     const activeModel = aiModels.find(model => model.id === activeModelId);
 
@@ -23,7 +24,12 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
         }
 
         try {
-            const prompt = `Translate the following text from ${speechLanguage} to ${translationLanguage} and provide only the translation without any additional information or alternatives:\n\n${textToTranslate}`;
+            const formattedText = formatTranscriptWithLineBreaks(
+                textToTranslate,
+                general.breakSentences,
+                general.lineBreakStyle
+            );
+            const prompt = `Translate the following text from ${speechLanguage} to ${translationLanguage} and provide only the translation without any additional information or alternatives:\n\n${formattedText}`;
             const response = await generateGeminiResponse(prompt, activeModel.apiKey);
             setTranslatedText(response);
         } catch (error) {

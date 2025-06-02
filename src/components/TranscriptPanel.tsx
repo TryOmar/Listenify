@@ -17,6 +17,7 @@ import { ResizableSplitter } from './layout/ResizableSplitter';
 import { saveTranscript } from '../lib/transcriptDb';
 import { TranscriptHistoryPanel } from './layout/TranscriptHistoryPanel';
 import { TranslationHoverPopup } from './TranslationHoverPopup';
+import { formatTranscriptWithLineBreaks } from '../lib/textFormat';
 
 type SpeechRecognitionResult = {
   isFinal: boolean;
@@ -144,10 +145,11 @@ export function TranscriptPanel() {
       const now = Date.now();
       const canSave = now - lastAutoSaveTimeRef.current > 10000;
       if (latestEnableSaving && transcript.trim() && canSave) {
+        const formattedText = formatTranscriptWithLineBreaks(transcript, general.breakSentences, general.lineBreakStyle);
         saveTranscript({
           title: '',
-          text: transcript,
-          wordCount: allWords.length,
+          text: formattedText,
+          wordCount: formattedText.split(/\s+/).filter(Boolean).length,
           folderId: null,
         });
         lastAutoSaveTimeRef.current = now;
@@ -175,10 +177,11 @@ export function TranscriptPanel() {
       const now = Date.now();
       const canSave = now - lastAutoSaveTimeRef.current > 10000;
       if (latestEnableSaving && transcript.trim() && canSave) {
+        const formattedText = formatTranscriptWithLineBreaks(transcript, general.breakSentences, general.lineBreakStyle);
         saveTranscript({
           title: '',
-          text: transcript,
-          wordCount: allWords.length,
+          text: formattedText,
+          wordCount: formattedText.split(/\s+/).filter(Boolean).length,
           folderId: null,
         });
         lastAutoSaveTimeRef.current = now;
@@ -288,10 +291,11 @@ export function TranscriptPanel() {
           const now = Date.now();
           const canSave = now - lastAutoSaveTimeRef.current > 10000;
           if (latestEnableSaving && (finalTranscript + ' ' + interimTranscript).trim() && canSave) {
+            const formattedText = formatTranscriptWithLineBreaks(finalTranscript + ' ' + interimTranscript, general.breakSentences, general.lineBreakStyle);
             saveTranscript({
               title: '',
-              text: (finalTranscript + ' ' + interimTranscript).trim(),
-              wordCount: allWords.length,
+              text: formattedText,
+              wordCount: formattedText.split(/\s+/).filter(Boolean).length,
               folderId: null,
             });
             lastAutoSaveTimeRef.current = now;
@@ -403,10 +407,11 @@ export function TranscriptPanel() {
   const handleClearTranscript = async () => {
     if (general.enableTranscriptSaving && transcript.trim()) {
       try {
+        const formattedText = formatTranscriptWithLineBreaks(transcript, general.breakSentences, general.lineBreakStyle);
         await saveTranscript({
           title: '',
-          text: transcript,
-          wordCount: transcript.split(/\s+/).filter(Boolean).length,
+          text: formattedText,
+          wordCount: formattedText.split(/\s+/).filter(Boolean).length,
           folderId: null,
         });
         addToast('Transcript saved to history', 'success');
@@ -562,7 +567,8 @@ export function TranscriptPanel() {
     try {
       if (activeModel?.model === 'gemini' && activeModel.apiKey) {
         // Use Gemini
-        const response = await generateGeminiResponse(prompt, activeModel.apiKey);
+        const promptText = formatTranscriptWithLineBreaks(transcript, general.breakSentences, general.lineBreakStyle);
+        const response = await generateGeminiResponse(promptText, activeModel.apiKey);
         addMessage(response, 'ai');
       } else {
         // Fallback to simulation
