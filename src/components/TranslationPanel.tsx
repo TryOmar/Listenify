@@ -12,7 +12,9 @@ interface TranslationPanelProps {
 }
 
 export function TranslationPanel({ textToTranslate, speechLanguage, translationLanguage }: TranslationPanelProps) {
-    const [translatedText, setTranslatedText] = useState('');
+    const [showTranslation, setShowTranslation] = useState(false);
+    const [originalSnapshot, setOriginalSnapshot] = useState('');
+    const [translatedLines, setTranslatedLines] = useState<string[]>([]);
     const { aiModels, activeModelId, general } = useSettingsStore();
     const { addToast } = useToastStore();
     const activeModel = aiModels.find(model => model.id === activeModelId);
@@ -29,9 +31,24 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
                 general.breakSentences,
                 general.lineBreakStyle
             );
-            const prompt = `Translate the following text from ${speechLanguage} to ${translationLanguage} and provide only the translation without any additional information or alternatives:\n\n${formattedText}`;
+            setOriginalSnapshot(formattedText);
+            const prompt = `Translate the following text from ${speechLanguage} to ${translationLanguage}. Return ONLY the translation, preserving the same number of lines and line breaks as the original. Each line in the translation should correspond to the same line in the original. Do not add or remove lines.\n\n${formattedText}`;
             const response = await generateGeminiResponse(prompt, activeModel.apiKey);
-            setTranslatedText(response);
+            setShowTranslation(true);
+            const originalLines = formattedText.split(/\n{1,2}/);
+            let splitTranslation = response.split(/\n{1,2}/);
+            if (splitTranslation.length !== originalLines.length) {
+                splitTranslation = response.split(/(?<=[.!?؟])\s+/);
+            }
+            if (splitTranslation.length < originalLines.length) {
+                splitTranslation = [
+                  ...splitTranslation,
+                  ...Array(originalLines.length - splitTranslation.length).fill('')
+                ];
+            } else if (splitTranslation.length > originalLines.length) {
+                splitTranslation = splitTranslation.slice(0, originalLines.length);
+            }
+            setTranslatedLines(splitTranslation);
         } catch (error) {
             console.error('Error generating translation:', error);
             addToast('Error generating translation.', 'error');
@@ -39,7 +56,9 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
     };
 
     const clearTranslation = () => {
-        setTranslatedText('');
+        setShowTranslation(false);
+        setOriginalSnapshot('');
+        setTranslatedLines([]);
         addToast('Translation cleared', 'info');
     };
 
@@ -57,27 +76,23 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
                 </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4" dir="auto">
-                {/* Side-by-side original and translation */}
-                <div className="grid grid-cols-2 gap-4 w-full">
-                  <div className="font-semibold text-gray-600 border-b pb-2">Original</div>
-                  <div className="font-semibold text-gray-600 border-b pb-2">Translation</div>
-                  {(() => {
-                    const formattedOriginal = formatTranscriptWithLineBreaks(
-                      textToTranslate,
-                      general.breakSentences,
-                      general.lineBreakStyle
-                    );
-                    const originalLines = formattedOriginal.split(/\n{1,2}/);
-                    const translatedLines = translatedText.split(/\n{1,2}/);
-                    const maxLines = Math.max(originalLines.length, translatedLines.length);
-                    return Array.from({ length: maxLines }).map((_, idx) => (
-                      <React.Fragment key={idx}>
-                        <div className="whitespace-pre-wrap text-gray-800 pr-4 border-r min-h-[1.5em]">{originalLines[idx] || ''}</div>
-                        <div className="whitespace-pre-wrap text-blue-900 pl-4 min-h-[1.5em]">{translatedLines[idx] || ''}</div>
-                      </React.Fragment>
-                    ));
-                  })()}
-                </div>
+                {/* Side-by-side original and translation, only shown after translation */}
+                {showTranslation && (
+                  <div className="grid grid-cols-2 gap-4 w-full">
+                    <div className="font-semibold text-gray-600 border-b pb-2">Original</div>
+                    <div className="font-semibold text-gray-600 border-b pb-2">Translation</div>
+                    {(() => {
+                      const originalLines = originalSnapshot.split(/\n{1,2}/);
+                      const maxLines = Math.max(originalLines.length, translatedLines.length);
+                      return Array.from({ length: maxLines }).map((_, idx) => (
+                        <React.Fragment key={idx}>
+                          <div className="whitespace-pre-wrap text-gray-800 pr-4 border-r min-h-[1.5em]" dir="auto">{originalLines[idx] || ''}</div>
+                          <div className="whitespace-pre-wrap text-blue-900 pl-4 min-h-[1.5em]" dir="auto">{translatedLines[idx] || ''}</div>
+                        </React.Fragment>
+                      ));
+                    })()}
+                  </div>
+                )}
             </div>
         </div>
     );
