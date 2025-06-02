@@ -57,7 +57,11 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
                 </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4" dir="auto">
-                <p>{translatedText}</p>
+                {translatedText
+                  .split(/\n{1,2}/)
+                  .map((line, idx) => (
+                    <div key={idx}>{line}</div>
+                  ))}
             </div>
         </div>
     );
