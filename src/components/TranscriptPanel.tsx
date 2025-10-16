@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Mic, Trash2, Copy, Maximize, Minimize, History } from 'lucide-react';
+import { Mic, Trash2, Copy, Maximize, Minimize, History, Coffee } from 'lucide-react';
 import { useTranscriptStore } from '../store/useTranscriptStore';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { WordPopup } from './WordPopup';
@@ -676,6 +676,15 @@ export function TranscriptPanel() {
               </span>
             </div>
             <div className="flex gap-3 flex-shrink-0 flex-wrap">
+              <a
+                href="https://buymeacoffee.com/tryomar"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-full bg-yellow-100 hover:bg-yellow-200 transition-colors"
+                title="Buy me a coffee ☕"
+              >
+                <Coffee size={isFullscreen ? 24 : 20} className="text-yellow-600" />
+              </a>
               <button
                 onClick={toggleListening}
                 className={`p-2 rounded-full ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
