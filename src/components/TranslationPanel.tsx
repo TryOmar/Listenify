@@ -20,15 +20,19 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
     const { addToast } = useToastStore();
     const activeModel = aiModels.find(model => model.id === activeModelId);
 
-    function getLastNSentences(text: string, n: number): string {
+    function getLastNSentences(text: string, n: number): string[] {
+        // First, try to split by sentence endings
         const sentences = text.match(/[^.!?؟]+[.!?؟]?/g);
         if (sentences && sentences.length > 1) {
-            return sentences.slice(-n).join(' ').trim();
+            // Take the last n sentences and return as array
+            return sentences.slice(-n).map(s => s.trim()).filter(s => s.length > 0);
         } else {
+            // If no clear sentences, split by words and take last chunk
             const words = text.split(/\s+/).filter(Boolean);
             const wordsPerSentence = 10;
             const totalWords = Math.min(words.length, n * wordsPerSentence);
-            return words.slice(-totalWords).join(' ');
+            const chunk = words.slice(-totalWords).join(' ');
+            return [chunk]; // Return as single sentence
         }
     }
 
@@ -39,30 +43,49 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
         }
 
         try {
-            const selectedText = getLastNSentences(textToTranslate, numSentences);
-            const formattedText = formatTranscriptWithLineBreaks(
-                selectedText,
-                general.breakSentences,
-                general.lineBreakStyle
-            );
-            setOriginalSnapshot(formattedText);
-            const prompt = `Translate ONLY the following text from ${speechLanguage} to ${translationLanguage}. Return ONLY the translation, preserving the same number of lines and line breaks as the original. Each line in the translation should correspond to the same line in the original. Do not add or remove lines. If the original text has no punctuation and is a single long line, break the translation into lines that match the same word chunks as the original (e.g., every 10 words per line).\n\n${formattedText}`;
+            const originalSentences = getLastNSentences(textToTranslate, numSentences);
+            setOriginalSnapshot(originalSentences.join('\n'));
+            
+            // Create a prompt that requests sentence-by-sentence translation
+            const prompt = `Translate the following sentences from ${speechLanguage} to ${translationLanguage}. 
+
+IMPORTANT INSTRUCTIONS:
+1. Translate each sentence separately
+2. Return ONLY the translations, one per line
+3. Maintain the same order as the original sentences
+4. Use proper punctuation in the target language
+5. Do not add explanations or extra text
+
+Original sentences:
+${originalSentences.map((sentence, index) => `${index + 1}. ${sentence}`).join('\n')}
+
+Translation (one sentence per line):`;
+
             const response = await generateGeminiResponse(prompt, activeModel.apiKey);
             setShowTranslation(true);
-            const originalLines = formattedText.split(/\n{1,2}/);
-            let splitTranslation = response.split(/\n{1,2}/);
-            if (splitTranslation.length !== originalLines.length) {
-                splitTranslation = response.split(/(?<=[.!?؟])\s+/);
-            }
-            if (splitTranslation.length < originalLines.length) {
-                splitTranslation = [
-                  ...splitTranslation,
-                  ...Array(originalLines.length - splitTranslation.length).fill('')
+            
+            // Clean the response and split into lines
+            const cleanResponse = response.trim();
+            let translatedSentences = cleanResponse.split(/\n+/).filter(line => line.trim().length > 0);
+            
+            // Remove numbering if present (e.g., "1. ", "2. ", etc.)
+            translatedSentences = translatedSentences.map(line => 
+                line.replace(/^\d+\.\s*/, '').trim()
+            );
+            
+            // Ensure we have the same number of translations as original sentences
+            if (translatedSentences.length < originalSentences.length) {
+                // Pad with empty strings
+                translatedSentences = [
+                    ...translatedSentences,
+                    ...Array(originalSentences.length - translatedSentences.length).fill('')
                 ];
-            } else if (splitTranslation.length > originalLines.length) {
-                splitTranslation = splitTranslation.slice(0, originalLines.length);
+            } else if (translatedSentences.length > originalSentences.length) {
+                // Truncate to match original length
+                translatedSentences = translatedSentences.slice(0, originalSentences.length);
             }
-            setTranslatedLines(splitTranslation);
+            
+            setTranslatedLines(translatedSentences);
         } catch (error) {
             console.error('Error generating translation:', error);
             addToast('Error generating translation.', 'error');
@@ -104,21 +127,31 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
                 </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4" dir="auto">
-                {/* Side-by-side original and translation, only shown after translation */}
+                {/* Side-by-side sentence matching, only shown after translation */}
                 {showTranslation && (
-                  <div className="grid grid-cols-2 gap-4 w-full">
-                    <div className="font-semibold text-gray-600 border-b pb-2">Original</div>
-                    <div className="font-semibold text-gray-600 border-b pb-2">Translation</div>
-                    {(() => {
-                      const originalLines = originalSnapshot.split(/\n{1,2}/);
-                      const maxLines = Math.max(originalLines.length, translatedLines.length);
-                      return Array.from({ length: maxLines }).map((_, idx) => (
-                        <React.Fragment key={idx}>
-                          <div className="whitespace-pre-wrap text-gray-800 pr-4 border-r min-h-[1.5em]" dir="auto">{originalLines[idx] || ''}</div>
-                          <div className="whitespace-pre-wrap text-blue-900 pl-4 min-h-[1.5em]" dir="auto">{translatedLines[idx] || ''}</div>
-                        </React.Fragment>
-                      ));
-                    })()}
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="font-semibold text-gray-600 border-b pb-2">Original ({speechLanguage})</div>
+                      <div className="font-semibold text-gray-600 border-b pb-2">Translation ({translationLanguage})</div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {(() => {
+                        const originalSentences = originalSnapshot.split('\n').filter(s => s.trim().length > 0);
+                        const maxLines = Math.max(originalSentences.length, translatedLines.length);
+                        
+                        return Array.from({ length: maxLines }).map((_, idx) => (
+                          <div key={idx} className="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded border">
+                            <div className="whitespace-pre-wrap text-gray-800 pr-4 border-r" dir="auto">
+                              {originalSentences[idx] || ''}
+                            </div>
+                            <div className="whitespace-pre-wrap text-blue-900 pl-4" dir="auto">
+                              {translatedLines[idx] || ''}
+                            </div>
+                          </div>
+                        ));
+                      })()}
+                    </div>
                   </div>
                 )}
             </div>

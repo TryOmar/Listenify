@@ -397,7 +397,7 @@ const defaultAIModel = {
   id: 'default-gemini',
   name: 'Default Gemini',
   model: 'gemini',
-  apiKey: 'AIzaSyCL9qTuUgzaYN7hZXWvrbRsjxDoogPTwrQ',
+  apiKey: 'AIzaSyD2Ulh0t23L4kLm2XiLA84Uan-_InqmUJ0',
 };
 
 // Documentation for variables in prompts and actions
