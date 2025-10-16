@@ -10,6 +10,12 @@
   "scope": "/",
   "icons": [
     {
+      "src": "/microphone.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
       "src": "/icons/icon-192x192.svg",
       "sizes": "192x192",
       "type": "image/svg+xml",
