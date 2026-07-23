@@ -705,8 +705,9 @@ export function TranscriptPanel() {
                 </h2>
               </div>
 
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700 hidden xs:inline-block">
-                {transcript.split(/\s+/).filter(Boolean).length} / {general.maxWords} w
+              <span className="text-xs font-semibold px-2 sm:px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700 inline-flex items-center gap-1 shrink-0">
+                <span className="text-[10px] uppercase tracking-wider opacity-70 hidden sm:inline-block">Words:</span>
+                {transcript.split(/\s+/).filter(Boolean).length} / {general.maxWords}
               </span>
             </div>
 

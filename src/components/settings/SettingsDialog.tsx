@@ -37,7 +37,7 @@ export function SettingsDialog() {
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in-0 z-[100]" />
-        <Dialog.Content className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[98vw] sm:w-[90vw] max-w-5xl h-[90vh] sm:h-[88vh] max-h-[850px] bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl shadow-2xl animate-in fade-in-0 zoom-in-95 z-[100] border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col">
+        <Dialog.Content className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[98vw] sm:w-[96vw] max-w-[1600px] h-[90vh] sm:h-[92vh] max-h-[960px] bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl shadow-2xl animate-in fade-in-0 zoom-in-95 z-[100] border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col">
           <Dialog.Title className="sr-only">Settings</Dialog.Title>
           <Dialog.Description className="sr-only">Manage your Listenify application settings.</Dialog.Description>
 
