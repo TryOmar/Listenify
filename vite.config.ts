@@ -7,6 +7,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true
+      },
       includeAssets: ['microphone.svg', 'icons/icon-192x192.svg', 'icons/icon-512x512.svg'],
       manifest: {
         name: "Listenify - Voice to Text Transcription",
