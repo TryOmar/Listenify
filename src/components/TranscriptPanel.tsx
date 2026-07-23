@@ -59,6 +59,36 @@ declare global {
   }
 }
 
+const SPEECH_LANG_MAP: Record<string, string> = {
+  en: 'en-US',
+  es: 'es-ES',
+  fr: 'fr-FR',
+  de: 'de-DE',
+  it: 'it-IT',
+  pt: 'pt-BR',
+  ru: 'ru-RU',
+  zh: 'zh-CN',
+  ja: 'ja-JP',
+  ko: 'ko-KR',
+  ar: 'ar-SA',
+  hi: 'hi-IN',
+  bn: 'bn-IN',
+  tr: 'tr-TR',
+  nl: 'nl-NL',
+  pl: 'pl-PL',
+  vi: 'vi-VN',
+  th: 'th-TH',
+  id: 'id-ID',
+  ms: 'ms-MY',
+  fa: 'fa-IR',
+};
+
+const getSpeechLanguageTag = (code: string) => {
+  if (!code) return 'en-US';
+  if (code.includes('-')) return code;
+  return SPEECH_LANG_MAP[code] || `${code}-${code.toUpperCase()}`;
+};
+
 const breakTextIntoSentences = (text: string, lineBreakStyle: 'single' | 'double'): string => {
   if (!text) return '';
   // Split by sentence endings (.!?) but keep the punctuation
@@ -216,7 +246,7 @@ export function TranscriptPanel() {
       newRecognition.continuous = true;
       newRecognition.interimResults = true;
       newRecognition.maxAlternatives = 1;
-      newRecognition.lang = general.speechLanguage;
+      newRecognition.lang = getSpeechLanguageTag(general.speechLanguage);
 
       // Initialize state from sessionStorage or defaults
       const getSessionState = () => ({
@@ -239,12 +269,14 @@ export function TranscriptPanel() {
 
       const MIN_RESTART_DELAY = 100; // Minimum delay between restarts
 
+      const isStartedRef = { current: false };
+
       const safeRestart = () => {
         const state = getSessionState();
         const now = Date.now();
         const timeSinceLastRestart = now - state.lastRestartTime;
 
-        if (!isListeningRef.current || state.manualStop) {
+        if (!isListeningRef.current || state.manualStop || isStartedRef.current) {
           return;
         }
 
@@ -255,11 +287,18 @@ export function TranscriptPanel() {
         }
 
         try {
+          isStartedRef.current = true;
           newRecognition.start();
           updateSessionState({ lastRestartTime: now });
         } catch (error) {
-          console.warn('Safe restart ignored (already active or busy):', error);
+          // If start fails (e.g. state transition in progress), reset ref so onend can try again cleanly
+          isStartedRef.current = false;
+          console.warn('Safe restart ignored:', error);
         }
+      };
+
+      newRecognition.onstart = () => {
+        isStartedRef.current = true;
       };
 
       newRecognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -313,44 +352,29 @@ export function TranscriptPanel() {
       };
 
       newRecognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        console.error('Recognition error:', event.error, event.message);
+        console.warn('SpeechRecognition error:', event.error, event.message);
 
-        // Don't restart for permission errors
+        // Don't restart for permission or audio hardware errors
         if (event.error === 'not-allowed' || event.error === 'audio-capture') {
           setIsListening(false);
+          isStartedRef.current = false;
           localStorage.setItem('microphoneState', 'false');
-          addToast(`Microphone error: ${event.error}. Please check your microphone permissions.`, 'error');
-          return;
+          addToast(`Microphone access error (${event.error}). Please check microphone permissions in browser settings.`, 'error');
         }
-
-        // For other recoverable errors, try to restart if listening
-        if (isListeningRef.current && !getSessionState().manualStop) {
-          safeRestart();
-        }
-      };
-
-      newRecognition.onnomatch = () => {
-        if (isListeningRef.current && !getSessionState().manualStop) {
-          safeRestart();
-        }
-      };
-
-      newRecognition.onspeechend = () => {
-        if (isListeningRef.current && !getSessionState().manualStop) {
-          safeRestart();
-        }
+        // For non-fatal errors (no-speech, network, aborted), onend will handle clean restart
       };
 
       newRecognition.onend = () => {
-        const shouldBeListening = localStorage.getItem('microphoneState') === 'true';
+        isStartedRef.current = false;
+        const shouldBeListening = localStorage.getItem('microphoneState') === 'true' || isListeningRef.current;
         const manualStop = getSessionState().manualStop;
 
         if (shouldBeListening && !manualStop) {
           setTimeout(() => {
-            if (localStorage.getItem('microphoneState') === 'true' && !getSessionState().manualStop) {
+            if (isListeningRef.current && !getSessionState().manualStop && !isStartedRef.current) {
               safeRestart();
             }
-          }, 150);
+          }, 200);
         }
       };
 
