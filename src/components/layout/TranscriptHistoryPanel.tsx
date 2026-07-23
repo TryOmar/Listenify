@@ -325,8 +325,8 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 z-[100] flex items-center justify-center">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[80vh] flex z-[101] border border-gray-200">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex z-[101] border border-slate-200 overflow-hidden">
         {/* Sidebar for folders */}
         <div className="w-60 border-r flex flex-col p-4 bg-gray-50 rounded-l-xl">
           <div className="flex items-center justify-between mb-4">
@@ -555,8 +555,8 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
       </div>
       {/* New Folder Prompt */}
       {showNewFolderPrompt && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 z-[110] flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-xs flex flex-col">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-80 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-xs flex flex-col overflow-hidden border border-slate-200">
             <div className="flex items-center justify-between p-4 border-b">
               <h4 className="text-base font-semibold flex items-center gap-2"><FolderPlus className="w-5 h-5" />New Folder</h4>
               <button onClick={() => {
@@ -585,8 +585,8 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
       )}
       {/* Delete Transcript Prompt */}
       {showDeleteTranscriptId && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 z-[120] flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-xs flex flex-col">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-80 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-xs flex flex-col overflow-hidden border border-slate-200">
             <div className="flex items-center justify-between p-4 border-b">
               <h4 className="text-base font-semibold flex items-center gap-2"><Trash2 className="w-5 h-5" />Delete Transcript</h4>
               <button onClick={() => setShowDeleteTranscriptId(null)} className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-200 transition" title="Close"><X className="w-5 h-5" /></button>
@@ -605,8 +605,8 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
       )}
       {/* Delete Folder Prompt */}
       {showDeleteFolderId && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 z-[120] flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-xs flex flex-col">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-80 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-xs flex flex-col overflow-hidden border border-slate-200">
             <div className="flex items-center justify-between p-4 border-b">
               <h4 className="text-base font-semibold flex items-center gap-2"><Trash2 className="w-5 h-5" />Delete Folder</h4>
               <button onClick={() => setShowDeleteFolderId(null)} className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-200 transition" title="Close"><X className="w-5 h-5" /></button>
@@ -625,8 +625,8 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
       )}
       {/* View/Edit Modal */}
       {selected && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 z-[110] flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-80 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
             <div className="flex items-center justify-between p-4 border-b">
               <h4 className="text-base font-semibold flex items-center gap-2">{editMode ? (<><Edit className="w-5 h-5" />Edit Transcript</>) : (<><FileText className="w-5 h-5" />View Transcript</>)} </h4>
               <button onClick={() => { setSelected(null); setEditMode(false); }} className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-200 transition" title="Close"><X className="w-5 h-5" /></button>
@@ -688,8 +688,8 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
         </div>
       )}
       {showDownloadModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 z-[120] flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm flex flex-col p-6 items-center">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-80 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm flex flex-col p-6 items-center border border-slate-200">
             <div className="flex items-center justify-between w-full mb-4">
               <h4 className="text-lg font-bold flex items-center gap-2"><Download className="w-6 h-6" />Download Folder</h4>
               <button onClick={() => { setShowDownloadModal(false); setDownloadFolderId(null); }} className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition" title="Close"><X className="w-5 h-5" /></button>
@@ -722,8 +722,8 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
         </div>
       )}
       {showBulkDownloadModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 z-[130] flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm flex flex-col p-6 items-center">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-80 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm flex flex-col p-6 items-center border border-slate-200">
             <div className="flex items-center justify-between w-full mb-4">
               <h4 className="text-lg font-bold flex items-center gap-2"><Download className="w-6 h-6" />Download Selected</h4>
               <button onClick={() => setShowBulkDownloadModal(false)} className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition" title="Close"><X className="w-5 h-5" /></button>

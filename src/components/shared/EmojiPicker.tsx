@@ -38,7 +38,7 @@ export function EmojiPicker({ value, onChange, readOnly }: EmojiPickerProps) {
                 {value}
             </button>
             {showPicker && !readOnly && (
-                <div className="absolute z-50 top-full left-0 mt-1">
+                <div className="absolute z-60 top-full left-0 mt-1">
                     <EmojiPickerReact onEmojiClick={handleEmojiClick} />
                 </div>
             )}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RefreshCw, Trash2 } from 'lucide-react';
+import { RefreshCw, Trash2, Volume2 } from 'lucide-react';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { generateGeminiResponse } from '../services/geminiService';
 import { useToastStore } from '../store/useToastStore';
@@ -19,6 +19,23 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
     const { aiModels, activeModelId, general } = useSettingsStore();
     const { addToast } = useToastStore();
     const activeModel = aiModels.find(model => model.id === activeModelId);
+
+    const speakText = (text: string, langCode: string) => {
+        if (!text.trim()) return;
+        if (!('speechSynthesis' in window)) {
+            addToast('Text-to-Speech (TTS) is not supported in this browser.', 'error');
+            return;
+        }
+        try {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = langCode;
+            window.speechSynthesis.speak(utterance);
+        } catch (e) {
+            console.error('TTS error:', e);
+            addToast('Failed to play Text-to-Speech audio', 'error');
+        }
+    };
 
     function getLastNSentences(text: string, n: number): string[] {
         // First, try to split by sentence endings
@@ -142,11 +159,29 @@ Translation (one sentence per line):`;
                         
                         return Array.from({ length: maxLines }).map((_, idx) => (
                           <div key={idx} className="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded border">
-                            <div className="whitespace-pre-wrap text-gray-800 pr-4 border-r" dir="auto">
-                              {originalSentences[idx] || ''}
+                            <div className="whitespace-pre-wrap text-gray-800 pr-4 border-r flex justify-between items-start" dir="auto">
+                              <span>{originalSentences[idx] || ''}</span>
+                              {originalSentences[idx] && (
+                                <button
+                                  onClick={() => speakText(originalSentences[idx], speechLanguage)}
+                                  className="p-1 text-gray-400 hover:text-blue-600 transition-colors ml-2 flex-shrink-0"
+                                  title="Listen to text (TTS)"
+                                >
+                                  <Volume2 size={16} />
+                                </button>
+                              )}
                             </div>
-                            <div className="whitespace-pre-wrap text-blue-900 pl-4" dir="auto">
-                              {translatedLines[idx] || ''}
+                            <div className="whitespace-pre-wrap text-blue-900 pl-4 flex justify-between items-start" dir="auto">
+                              <span>{translatedLines[idx] || ''}</span>
+                              {translatedLines[idx] && (
+                                <button
+                                  onClick={() => speakText(translatedLines[idx], translationLanguage)}
+                                  className="p-1 text-gray-400 hover:text-blue-600 transition-colors ml-2 flex-shrink-0"
+                                  title="Listen to translation (TTS)"
+                                >
+                                  <Volume2 size={16} />
+                                </button>
+                              )}
                             </div>
                           </div>
                         ));

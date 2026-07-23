@@ -131,7 +131,7 @@ export const TranslationHoverPopup: React.FC<TranslationHoverPopupProps> = ({
       left: wordRect.left + wordRect.width / 2,
       top: wordRect.top - 8, // 8px gap above word
       transform: 'translate(-50%, -100%)',
-      zIndex: 9999,
+      zIndex: 60,
       pointerEvents: 'auto',
       minWidth: 120,
       maxWidth: 200,
@@ -150,7 +150,7 @@ export const TranslationHoverPopup: React.FC<TranslationHoverPopupProps> = ({
       position: 'fixed',
       left: position.x,
       top: position.y - 40,
-      zIndex: 9999,
+      zIndex: 60,
       pointerEvents: 'auto',
       minWidth: 120,
       maxWidth: 200,

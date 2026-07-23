@@ -95,27 +95,26 @@ export function MainLayout() {
         return () => window.removeEventListener('resize', handleResize);
     }, [leftPanelWidth, rightPanelWidth, lastModifiedPanel, setLeftPanelWidth, setRightPanelWidth]);
 
+    const isMobileViewport = typeof window !== 'undefined' && window.innerWidth < 768;
+
     return (
         <div className={cn(
-            "relative h-full",
-            isFullscreen && "fixed inset-0 bg-white z-50"
+            "relative h-full bg-slate-100/60",
+            isFullscreen && "fixed inset-0 bg-white z-30"
         )}>
             {/* Main Transcription Panel */}
             <div
                 className={cn(
                     'h-full transition-all duration-150 ease-in-out overflow-auto',
-                    !isMainPanelVisible && 'opacity-0 pointer-events-none'
+                    !isMainPanelVisible && !isMobileViewport && 'opacity-0 pointer-events-none'
                 )}
                 style={{
-                    marginLeft: `${leftPanelWidth > 0 ? leftPanelWidth + PANEL_SPACING / 2 : TITLE_BAR_WIDTH}px`,
-                    marginRight: `${rightPanelWidth > 0 ? rightPanelWidth + PANEL_SPACING / 2 : TITLE_BAR_WIDTH}px`,
-                    minWidth: `${MIN_MAIN_PANEL_WIDTH}px`,
+                    marginLeft: isMobileViewport ? '0px' : `${leftPanelWidth > 0 ? leftPanelWidth + PANEL_SPACING : TITLE_BAR_WIDTH + 16}px`,
+                    marginRight: isMobileViewport ? '0px' : `${rightPanelWidth > 0 ? rightPanelWidth + PANEL_SPACING : TITLE_BAR_WIDTH + 16}px`,
+                    minWidth: isMobileViewport ? '100%' : `${MIN_MAIN_PANEL_WIDTH}px`,
                 }}
             >
-                <div className={cn(
-                    "mx-auto h-full px-4 pb-8",
-                    isFullscreen ? "max-w-[98%] lg:max-w-[96%] xl:max-w-[94%]" : "max-w-4xl"
-                )}>
+                <div className="w-full h-full px-2 sm:px-4 py-2 sm:py-3">
                     <TranscriptPanel />
                 </div>
             </div>

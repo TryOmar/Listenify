@@ -130,9 +130,9 @@ export function CollapsiblePanel({
 
     // Add CSS transition for smooth animation
     const panelStyle = {
-        transition: 'width 0.3s ease',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         width: `${width}px`,
-        maxWidth: 'calc(100vw - 15vw)',
+        maxWidth: 'calc(100vw - 2rem)',
         transform: !isVisible ? `translateX(${side === 'left' ? '-100%' : '100%'})` : 'translateX(0)',
         left: side === 'left' ? 0 : 'auto',
         right: side === 'right' ? 0 : 'auto',
@@ -140,10 +140,18 @@ export function CollapsiblePanel({
 
     return (
         <>
+            {/* Backdrop Overlay for Narrow / Mobile Viewports */}
+            {isVisible && (
+                <div
+                    className="fixed inset-x-0 bottom-0 top-[62px] sm:top-[66px] bg-slate-900/40 backdrop-blur-xs z-30 lg:hidden transition-opacity"
+                    onClick={togglePanel}
+                />
+            )}
+
             {/* Panel */}
             <div
                 className={cn(
-                    'fixed top-0 h-full bg-white shadow-lg transition-all duration-200 ease-in-out z-panel',
+                    'fixed top-[62px] sm:top-[66px] h-[calc(100vh-62px)] sm:h-[calc(100vh-66px)] bg-white shadow-2xl lg:shadow-lg transition-all duration-200 ease-in-out z-panel',
                     side === 'left' ? 'left-0' : 'right-0',
                     'panel-container'
                 )}
@@ -151,11 +159,20 @@ export function CollapsiblePanel({
             >
                 {/* Panel Header */}
                 <div className={cn(
-                    "h-12 bg-gray-50 border-b flex items-center px-4 gap-2",
+                    "h-12 bg-slate-50 border-b flex items-center justify-between px-4 gap-2",
                     isVisible ? 'opacity-100' : 'opacity-0'
                 )}>
-                    {getPanelIcon()}
-                    <h2 className="text-sm font-semibold text-gray-700">{title}</h2>
+                    <div className="flex items-center gap-2">
+                        {getPanelIcon()}
+                        <h2 className="text-sm font-semibold text-slate-800">{title}</h2>
+                    </div>
+                    <button
+                        onClick={togglePanel}
+                        className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 lg:hidden transition-colors"
+                        title="Close panel"
+                    >
+                        <ChevronLeft size={18} className={side === 'right' ? '' : 'rotate-180'} />
+                    </button>
                 </div>
 
                 {/* Panel Content */}
@@ -169,7 +186,7 @@ export function CollapsiblePanel({
                 {/* Resize Handle */}
                 <div
                     className={cn(
-                        'absolute top-0 w-1 h-full cursor-col-resize hover:bg-blue-100 z-resize-handle transition-colors duration-150',
+                        'absolute top-0 w-1 h-full cursor-col-resize hover:bg-blue-200 z-resize-handle transition-colors duration-150 hidden sm:block',
                         side === 'left' ? 'right-0' : 'left-0',
                         'panel-resize-handle'
                     )}
@@ -181,25 +198,40 @@ export function CollapsiblePanel({
                     <button
                         onClick={togglePanel}
                         className={cn(
-                            'absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white shadow-md',
-                            'flex items-center justify-center hover:bg-gray-50 transition-colors duration-150',
-                            'border border-gray-200 z-50',
+                            'absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white shadow-md hidden lg:flex',
+                            'items-center justify-center hover:bg-slate-100 transition-colors duration-150',
+                            'border border-slate-200 z-50',
                             side === 'left' ? '-right-3' : '-left-3'
                         )}
                     >
                         {side === 'left' ? (
-                            <ChevronLeft size={14} className="text-gray-600" />
+                            <ChevronLeft size={14} className="text-slate-600" />
                         ) : (
-                            <ChevronRight size={14} className="text-gray-600" />
+                            <ChevronRight size={14} className="text-slate-600" />
                         )}
                     </button>
                 )}
             </div>
 
-            {/* Title Bar */}
+            {/* Floating Mobile Toggle Button */}
+            {!isVisible && (
+                <button
+                    onClick={togglePanel}
+                    className={cn(
+                        'fixed top-[45vh] z-30 md:hidden bg-white/95 backdrop-blur-md shadow-md border border-slate-200/80 rounded-full px-2.5 py-1.5 text-slate-700 hover:bg-slate-100 active:scale-95 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-slate-300/50',
+                        side === 'left' ? 'left-2.5' : 'right-2.5'
+                    )}
+                    title={`Open ${title}`}
+                >
+                    {getPanelIcon()}
+                    <span className="text-[11px]">{title}</span>
+                </button>
+            )}
+
+            {/* Title Bar (Desktop/Tablet) */}
             <div
                 className={cn(
-                    'fixed top-0 h-full w-11 transition-all duration-200 ease-in-out z-panel-button',
+                    'fixed top-[62px] sm:top-[66px] h-[calc(100vh-62px)] sm:h-[calc(100vh-66px)] w-10 transition-all duration-200 ease-in-out z-panel-button hidden md:block',
                     'panel-title-bar',
                     side === 'left' ? 'left-0' : 'right-0',
                     isVisible ? 'opacity-0 pointer-events-none' : 'opacity-100 cursor-pointer'
@@ -209,15 +241,15 @@ export function CollapsiblePanel({
                 onMouseLeave={() => setIsHovered(false)}
             >
                 <div className={cn(
-                    'absolute inset-0 bg-gray-50 border-r hover:bg-gray-100 transition-colors duration-150',
+                    'absolute inset-0 bg-slate-50/90 backdrop-blur-xs border-r hover:bg-slate-100/90 transition-colors duration-150',
                     side === 'right' && 'border-l border-r-0'
                 )}>
                     {/* Title Container */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                         {/* Top Icon */}
                         <div className={cn(
-                            'absolute top-4 text-gray-400',
-                            isHovered && 'text-gray-600'
+                            'absolute top-4 text-slate-400',
+                            isHovered && 'text-slate-700'
                         )}>
                             {getPanelIcon()}
                         </div>
@@ -229,8 +261,8 @@ export function CollapsiblePanel({
                         )}>
                             <span className={cn(
                                 'text-xs font-semibold tracking-wider uppercase',
-                                'text-gray-600',
-                                isHovered && 'text-gray-900'
+                                'text-slate-600',
+                                isHovered && 'text-slate-900'
                             )}>
                                 {title}
                             </span>
@@ -238,8 +270,8 @@ export function CollapsiblePanel({
 
                         {/* Arrow Icon */}
                         <div className={cn(
-                            'absolute bottom-4 text-gray-400',
-                            isHovered && 'text-gray-600'
+                            'absolute bottom-4 text-slate-400',
+                            isHovered && 'text-slate-700'
                         )}>
                             {side === 'left' ? (
                                 <ChevronRight size={16} />

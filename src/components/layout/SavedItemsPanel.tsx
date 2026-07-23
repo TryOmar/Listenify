@@ -163,7 +163,7 @@ export function SavedItemsPanel() {
                         left: `${selectionPosition.x}px`,
                         top: `${selectionPosition.y}px`,
                         transform: 'translate(0, 0)',
-                        zIndex: 50,
+                        zIndex: 60,
                     }}
                 >
                     <TextSelectionPopup

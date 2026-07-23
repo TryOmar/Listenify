@@ -196,6 +196,17 @@ export function TranscriptPanel() {
     if (transcript === '') autoClearingRef.current = false;
   }, [transcript, setTranscript, addToast, general.maxWords]);
 
+  const isListeningRef = useRef(isListening);
+  const generalRef = useRef(general);
+
+  useEffect(() => {
+    isListeningRef.current = isListening;
+  }, [isListening]);
+
+  useEffect(() => {
+    generalRef.current = general;
+  }, [general]);
+
   useEffect(() => {
     if (window.SpeechRecognition || window.webkitSpeechRecognition) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -226,42 +237,32 @@ export function TranscriptPanel() {
         return newState;
       };
 
-      const MIN_RESTART_DELAY = 50; // Minimum delay between restarts
+      const MIN_RESTART_DELAY = 100; // Minimum delay between restarts
 
       const safeRestart = () => {
         const state = getSessionState();
         const now = Date.now();
         const timeSinceLastRestart = now - state.lastRestartTime;
 
-        if (!isListening || state.manualStop) {
-          console.log('Not restarting - microphone is off or manual stop', {
-            isListening,
-            manualStop: state.manualStop,
-            lastRestart: new Date(state.lastRestartTime).toISOString()
-          });
+        if (!isListeningRef.current || state.manualStop) {
           return;
         }
 
         // Prevent rapid restarts
         if (timeSinceLastRestart < MIN_RESTART_DELAY) {
-          console.log('Delaying restart to prevent rapid cycling');
           setTimeout(safeRestart, MIN_RESTART_DELAY - timeSinceLastRestart);
           return;
         }
 
         try {
-          console.log('Attempting safe restart', new Date().toISOString());
           newRecognition.start();
           updateSessionState({ lastRestartTime: now });
         } catch (error) {
-          console.error('Error during safe restart:', error);
-          // If we fail to restart, wait a bit longer
-          setTimeout(safeRestart, 1000);
+          console.warn('Safe restart ignored (already active or busy):', error);
         }
       };
 
       newRecognition.onresult = (event: SpeechRecognitionEvent) => {
-        console.log('Recognition result received', new Date().toISOString());
         let interimTranscript = '';
         let finalTranscript = finalTranscriptRef.current;
 
@@ -278,20 +279,19 @@ export function TranscriptPanel() {
         // Store interim transcript for reference
         interimTranscriptRef.current = interimTranscript;
 
-        // Get all words
-        const allWords = (finalTranscript + ' ' + interimTranscript).trim().split(/\s+/);
-        // Always get the latest maxWords from the store
-        const latestMaxWords = useSettingsStore.getState().general.maxWords;
+        const combined = (finalTranscript + ' ' + interimTranscript).trim();
+        const allWords = combined.split(/\s+/).filter(Boolean);
+        const latestMaxWords = generalRef.current.maxWords;
 
         // If exceeding max words, clear everything and start fresh
         if (allWords.length > latestMaxWords) {
           if (autoClearingRef.current) return;
           autoClearingRef.current = true;
-          const latestEnableSaving = useSettingsStore.getState().general.enableTranscriptSaving;
+          const latestEnableSaving = generalRef.current.enableTranscriptSaving;
           const now = Date.now();
           const canSave = now - lastAutoSaveTimeRef.current > 10000;
-          if (latestEnableSaving && (finalTranscript + ' ' + interimTranscript).trim() && canSave) {
-            const formattedText = formatTranscriptWithLineBreaks(finalTranscript + ' ' + interimTranscript, general.breakSentences, general.lineBreakStyle);
+          if (latestEnableSaving && combined && canSave) {
+            const formattedText = formatTranscriptWithLineBreaks(combined, generalRef.current.breakSentences, generalRef.current.lineBreakStyle);
             saveTranscript({
               title: '',
               text: formattedText,
@@ -313,9 +313,9 @@ export function TranscriptPanel() {
       };
 
       newRecognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        console.error('Recognition error:', event.error, event.message, new Date().toISOString());
+        console.error('Recognition error:', event.error, event.message);
 
-        // Don't restart for these errors
+        // Don't restart for permission errors
         if (event.error === 'not-allowed' || event.error === 'audio-capture') {
           setIsListening(false);
           localStorage.setItem('microphoneState', 'false');
@@ -323,80 +323,48 @@ export function TranscriptPanel() {
           return;
         }
 
-        // For other errors, try to restart if we're supposed to be listening
-        if (isListening && !getSessionState().manualStop) {
-          console.log('Error recovery restart');
+        // For other recoverable errors, try to restart if listening
+        if (isListeningRef.current && !getSessionState().manualStop) {
           safeRestart();
         }
       };
 
-      // Handle no match event
       newRecognition.onnomatch = () => {
-        console.log('No match detected', new Date().toISOString());
-        if (isListening && !getSessionState().manualStop) {
-          console.log('Restarting after no match');
+        if (isListeningRef.current && !getSessionState().manualStop) {
           safeRestart();
         }
       };
 
-      // Handle speech end
       newRecognition.onspeechend = () => {
-        console.log('Speech ended', new Date().toISOString());
-        console.log('Session state:', getSessionState());
-        console.log('isListening:', isListening);
-        if (isListening && !getSessionState().manualStop) {
-          console.log('Restarting after speech end');
+        if (isListeningRef.current && !getSessionState().manualStop) {
           safeRestart();
         }
       };
 
-      // Handle recognition end
       newRecognition.onend = () => {
-        const now = new Date().toISOString();
         const shouldBeListening = localStorage.getItem('microphoneState') === 'true';
+        const manualStop = getSessionState().manualStop;
 
-        console.log('Recognition ended - State Debug:', {
-          timestamp: now,
-          shouldBeListening,
-          actualIsListening: isListening, // for debugging comparison
-        });
-
-        if (shouldBeListening) {
-          console.log('Auto-restart based on localStorage state');
-          try {
-            setTimeout(() => {
-              if (localStorage.getItem('microphoneState') === 'true') {
-                newRecognition.start();
-                console.log('Recognition restarted successfully');
-              }
-            }, 100);
-          } catch (error) {
-            console.error('Error during restart:', error);
-            setTimeout(() => {
-              try {
-                newRecognition.start();
-              } catch (retryError) {
-                console.error('Retry failed:', retryError);
-                setIsListening(false);
-                localStorage.setItem('microphoneState', 'false');
-                addToast('Failed to restart recognition', 'error');
-              }
-            }, 1000);
-          }
-        } else {
-          console.log('Not restarting - microphone should be off according to localStorage');
+        if (shouldBeListening && !manualStop) {
+          setTimeout(() => {
+            if (localStorage.getItem('microphoneState') === 'true' && !getSessionState().manualStop) {
+              safeRestart();
+            }
+          }, 150);
         }
       };
 
       setRecognition(newRecognition);
 
-      // Clear session state when component unmounts
       return () => {
-        sessionStorage.removeItem('recognitionManualStop');
-        sessionStorage.removeItem('recognitionLastRestart');
+        try {
+          newRecognition.stop();
+        } catch (e) {
+          // Ignore error on unmount
+        }
       };
     }
-  }, [general.maxWords, setTranscript, setRecognition, general.speechLanguage, isListening, addToast, transcript]);
+  }, [general.speechLanguage, setTranscript, setRecognition, addToast, setIsListening]);
 
   // Effect to sync microphone state with localStorage
   useEffect(() => {
@@ -432,7 +400,28 @@ export function TranscriptPanel() {
   };
 
   const renderTranscript = () => {
-    if (!transcript) return null;
+    if (!transcript) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center select-none">
+          <div className={cn(
+            "w-14 h-14 rounded-2xl flex items-center justify-center mb-3 transition-all shadow-xs border",
+            isListening
+              ? "bg-red-50 border-red-200 text-red-600 animate-pulse"
+              : "bg-slate-50 border-slate-200 text-slate-400"
+          )}>
+            <Mic size={26} />
+          </div>
+          <p className="text-sm font-semibold text-slate-800">
+            {isListening ? 'Listening for speech...' : 'Microphone is paused'}
+          </p>
+          <p className="text-xs text-slate-500 max-w-xs mt-1 leading-relaxed">
+            {isListening
+              ? 'Speak into your microphone to transcribe in real-time.'
+              : 'Tap the microphone button above to start live transcription.'}
+          </p>
+        </div>
+      );
+    }
 
     const displayText = general.breakSentences
       ? breakTextIntoSentences(transcript, general.lineBreakStyle)
@@ -600,13 +589,13 @@ export function TranscriptPanel() {
 
   // Update initial height when fullscreen changes
   useEffect(() => {
-    const newHeight = isFullscreen ? window.innerHeight * 0.95 : window.innerHeight * 0.65; // Changed from 0.75 to 0.85
+    const newHeight = isFullscreen ? window.innerHeight * 0.95 : window.innerHeight * 0.65;
     setTranscriptHeight(newHeight);
   }, [isFullscreen]);
 
   const toggleListening = () => {
     if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
-      addToast('Speech recognition unavailable. Please use Chrome or Edge or Safari or Opera for this feature.', 'error');
+      addToast('Speech recognition unavailable. Please use Chrome, Edge, Safari, or Opera.', 'error');
       return;
     }
 
@@ -615,23 +604,28 @@ export function TranscriptPanel() {
     if (isListening) {
       console.log('Manual stop requested');
       sessionStorage.setItem('recognitionManualStop', 'true');
-      recognition.stop();
-      setIsListening(false);
       localStorage.setItem('microphoneState', 'false');
+      try {
+        recognition.stop();
+      } catch (err) {
+        console.error('Error stopping recognition:', err);
+      }
+      setIsListening(false);
       addToast('Microphone stopped', 'info');
     } else {
       console.log('Starting microphone');
       sessionStorage.setItem('recognitionManualStop', 'false');
+      localStorage.setItem('microphoneState', 'true');
       finalTranscriptRef.current = transcript;
       fullTranscriptRef.current = transcript.split(/\s+/).filter(Boolean);
       try {
         recognition.start();
         setIsListening(true);
-        localStorage.setItem('microphoneState', 'true');
         addToast('Microphone started', 'success');
       } catch (error) {
-        console.error('Error starting recognition:', error);
-        addToast('Failed to start recognition. Please try again.', 'error');
+        console.warn('Error starting recognition (may already be running):', error);
+        setIsListening(true);
+        addToast('Microphone active', 'success');
       }
     }
   };
@@ -659,84 +653,108 @@ export function TranscriptPanel() {
   }, [hoveredWord, translationCache, translationIndex]);
 
   return (
-    <div className="flex flex-col h-full bg-white transcript-panel">
+    <div className="flex flex-col h-full bg-white rounded-xl shadow-xs border border-slate-200/80 overflow-hidden transcript-panel">
       <div
         className="flex flex-col bg-white transcript-content"
         style={{ height: `${transcriptHeight}px` }}
       >
-        <div className="sticky top-0 z-10 bg-white border-b">
-          <div className="flex justify-between items-center p-4 flex-wrap">
-            <div className="flex items-center gap-4 flex-grow mb-2">
-              <h2 className={cn(
-                "font-semibold",
-                isFullscreen ? "text-2xl" : "text-lg"
-              )}>Live Transcription</h2>
-              <span className="text-sm text-gray-500">
-                {transcript.split(/\s+/).filter(Boolean).length} / {general.maxWords} words
+        <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-slate-200/80">
+          <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 gap-2 flex-wrap sm:flex-nowrap">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className={cn(
+                  "relative flex h-3 w-3 items-center justify-center"
+                )}>
+                  {isListening && (
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  )}
+                  <span className={cn(
+                    "relative inline-flex rounded-full h-2.5 w-2.5",
+                    isListening ? "bg-red-500" : "bg-slate-300"
+                  )} />
+                </span>
+                <h2 className={cn(
+                  "font-bold text-slate-800 tracking-tight truncate",
+                  isFullscreen ? "text-xl sm:text-2xl" : "text-base sm:text-lg"
+                )}>
+                  Live Transcription
+                </h2>
+              </div>
+
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200/60 hidden xs:inline-block">
+                {transcript.split(/\s+/).filter(Boolean).length} / {general.maxWords} w
               </span>
             </div>
-            <div className="flex gap-3 flex-shrink-0 flex-wrap">
+
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+              <button
+                onClick={toggleListening}
+                className={cn(
+                  "px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-white font-semibold text-xs sm:text-sm flex items-center gap-1.5 transition-all shadow-xs",
+                  isListening
+                    ? "bg-red-600 hover:bg-red-700 shadow-red-500/20 animate-pulse"
+                    : "bg-blue-600 hover:bg-blue-700 shadow-blue-500/20"
+                )}
+                title={isListening ? "Pause microphone" : "Start microphone"}
+              >
+                <Mic size={isFullscreen ? 20 : 16} />
+                <span>{isListening ? 'Listening' : 'Start Mic'}</span>
+              </button>
+
+              <div className="h-4 w-px bg-slate-200 mx-0.5 hidden xs:block" />
+
               <a
                 href="https://buymeacoffee.com/tryomar"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-full bg-yellow-100 hover:bg-yellow-200 transition-colors"
+                className="p-1.5 sm:p-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/60 transition-colors"
                 title="Buy me a coffee ☕"
               >
-                <Coffee size={isFullscreen ? 24 : 20} className="text-yellow-600" />
+                <Coffee size={isFullscreen ? 20 : 17} />
               </a>
-              <button
-                onClick={toggleListening}
-                className={`p-2 rounded-full ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} text-white transition-colors`}
-              >
-                <Mic size={isFullscreen ? 24 : 20} />
-              </button>
-              <a
-                href="https://discord.gg/c3pxrhTCAB"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
-                title="Join our Discord community"
-              >
-                <img src={DiscordIcon} alt="Discord" width={isFullscreen ? 24 : 20} height={isFullscreen ? 24 : 20} style={{ filter: 'invert(1)' }} />
-              </a>
+
               <button
                 onClick={handleClearTranscript}
-                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+                className="p-1.5 sm:p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
                 title="Clear transcript"
               >
-                <Trash2 size={isFullscreen ? 24 : 20} />
+                <Trash2 size={isFullscreen ? 20 : 17} />
               </button>
+
               <button
                 onClick={handleCopyTranscript}
-                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+                className="p-1.5 sm:p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
                 title="Copy transcript"
               >
-                <Copy size={isFullscreen ? 24 : 20} />
+                <Copy size={isFullscreen ? 20 : 17} />
               </button>
+
               {general.enableTranscriptSaving && (
                 <button
                   onClick={() => setShowHistoryPanel((v) => !v)}
-                  className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+                  className="p-1.5 sm:p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
                   title="Transcript History"
                 >
-                  <History size={isFullscreen ? 24 : 20} />
+                  <History size={isFullscreen ? 20 : 17} />
                 </button>
               )}
+
               <SettingsDialog />
+
               <button
                 onClick={toggleFullscreen}
-                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+                className="p-1.5 sm:p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors hidden sm:inline-flex"
                 title={isFullscreen ? "Minimize screen" : "Fullscreen"}
               >
-                {isFullscreen ? <Minimize size={24} /> : <Maximize size={20} />}
+                {isFullscreen ? <Minimize size={18} /> : <Maximize size={17} />}
               </button>
             </div>
           </div>
         </div>
+
         <div
           ref={transcriptRef}
-          className="flex-1 overflow-y-auto p-4"
+          className="flex-1 overflow-y-auto pt-3 sm:pt-4 pb-3 px-1.5 sm:px-3"
           onMouseUp={(e) => {
             e.stopPropagation();
             handleTextSelection();
@@ -751,7 +769,7 @@ export function TranscriptPanel() {
             dir="auto"
             style={{
               fontSize: isFullscreen ? `${general.fontSize * 1.2}px` : `${general.fontSize}px`,
-              lineHeight: '1.5',
+              lineHeight: '1.6',
               whiteSpace: 'pre-wrap'
             }}
           >
@@ -764,7 +782,7 @@ export function TranscriptPanel() {
                 left: `${selectionPosition.x}px`,
                 top: `${selectionPosition.y}px`,
                 transform: 'translate(-50%, 0)',
-                zIndex: 50,
+                zIndex: 60,
               }}
             >
               <TextSelectionPopup
