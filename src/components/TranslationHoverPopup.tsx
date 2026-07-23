@@ -129,22 +129,22 @@ export const TranslationHoverPopup: React.FC<TranslationHoverPopupProps> = ({
   return (
     <div
       ref={popupRef}
-      className="fixed z-[90] pointer-events-auto min-w-[120px] max-w-[220px] bg-white/98 dark:bg-slate-900/98 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl p-2.5 text-center text-sm shadow-xl transition-all duration-150"
+      className="fixed z-[90] pointer-events-auto min-w-[140px] max-w-[260px] bg-slate-900 dark:bg-slate-800 border border-slate-700 dark:border-slate-600 text-white rounded-2xl p-3 sm:p-4 text-center shadow-2xl dark:shadow-blue-900/20 transition-all duration-150 ring-1 ring-white/10"
       style={{
         left: leftPos,
-        top: topPos,
+        top: topPos - 4,
         transform: 'translate(-50%, -100%)',
       }}
     >
-      {loading && <div className="text-xs text-slate-500 dark:text-slate-400 animate-pulse">Loading...</div>}
-      {error && <div className="text-xs text-red-500 font-medium">{error}</div>}
+      {loading && <div className="text-xs text-slate-400 animate-pulse">Loading...</div>}
+      {error && <div className="text-xs text-red-400 font-medium">{error}</div>}
       {!loading && !error && translations.length > 0 && (
         <div>
-          <div className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 mb-0.5">{translations[index]?.translation}</div>
-          <div className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">{index + 1} / {translations.length}</div>
+          <div className="font-bold text-base sm:text-lg text-white mb-0.5">{translations[index]?.translation}</div>
+          <div className="text-[11px] text-slate-400 font-medium mt-1">{index + 1} / {translations.length}</div>
         </div>
       )}
-      {!loading && !error && translations.length === 0 && <div className="text-xs text-slate-500 dark:text-slate-400">No translation found</div>}
+      {!loading && !error && translations.length === 0 && <div className="text-xs text-slate-400">No translation found</div>}
     </div>
   );
 }; 

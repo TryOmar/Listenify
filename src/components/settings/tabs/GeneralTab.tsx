@@ -219,46 +219,46 @@ export function GeneralTab() {
         <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
           <h4 className="font-bold text-sm text-slate-800 dark:text-slate-200">Sentence Formatting & History</h4>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Break Sentences</label>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 rounded-md">Recommended</span>
-                </div>
-                <span className="text-xs text-slate-500 dark:text-slate-400">Break text into lines by punctuation</span>
+          <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Sentence Formatting</label>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 rounded-md">Recommended</span>
               </div>
-              <button
-                onClick={() => updateGeneralSettings({ breakSentences: !general.breakSentences })}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${general.breakSentences ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'}`}
-                role="switch"
-                aria-checked={general.breakSentences}
-              >
-                <span
-                  className={`${general.breakSentences ? 'translate-x-6' : 'translate-x-1'
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-xs`}
-                />
-              </button>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Choose spacing between transcribed sentences</span>
             </div>
-
-            <div className={`transition-all duration-300 ease-in-out ${general.breakSentences ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 h-0 overflow-hidden'}`}>
-              <div className="ml-4 pl-4 border-l-2 border-blue-500/30 dark:border-blue-400/30">
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Line Break Style</label>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">Choose spacing between sentences</span>
-                  </div>
-                  <select
-                    value={general.lineBreakStyle}
-                    onChange={(e) => updateGeneralSettings({ lineBreakStyle: e.target.value as 'single' | 'double' })}
-                    className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl text-xs sm:text-sm focus:outline-none"
-                    disabled={!general.breakSentences}
-                  >
-                    <option value="single" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Single Line Break</option>
-                    <option value="double" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Double Line Break</option>
-                  </select>
-                </div>
-              </div>
+            
+            <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-200/60 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 w-full xl:w-auto">
+              <button
+                onClick={() => updateGeneralSettings({ breakSentences: false })}
+                className={`flex-1 xl:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  !general.breakSentences
+                    ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                }`}
+              >
+                Continuous
+              </button>
+              <button
+                onClick={() => updateGeneralSettings({ breakSentences: true, lineBreakStyle: 'single' })}
+                className={`flex-1 xl:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  general.breakSentences && general.lineBreakStyle === 'single'
+                    ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                }`}
+              >
+                Single Break
+              </button>
+              <button
+                onClick={() => updateGeneralSettings({ breakSentences: true, lineBreakStyle: 'double' })}
+                className={`flex-1 xl:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  general.breakSentences && general.lineBreakStyle === 'double'
+                    ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                }`}
+              >
+                Double Break
+              </button>
             </div>
           </div>
         </div>

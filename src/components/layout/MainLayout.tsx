@@ -100,7 +100,7 @@ export function MainLayout() {
     return (
         <div className={cn(
             "relative h-full bg-slate-100/60 dark:bg-slate-950",
-            isFullscreen && "fixed inset-0 bg-white dark:bg-slate-950 z-30"
+            isFullscreen && "absolute inset-0 bg-white dark:bg-slate-950 z-30"
         )}>
             {/* Main Transcription Panel */}
             <div
