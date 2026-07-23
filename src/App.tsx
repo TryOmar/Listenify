@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { MainLayout } from './components/layout/MainLayout';
 import { ToastContainer } from './components/ui/Toast';
@@ -6,7 +7,8 @@ import { useSettingsStore } from './store/useSettingsStore';
 import './App.css';
 
 function App() {
-  const { general, updateGeneralSettings } = useSettingsStore();
+  const themeMode = useSettingsStore((state) => state.general.theme);
+  const updateGeneralSettings = useSettingsStore((state) => state.updateGeneralSettings);
   const [isSystemDark, setIsSystemDark] = useState(() =>
     typeof window !== 'undefined' ? window.matchMedia('(prefers-color-scheme: dark)').matches : false
   );
@@ -22,36 +24,39 @@ function App() {
   }, []);
 
   const isDarkActive =
-    general.theme === 'dark' ||
-    (general.theme === 'system' && isSystemDark);
+    themeMode === 'dark' ||
+    themeMode === 'deep-dark' ||
+    (themeMode === 'system' && isSystemDark);
 
   useEffect(() => {
-    if (isDarkActive) {
-      document.documentElement.classList.add('dark');
-      document.body.classList.add('dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.documentElement.style.colorScheme = 'dark';
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.body.classList.remove('dark');
-      document.documentElement.setAttribute('data-theme', 'light');
-      document.documentElement.style.colorScheme = 'light';
+    const root = document.documentElement;
+    const body = document.body;
+    
+    let activeDataTheme = themeMode;
+    if (themeMode === 'system') {
+       activeDataTheme = isSystemDark ? 'dark' : 'light';
     }
-  }, [isDarkActive]);
+
+    if (activeDataTheme === 'deep-dark') {
+      root.classList.add('dark');
+      body.classList.add('dark');
+      root.setAttribute('data-theme', 'deep-dark');
+      root.style.colorScheme = 'dark';
+    } else if (isDarkActive) {
+      root.classList.add('dark');
+      body.classList.add('dark');
+      root.setAttribute('data-theme', 'dark');
+      root.style.colorScheme = 'dark';
+    } else {
+      root.classList.remove('dark');
+      body.classList.remove('dark');
+      root.setAttribute('data-theme', 'light');
+      root.style.colorScheme = 'light';
+    }
+  }, [isDarkActive, themeMode, isSystemDark]);
 
   const toggleTheme = () => {
     const nextTheme = isDarkActive ? 'light' : 'dark';
-    if (nextTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.body.classList.add('dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.documentElement.style.colorScheme = 'dark';
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.body.classList.remove('dark');
-      document.documentElement.setAttribute('data-theme', 'light');
-      document.documentElement.style.colorScheme = 'light';
-    }
     updateGeneralSettings({ theme: nextTheme });
   };
 

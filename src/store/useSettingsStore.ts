@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 export interface GeneralSettings {
   speechLanguage: string;
   translationLanguage: string;
-  theme: 'system' | 'light' | 'dark';
+  theme: 'system' | 'light' | 'dark' | 'deep-dark';
   fontSize: number;
   aiChatFontSize: number;
   maxWords: number;

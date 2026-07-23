@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSettingsStore } from '../../../store/useSettingsStore';
-import { Sun, Moon, Mic, Settings, Copy, Link, Info, ExternalLink, CheckCircle, Monitor } from 'lucide-react';
+import { Sun, Moon, MoonStar, Mic, Settings, Copy, Link, Info, ExternalLink, CheckCircle, Monitor } from 'lucide-react';
 import { LANGUAGES } from '../../../constants/languages';
 
 export function GeneralTab() {
@@ -73,15 +73,17 @@ export function GeneralTab() {
             <div className="flex items-center gap-2">
               <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Appearance Theme</label>
               <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 rounded-md">
-                {general.theme === 'system' ? 'Auto System' : general.theme === 'dark' ? 'Dark' : 'Light'}
+                {general.theme === 'system' ? 'Auto System' : general.theme === 'deep-dark' ? 'Deep Dark' : general.theme === 'dark' ? 'Dark' : 'Light'}
               </span>
             </div>
             <span className="text-xs text-slate-500 dark:text-slate-400">Default is System Preference</span>
           </div>
 
-          <div className="flex items-center gap-1.5 p-1 bg-slate-200/60 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-200/60 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 w-full sm:w-auto">
             <button
-              onClick={() => updateGeneralSettings({ theme: 'system' })}
+              onClick={() => {
+                updateGeneralSettings({ theme: 'system' });
+              }}
               className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                 general.theme === 'system'
                   ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-xs'
@@ -92,7 +94,9 @@ export function GeneralTab() {
               <span>System</span>
             </button>
             <button
-              onClick={() => updateGeneralSettings({ theme: 'light' })}
+              onClick={() => {
+                updateGeneralSettings({ theme: 'light' });
+              }}
               className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                 general.theme === 'light'
                   ? 'bg-white dark:bg-slate-800 text-amber-500 shadow-xs'
@@ -103,7 +107,9 @@ export function GeneralTab() {
               <span>Light</span>
             </button>
             <button
-              onClick={() => updateGeneralSettings({ theme: 'dark' })}
+              onClick={() => {
+                updateGeneralSettings({ theme: 'dark' });
+              }}
               className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                 general.theme === 'dark'
                   ? 'bg-white dark:bg-slate-800 text-blue-400 shadow-xs'
@@ -112,6 +118,19 @@ export function GeneralTab() {
             >
               <Moon size={14} />
               <span>Dark</span>
+            </button>
+            <button
+              onClick={() => {
+                updateGeneralSettings({ theme: 'deep-dark' });
+              }}
+              className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                general.theme === 'deep-dark'
+                  ? 'bg-white dark:bg-slate-800 text-purple-400 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              <MoonStar size={14} />
+              <span>Deep Dark</span>
             </button>
           </div>
         </div>

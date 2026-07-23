@@ -187,3 +187,52 @@ html.dark body {
     gap: 5px;
   }
 }
+
+/* Deep Dark Theme Overrides */
+html[data-theme='deep-dark'].dark,
+html[data-theme='deep-dark'].dark body {
+  background-color: #000000;
+}
+html[data-theme='deep-dark'] [class*="dark:bg-slate-950"] {
+  background-color: #000000 !important;
+}
+html[data-theme='deep-dark'] [class*="dark:bg-slate-900"] {
+  background-color: #050505 !important;
+}
+html[data-theme='deep-dark'] [class*="dark:bg-slate-800"] {
+  background-color: #111111 !important;
+}
+html[data-theme='deep-dark'] [class*="dark:bg-slate-700"] {
+  background-color: #1a1a1a !important;
+}
+html[data-theme='deep-dark'] [class*="dark:border-slate-800"] {
+  border-color: #1a1a1a !important;
+}
+html[data-theme='deep-dark'] [class*="dark:border-slate-700"] {
+  border-color: #222222 !important;
+}
+
+/* Deep Dark Blue Sections Overrides */
+html[data-theme='deep-dark'] [class*="dark:bg-blue-950"] {
+  background-color: #00030a !important; /* Very dark pure blue */
+}
+html[data-theme='deep-dark'] [class*="dark:bg-blue-900"] {
+  background-color: #000b1f !important;
+}
+html[data-theme='deep-dark'] [class*="dark:border-blue-900"],
+html[data-theme='deep-dark'] [class*="dark:border-blue-800"] {
+  border-color: #001233 !important;
+}
+html[data-theme='deep-dark'] [class*="dark:bg-blue-800"] {
+  background-color: #001233 !important;
+}
+
+/* Override standard blue-600 primary buttons for deep dark */
+html[data-theme='deep-dark'] .bg-blue-600,
+html[data-theme='deep-dark'] [class*="bg-blue-600"] {
+  background-color: #1e3a8a !important; /* Tailwind blue-900 */
+}
+html[data-theme='deep-dark'] .hover\:bg-blue-700:hover,
+html[data-theme='deep-dark'] [class*="hover:bg-blue-700"]:hover {
+  background-color: #172554 !important; /* Tailwind blue-950 */
+}
