@@ -117,12 +117,12 @@ Translation (one sentence per line):`;
     };
 
     return (
-        <div className="flex flex-col flex-1 bg-gray-100">
-            <div className="flex justify-between items-center p-4 border-b flex-wrap">
-                <h2 className="text-lg font-semibold">Translate with AI</h2>
+        <div className="flex flex-col flex-1 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+            <div className="flex justify-between items-center px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex-wrap gap-2">
+                <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">Translate with AI</h2>
                 <div className="flex gap-2 items-center">
                     <select
-                        className="p-2 rounded bg-gray-200 text-sm mr-2"
+                        className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs sm:text-sm border border-slate-200 dark:border-slate-700 focus:outline-none"
                         value={numSentences}
                         onChange={e => setNumSentences(Number(e.target.value))}
                         title="Select how much to translate"
@@ -135,11 +135,11 @@ Translation (one sentence per line):`;
                         <option value={50}>Last 50 sentences (~500 words)</option>
                         <option value={100}>Last 100 sentences (~1000 words)</option>
                     </select>
-                    <button onClick={clearTranslation} className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors">
-                        <Trash2 size={20} />
+                    <button onClick={clearTranslation} className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors" title="Clear translation">
+                        <Trash2 size={18} />
                     </button>
-                    <button onClick={translateText} className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors">
-                        <RefreshCw size={20} />
+                    <button onClick={translateText} className="p-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-colors" title="Translate text">
+                        <RefreshCw size={18} />
                     </button>
                 </div>
             </div>
@@ -147,9 +147,9 @@ Translation (one sentence per line):`;
                 {/* Side-by-side sentence matching, only shown after translation */}
                 {showTranslation && (
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="font-semibold text-gray-600 border-b pb-2">Original ({speechLanguage})</div>
-                      <div className="font-semibold text-gray-600 border-b pb-2">Translation ({translationLanguage})</div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-2">Original ({speechLanguage})</div>
+                      <div className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 pb-2 hidden md:block">Translation ({translationLanguage})</div>
                     </div>
                     
                     <div className="space-y-3">
@@ -158,25 +158,25 @@ Translation (one sentence per line):`;
                         const maxLines = Math.max(originalSentences.length, translatedLines.length);
                         
                         return Array.from({ length: maxLines }).map((_, idx) => (
-                          <div key={idx} className="grid grid-cols-2 gap-4 p-3 bg-gray-50 rounded border">
-                            <div className="whitespace-pre-wrap text-gray-800 pr-4 border-r flex justify-between items-start" dir="auto">
+                          <div key={idx} className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/80">
+                            <div className="whitespace-pre-wrap text-slate-800 dark:text-slate-200 text-xs sm:text-sm pr-0 md:pr-4 md:border-r border-slate-200 dark:border-slate-700 flex justify-between items-start" dir="auto">
                               <span>{originalSentences[idx] || ''}</span>
                               {originalSentences[idx] && (
                                 <button
                                   onClick={() => speakText(originalSentences[idx], speechLanguage)}
-                                  className="p-1 text-gray-400 hover:text-blue-600 transition-colors ml-2 flex-shrink-0"
+                                  className="p-1 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors ml-2 shrink-0"
                                   title="Listen to text (TTS)"
                                 >
                                   <Volume2 size={16} />
                                 </button>
                               )}
                             </div>
-                            <div className="whitespace-pre-wrap text-blue-900 pl-4 flex justify-between items-start" dir="auto">
+                            <div className="whitespace-pre-wrap text-blue-900 dark:text-blue-300 font-medium text-xs sm:text-sm pl-0 md:pl-4 flex justify-between items-start" dir="auto">
                               <span>{translatedLines[idx] || ''}</span>
                               {translatedLines[idx] && (
                                 <button
                                   onClick={() => speakText(translatedLines[idx], translationLanguage)}
-                                  className="p-1 text-gray-400 hover:text-blue-600 transition-colors ml-2 flex-shrink-0"
+                                  className="p-1 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors ml-2 shrink-0"
                                   title="Listen to translation (TTS)"
                                 >
                                   <Volume2 size={16} />

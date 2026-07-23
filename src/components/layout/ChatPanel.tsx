@@ -68,23 +68,23 @@ export function ChatPanel() {
     };
 
     return (
-        <div className="h-full flex flex-col">
+        <div className="h-full flex flex-col bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
                 {messages.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-gray-500">
+                    <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
                         <MessageSquare size={40} className="mb-2 opacity-50" />
-                        <p className="text-center">No messages yet. Start a conversation!</p>
+                        <p className="text-center font-medium">No messages yet. Start a conversation!</p>
                         {!activeModel?.apiKey && (
                             <div className="text-center mt-2">
-                                <p className="text-sm text-gray-400 mb-3">
+                                <p className="text-sm text-slate-400 dark:text-slate-500 mb-3">
                                     Note: Configure an AI model in settings to get started.
                                 </p>
                                 <a
                                     href="https://discord.gg/c3pxrhTCAB"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition-colors text-sm"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-xl transition-colors text-sm font-semibold shadow-xs"
                                 >
                                     <img src={DiscordIcon} alt="Discord" width="16" height="16" />
                                     Join our Discord for help
@@ -100,10 +100,10 @@ export function ChatPanel() {
                         >
                             <div
                                 className={cn(
-                                    'max-w-[80%] p-3 rounded-lg',
+                                    'max-w-[85%] p-3 rounded-2xl shadow-2xs',
                                     message.sender === 'user'
-                                        ? 'bg-blue-500 text-white rounded-br-none'
-                                        : 'bg-gray-100 text-gray-700 rounded-bl-none'
+                                        ? 'bg-blue-600 text-white rounded-br-none font-medium'
+                                        : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-bl-none border border-slate-200/80 dark:border-slate-700/80'
                                 )}
                                 style={{ fontSize: `${general.aiChatFontSize}px` }}
                             >
@@ -118,8 +118,8 @@ export function ChatPanel() {
                                                     return (
                                                         <code
                                                             className={cn(
-                                                                'bg-gray-200 rounded px-1',
-                                                                !inline && 'block bg-gray-800 text-gray-100 p-2 my-2',
+                                                                'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded px-1.5 py-0.5 font-mono text-[0.9em]',
+                                                                !inline && 'block bg-slate-900 dark:bg-slate-950 text-slate-100 p-3 my-2 border border-slate-800 rounded-xl overflow-x-auto',
                                                                 className
                                                             )}
                                                             {...props}
@@ -131,7 +131,7 @@ export function ChatPanel() {
                                                 a({ children, ...props }) {
                                                     return (
                                                         <a
-                                                            className="text-blue-600 hover:underline"
+                                                            className="text-blue-600 dark:text-blue-400 hover:underline font-semibold"
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             {...props}
@@ -154,8 +154,8 @@ export function ChatPanel() {
             </div>
 
             {/* Message Input */}
-            <form onSubmit={handleSend} className="p-4 border-t">
-                <div className="flex gap-2">
+            <form onSubmit={handleSend} className="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <div className="flex gap-2 items-center">
                     <textarea
                         value={newMessage}
                         onChange={e => setNewMessage(e.target.value)}
@@ -168,7 +168,7 @@ export function ChatPanel() {
                         placeholder={isLoading ? 'AI is thinking...' : 'Type a message...'}
                         disabled={isLoading}
                         rows={1}
-                        className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 resize-none"
+                        className="flex-1 px-3.5 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 resize-none text-xs sm:text-sm"
                         style={{
                             minHeight: '42px',
                             maxHeight: '200px',
@@ -179,19 +179,20 @@ export function ChatPanel() {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+                        className="p-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors disabled:opacity-50 shadow-xs"
+                        title="Send message"
                     >
-                        <Send size={20} />
+                        <Send size={18} />
                     </button>
                     {messages.length > 0 && (
                         <button
                             type="button"
                             onClick={handleClearChat}
                             disabled={isLoading}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                            className="p-2.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-xl transition-colors disabled:opacity-50"
                             title="Clear chat"
                         >
-                            <Trash2 size={20} />
+                            <Trash2 size={18} />
                         </button>
                     )}
                 </div>

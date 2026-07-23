@@ -1,3 +1,12 @@
+/* Theme & Dark Mode base transitions */
+html {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
 /* React Resizable styles */
 .react-resizable {
   position: relative;

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import EmojiPickerReact from 'emoji-picker-react';
+import EmojiPickerReact, { Theme } from 'emoji-picker-react';
 import type { EmojiClickData } from 'emoji-picker-react';
 
 interface EmojiPickerProps {
@@ -28,18 +28,23 @@ export function EmojiPicker({ value, onChange, readOnly }: EmojiPickerProps) {
         setShowPicker(false);
     };
 
+    const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+
     return (
         <div className="relative" ref={pickerRef}>
             <button
                 type="button"
                 onClick={() => !readOnly && setShowPicker(!showPicker)}
-                className={`text-2xl ${readOnly ? 'cursor-default' : 'cursor-pointer hover:opacity-80'}`}
+                className={`text-2xl p-1 rounded-lg ${readOnly ? 'cursor-default' : 'cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors'}`}
             >
                 {value}
             </button>
             {showPicker && !readOnly && (
-                <div className="absolute z-60 top-full left-0 mt-1">
-                    <EmojiPickerReact onEmojiClick={handleEmojiClick} />
+                <div className="absolute z-60 top-full left-0 mt-1 shadow-2xl rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+                    <EmojiPickerReact
+                        onEmojiClick={handleEmojiClick}
+                        theme={isDark ? Theme.DARK : Theme.LIGHT}
+                    />
                 </div>
             )}
         </div>

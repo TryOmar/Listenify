@@ -37,21 +37,21 @@ export function SettingsDialog() {
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in-0 z-[100]" />
-        <Dialog.Content className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[98vw] sm:w-[90vw] max-w-5xl h-[90vh] sm:h-[88vh] max-h-[850px] bg-white rounded-xl sm:rounded-2xl shadow-2xl animate-in fade-in-0 zoom-in-95 z-[100] border border-slate-200 overflow-hidden flex flex-col">
+        <Dialog.Content className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[98vw] sm:w-[90vw] max-w-5xl h-[90vh] sm:h-[88vh] max-h-[850px] bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl shadow-2xl animate-in fade-in-0 zoom-in-95 z-[100] border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col">
           <Dialog.Title className="sr-only">Settings</Dialog.Title>
 
           {/* Modal Header */}
-          <div className="flex items-center justify-between px-3 py-2.5 sm:px-6 border-b border-slate-200 bg-white shrink-0">
+          <div className="flex items-center justify-between px-3 py-2.5 sm:px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
+              <div className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
                 <SettingsIcon size={18} />
               </div>
-              <h2 className="text-sm sm:text-lg font-bold text-slate-900">Settings</h2>
+              <h2 className="text-sm sm:text-lg font-bold text-slate-900 dark:text-slate-100">Settings</h2>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={resetToDefaults}
-                className="inline-flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors border border-slate-200/80"
+                className="inline-flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 bg-slate-50 dark:bg-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200/80 dark:border-slate-700"
                 title="Reset to default settings"
               >
                 <RotateCcw size={13} />
@@ -59,7 +59,7 @@ export function SettingsDialog() {
               </button>
               <Dialog.Close asChild>
                 <button
-                  className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+                  className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                   aria-label="Close settings"
                 >
                   <X size={18} />
@@ -71,7 +71,7 @@ export function SettingsDialog() {
           {/* Body Container */}
           <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
             {/* Navigation Bar / Sidebar */}
-            <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible p-2 md:p-4 border-b md:border-b-0 md:border-r border-slate-200 bg-slate-50/70 shrink-0 gap-1 sm:gap-1.5 md:w-56">
+            <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible p-2 md:p-4 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/70 shrink-0 gap-1 sm:gap-1.5 md:w-56">
               {TABS.map((tab) => (
                 <SettingsNavButton
                   key={tab.id}
@@ -84,7 +84,7 @@ export function SettingsDialog() {
             </div>
 
             {/* Active Tab Content Area */}
-            <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-white">
+            <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
               {ActiveComponent && <ActiveComponent />}
             </div>
           </div>

@@ -94,17 +94,17 @@ export function ResizableSplitter({
     return (
         <div
             className={cn(
-                'group relative h-3.5 bg-slate-100/90 hover:bg-blue-50/80 cursor-row-resize transition-all border-y border-slate-200/70 select-none z-1',
+                'group relative h-3.5 bg-slate-100/90 dark:bg-slate-900 hover:bg-blue-50/80 dark:hover:bg-slate-800 cursor-row-resize transition-all border-y border-slate-200/70 dark:border-slate-800 select-none z-1',
                 'flex items-center justify-center touch-none',
-                isResizing && 'bg-blue-100/90 border-blue-300'
+                isResizing && 'bg-blue-100/90 dark:bg-blue-950/60 border-blue-300 dark:border-blue-700'
             )}
             onMouseDown={handleMouseDown}
             onTouchStart={handleTouchStart}
             title="Drag up or down to adjust panel height"
         >
             <div className={cn(
-                "w-14 h-1 rounded-full transition-all bg-slate-300 group-hover:bg-blue-500 group-hover:w-20",
-                isResizing && "bg-blue-600 w-24"
+                "w-14 h-1 rounded-full transition-all bg-slate-300 dark:bg-slate-600 group-hover:bg-blue-500 dark:group-hover:bg-blue-400 group-hover:w-20",
+                isResizing && "bg-blue-600 dark:bg-blue-400 w-24"
             )} />
         </div>
     );

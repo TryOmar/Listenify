@@ -10,9 +10,9 @@ const toastIcons = {
 };
 
 const toastStyles: Record<ToastType, string> = {
-    success: 'bg-green-50 text-green-500 border-green-200',
-    error: 'bg-red-50 text-red-500 border-red-200',
-    info: 'bg-blue-50 text-blue-500 border-blue-200',
+    success: 'bg-green-50 dark:bg-green-950/90 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800/80',
+    error: 'bg-red-50 dark:bg-red-950/90 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800/80',
+    info: 'bg-blue-50 dark:bg-blue-950/90 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800/80',
 };
 
 export function ToastContainer() {
@@ -24,15 +24,15 @@ export function ToastContainer() {
                 <div
                     key={toast.id}
                     className={cn(
-                        'pointer-events-auto flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg border animate-in slide-in-from-right-5',
+                        'pointer-events-auto flex items-center gap-2 px-4 py-3 rounded-xl shadow-xl border animate-in slide-in-from-right-5 text-xs sm:text-sm font-semibold backdrop-blur-md',
                         toastStyles[toast.type]
                     )}
                 >
                     {toastIcons[toast.type]}
-                    <span className="text-sm">{toast.message}</span>
+                    <span>{toast.message}</span>
                     <button
                         onClick={() => removeToast(toast.id)}
-                        className="ml-2 p-1 hover:bg-black/5 rounded"
+                        className="ml-2 p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
                     >
                         <X className="w-4 h-4" />
                     </button>

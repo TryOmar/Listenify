@@ -76,22 +76,22 @@ export function ModelsTab() {
   };
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 text-slate-900 dark:text-slate-100">
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Add AI Model</h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Add AI Model</h3>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input
               type="text"
               placeholder="Custom Name (e.g., My Gemini)"
               value={newModel.name}
               onChange={(e) => setNewModel({ ...newModel, name: e.target.value })}
-              className="px-3 py-2 border rounded-lg"
+              className="px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <select
               value={newModel.model}
               onChange={(e) => setNewModel({ ...newModel, model: e.target.value })}
-              className="px-3 py-2 border rounded-lg"
+              className="px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {AI_MODEL_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -106,82 +106,83 @@ export function ModelsTab() {
               placeholder="API Key for Authentication"
               value={newModel.apiKey}
               onChange={(e) => setNewModel({ ...newModel, apiKey: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg pr-10"
+              className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10 font-mono"
             />
             <button
               type="button"
               onClick={() => setShowNewApiKey(!showNewApiKey)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-500 hover:text-gray-700 rounded"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 rounded-lg"
               aria-label="Toggle API key visibility"
             >
-              {showNewApiKey ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showNewApiKey ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
           <button
             type="submit"
-            className="w-full p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-xs sm:text-sm transition-colors shadow-xs"
           >
-            <Plus className="inline mr-2" size={20} />
+            <Plus className="inline mr-1.5" size={18} />
             Add Model
           </button>
         </form>
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Configured Models</h3>
+        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Configured Models</h3>
         <div className="space-y-3">
           {aiModels.map((model) => (
             <div
               key={model.id}
-              className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg"
+              className="flex items-center gap-3 sm:gap-4 p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 rounded-xl"
             >
-              <div className="text-gray-500">
+              <div className="text-slate-500 dark:text-slate-400 shrink-0">
                 {getModelIcon(model.model)}
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h4 className="font-medium">{model.name}</h4>
-                  <span className="text-xs text-gray-400">
+                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 truncate">{model.name}</h4>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-200/60 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                     {AI_MODEL_OPTIONS.find(opt => opt.value === model.model)?.label || 'Custom Model'}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mt-0.5">
                   <input
                     type={visibleKeys[model.id] ? "text" : "password"}
                     value={model.apiKey}
                     readOnly
-                    className="text-sm text-gray-500 bg-transparent border-none p-0"
+                    className="text-xs text-slate-500 dark:text-slate-400 bg-transparent border-none p-0 font-mono truncate focus:outline-none"
                   />
                   <button
                     onClick={() => toggleKeyVisibility(model.id)}
-                    className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                    className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-md shrink-0"
                   >
-                    {visibleKeys[model.id] ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {visibleKeys[model.id] ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   onClick={() => setActiveModel(model.id)}
-                  className={`p-2 rounded ${activeModelId === model.id
-                    ? 'text-green-500 bg-green-50'
-                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                  className={`p-2 rounded-xl transition-colors ${activeModelId === model.id
+                    ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/60 border border-green-200 dark:border-green-800/80'
+                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700'
                     }`}
                   title={activeModelId === model.id ? 'Active Model' : 'Set as Active'}
                 >
-                  <Check size={20} />
+                  <Check size={18} />
                 </button>
                 <button
                   onClick={() => handleRemoveModel(model.id)}
-                  className="p-2 text-red-500 hover:bg-red-50 rounded"
+                  className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-xl transition-colors"
+                  title="Remove Model"
                 >
-                  <Trash2 size={20} />
+                  <Trash2 size={18} />
                 </button>
               </div>
             </div>
           ))}
           {aiModels.length === 0 && (
-            <p className="text-center text-gray-500 py-4">
+            <p className="text-center text-slate-400 dark:text-slate-500 py-4 text-xs sm:text-sm">
               No AI models configured yet.
             </p>
           )}

@@ -79,26 +79,24 @@ export function ActionsTab() {
     };
 
     return (
-        <section className="space-y-4">
-            <h3 className="text-lg font-semibold">Actions</h3>
+        <section className="space-y-4 text-slate-900 dark:text-slate-100">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Actions</h3>
 
-            <div className="text-sm text-gray-500 mb-4">
-                <p>Available placeholders:</p>
-                <ul className="list-disc list-inside mt-1">
+            <div className="text-xs text-slate-500 dark:text-slate-400 mb-4 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
+                <p className="font-semibold text-slate-700 dark:text-slate-300">Available placeholders:</p>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 font-mono">
                     {activeType === 'word' ? (
-                        <li><code>{'{word}'}</code> - Selected single word - use in word popup prompts</li>
+                        <li><code>{'{word}'}</code> - Selected single word</li>
                     ) : (
-                        <li><code>{'{text}'}</code> - Selected text - use in text selection prompts</li>
+                        <li><code>{'{text}'}</code> - Selected text</li>
                     )}
                     <li><code>{'{speech_language}'}</code> - Speech language (e.g., "English")</li>
                     <li><code>{'{translation_language}'}</code> - Translation language (e.g., "Arabic")</li>
-                    <li><code>{'{speech_language_code}'}</code> - Speech language code (e.g., "en")</li>
-                    <li><code>{'{translation_language_code}'}</code> - Translation language code (e.g., "ar")</li>
                 </ul>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-[auto,1fr] gap-4">
+            <form onSubmit={handleSubmit} className="space-y-3">
+                <div className="grid grid-cols-[auto,1fr] gap-3">
                     <EmojiPicker
                         value={newAction.icon}
                         onChange={(emoji) => setNewAction({ ...newAction, icon: emoji })}
@@ -106,11 +104,11 @@ export function ActionsTab() {
                     <input
                         type="text"
                         placeholder={activeType === 'word'
-                            ? "Enter action name (e.g., 'Google Translate', 'Dictionary Lookup')"
-                            : "Enter action name (e.g., 'Translate Selection', 'Search Text')"}
+                            ? "Enter action name (e.g., 'Google Translate')"
+                            : "Enter action name (e.g., 'Search Text')"}
                         value={newAction.name}
                         onChange={(e) => setNewAction({ ...newAction, name: e.target.value })}
-                        className="px-3 py-2 border rounded-lg"
+                        className="px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </div>
                 <input
@@ -118,31 +116,31 @@ export function ActionsTab() {
                     placeholder={`Enter URL template using variables like {${activeType}}. Example: 'https://translate.google.com/?text={${activeType}}'`}
                     value={newAction.url}
                     onChange={(e) => setNewAction({ ...newAction, url: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                 />
                 <button
                     type="submit"
-                    className="w-full p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                    className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-xs sm:text-sm transition-colors shadow-xs"
                 >
-                    <Plus className="inline mr-2" size={20} />
+                    <Plus className="inline mr-1.5" size={18} />
                     Add {activeType === 'word' ? 'Word' : 'Text'} Action
                 </button>
             </form>
 
-            <div className="flex gap-2 border-b mb-4">
+            <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 mb-4 pt-2">
                 <button
                     onClick={() => setActiveType('word')}
-                    className={`py-2 px-4 relative ${activeType === 'word' ? 'text-blue-600 font-medium' : 'text-gray-600'}`}
+                    className={`py-2 px-4 text-xs sm:text-sm font-bold relative transition-colors ${activeType === 'word' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'}`}
                 >
                     Word Actions ({actions.word.length})
-                    {activeType === 'word' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></div>}
+                    {activeType === 'word' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-full"></div>}
                 </button>
                 <button
                     onClick={() => setActiveType('text')}
-                    className={`py-2 px-4 relative ${activeType === 'text' ? 'text-blue-600 font-medium' : 'text-gray-600'}`}
+                    className={`py-2 px-4 text-xs sm:text-sm font-bold relative transition-colors ${activeType === 'text' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'}`}
                 >
                     Text Actions ({actions.text.length})
-                    {activeType === 'text' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></div>}
+                    {activeType === 'text' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-full"></div>}
                 </button>
             </div>
 
@@ -165,7 +163,7 @@ export function ActionsTab() {
                             />
                         ))
                     ) : (
-                        <p className="text-center text-gray-500 py-4">
+                        <p className="text-center text-slate-400 dark:text-slate-500 py-4 text-xs sm:text-sm">
                             No word actions yet
                         </p>
                     )
@@ -187,7 +185,7 @@ export function ActionsTab() {
                             />
                         ))
                     ) : (
-                        <p className="text-center text-gray-500 py-4">
+                        <p className="text-center text-slate-400 dark:text-slate-500 py-4 text-xs sm:text-sm">
                             No text actions yet
                         </p>
                     )

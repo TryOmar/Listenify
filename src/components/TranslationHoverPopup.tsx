@@ -123,72 +123,28 @@ export const TranslationHoverPopup: React.FC<TranslationHoverPopupProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [translations, index, setIndex]);
 
-  // Calculate style: above the word, centered
-  let style: React.CSSProperties;
-  if (wordRect) {
-    style = {
-      position: 'fixed',
-      left: wordRect.left + wordRect.width / 2,
-      top: wordRect.top - 8, // 8px gap above word
-      transform: 'translate(-50%, -100%)',
-      zIndex: 90,
-      pointerEvents: 'auto',
-      minWidth: 120,
-      maxWidth: 220,
-      background: 'rgba(255, 255, 255, 0.98)',
-      border: '1px solid #cbd5e1',
-      borderRadius: 12,
-      boxShadow: '0 10px 25px -5px rgba(0,0,0,0.15), 0 8px 10px -6px rgba(0,0,0,0.1)',
-      padding: '8px 12px',
-      fontSize: 14,
-      color: '#0f172a',
-      transition: 'all 0.15s ease-out',
-      textAlign: 'center',
-    };
-  } else {
-    style = {
-      position: 'fixed',
-      left: position.x,
-      top: position.y - 40,
-      zIndex: 90,
-      pointerEvents: 'auto',
-      minWidth: 120,
-      maxWidth: 220,
-      background: 'rgba(255, 255, 255, 0.98)',
-      border: '1px solid #cbd5e1',
-      borderRadius: 12,
-      boxShadow: '0 10px 25px -5px rgba(0,0,0,0.15), 0 8px 10px -6px rgba(0,0,0,0.1)',
-      padding: '8px 12px',
-      fontSize: 14,
-      color: '#0f172a',
-      transition: 'all 0.15s ease-out',
-      textAlign: 'center',
-    };
-  }
-
-  // Hide on mouse leave
-  useEffect(() => {
-    const handleMouseLeave = (e: MouseEvent) => {
-      if (popupRef.current && !popupRef.current.contains(e.relatedTarget as Node)) {
-        onClose();
-      }
-    };
-    const node = popupRef.current;
-    if (node) node.addEventListener('mouseleave', handleMouseLeave);
-    return () => { if (node) node.removeEventListener('mouseleave', handleMouseLeave); };
-  }, [onClose]);
+  const topPos = wordRect ? wordRect.top - 8 : position.y - 40;
+  const leftPos = wordRect ? wordRect.left + wordRect.width / 2 : position.x;
 
   return (
-    <div ref={popupRef} style={style}>
-      {loading && <div>Loading...</div>}
-      {error && <div className="text-red-500">{error}</div>}
+    <div
+      ref={popupRef}
+      className="fixed z-[90] pointer-events-auto min-w-[120px] max-w-[220px] bg-white/98 dark:bg-slate-900/98 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl p-2.5 text-center text-sm shadow-xl transition-all duration-150"
+      style={{
+        left: leftPos,
+        top: topPos,
+        transform: 'translate(-50%, -100%)',
+      }}
+    >
+      {loading && <div className="text-xs text-slate-500 dark:text-slate-400 animate-pulse">Loading...</div>}
+      {error && <div className="text-xs text-red-500 font-medium">{error}</div>}
       {!loading && !error && translations.length > 0 && (
         <div>
-          <div className="font-bold text-base mb-1">{translations[index]?.translation}</div>
-          <div className="text-xs text-gray-500">{index + 1} / {translations.length}</div>
+          <div className="font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 mb-0.5">{translations[index]?.translation}</div>
+          <div className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">{index + 1} / {translations.length}</div>
         </div>
       )}
-      {!loading && !error && translations.length === 0 && <div>No translation found</div>}
+      {!loading && !error && translations.length === 0 && <div className="text-xs text-slate-500 dark:text-slate-400">No translation found</div>}
     </div>
   );
 }; 

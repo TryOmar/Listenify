@@ -80,7 +80,7 @@ export function TextSelectionPopup({ selectedText, onAIPromptClick, onClose, pre
 
     return (
         <div
-            className="bg-white rounded-xl shadow-2xl animate-in fade-in-0 zoom-in-95 z-[90] border border-slate-200/90"
+            className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl shadow-2xl animate-in fade-in-0 zoom-in-95 z-[90] border border-slate-200 dark:border-slate-800"
             style={{
                 maxWidth: '50vw',
                 minWidth: '10em',
@@ -94,30 +94,30 @@ export function TextSelectionPopup({ selectedText, onAIPromptClick, onClose, pre
             }}
         >
             <div className="flex flex-col gap-1">
-                <div className="border-b pb-2 mb-2">
-                    <h3 className="font-medium text-sm text-gray-600 mb-1">Text Actions</h3>
+                <div className="border-b border-slate-200 dark:border-slate-800 pb-2 mb-2">
+                    <h3 className="font-medium text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Text Actions</h3>
                     {actions.text.map((action) => (
                         <a
                             key={action.id}
                             href={getProcessedUrl(action.url)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded transition-colors"
+                            className="flex items-center gap-2 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-800 dark:text-slate-200"
                             onClick={(e) => handleTextActionClick(e, getProcessedUrl(action.url))}
                         >
                             <span>{action.icon}</span>
                             <span className="flex-1">{action.name}</span>
-                            <ExternalLink size={16} className="text-gray-400" />
+                            <ExternalLink size={16} className="text-slate-400 dark:text-slate-500" />
                         </a>
                     ))}
                 </div>
                 <div>
-                    <h3 className="font-medium text-sm text-gray-600 mb-1">AI Actions</h3>
+                    <h3 className="font-medium text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">AI Actions</h3>
                     {textPrompts.map((prompt) => (
                         <button
                             key={prompt.id}
                             onClick={(e) => handleAIPromptClick(prompt.prompt, e)}
-                            className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded transition-colors w-full text-left"
+                            className="flex items-center gap-2 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors w-full text-left text-slate-800 dark:text-slate-200"
                         >
                             <span>{prompt.icon}</span>
                             <span className="flex-1">{prompt.name}</span>
@@ -126,7 +126,7 @@ export function TextSelectionPopup({ selectedText, onAIPromptClick, onClose, pre
                 </div>
             </div>
             <div
-                className="absolute left-1/2 transform -translate-x-1/2 rotate-45 bg-white"
+                className="absolute left-1/2 transform -translate-x-1/2 rotate-45 bg-white dark:bg-slate-900 border-t border-l border-slate-200 dark:border-slate-800"
                 style={{
                     top: '-0.7em',
                     width: '1.2em',

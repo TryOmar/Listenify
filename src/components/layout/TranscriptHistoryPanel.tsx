@@ -326,35 +326,35 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-2 sm:p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex z-[101] border border-slate-200 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex z-[101] border border-slate-200 dark:border-slate-800 overflow-hidden">
         {/* Sidebar for folders */}
-        <div className="w-60 border-r flex flex-col p-4 bg-gray-50 rounded-l-xl">
+        <div className="w-60 border-r border-slate-200 dark:border-slate-800 flex flex-col p-4 bg-slate-50 dark:bg-slate-950 rounded-l-2xl">
           <div className="flex items-center justify-between mb-4">
-            <span className="font-semibold text-base flex items-center gap-2"><Folder className="w-5 h-5" />Folders</span>
+            <span className="font-bold text-sm sm:text-base flex items-center gap-2 text-slate-900 dark:text-slate-100"><Folder className="w-5 h-5 text-blue-600 dark:text-blue-400" />Folders</span>
             <button
-              className="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-100 transition"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 p-1 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-800 transition"
               title="New Folder"
               onClick={() => setShowNewFolderPrompt(true)}
             >
               <FolderPlus className="w-5 h-5" />
             </button>
           </div>
-          <div className="flex flex-col p-2 space-y-1 flex-grow overflow-y-auto">
+          <div className="flex flex-col p-1 space-y-1 flex-grow overflow-y-auto">
             <div
-              className={`cursor-pointer px-3 py-2 rounded mb-1 flex items-center gap-2 ${selectedFolder === ALL_ID ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-200'}`}
+              className={`cursor-pointer px-3 py-2 rounded-xl mb-1 flex items-center gap-2 text-xs sm:text-sm font-semibold transition-colors ${selectedFolder === ALL_ID ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800'}`}
               onClick={() => setSelectedFolder(ALL_ID)}
             >
               <FileText className="w-4 h-4" /> All
-              <span className="ml-auto text-xs text-gray-500">{allCount}</span>
+              <span className={`ml-auto text-xs ${selectedFolder === ALL_ID ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'}`}>{allCount}</span>
             </div>
             <div
-              className={`cursor-pointer px-3 py-2 rounded mb-1 flex items-center gap-2 ${selectedFolder === UNCATEGORIZED_ID ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-200'}`}
+              className={`cursor-pointer px-3 py-2 rounded-xl mb-1 flex items-center gap-2 text-xs sm:text-sm font-semibold transition-colors ${selectedFolder === UNCATEGORIZED_ID ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800'}`}
               onClick={() => setSelectedFolder(UNCATEGORIZED_ID)}
             >
-              <Folder className="w-4 h-4 opacity-60" /> Uncategorized
-              <span className="ml-auto text-xs text-gray-500">{uncategorizedCount}</span>
+              <Folder className="w-4 h-4 opacity-70" /> Uncategorized
+              <span className={`ml-auto text-xs ${selectedFolder === UNCATEGORIZED_ID ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'}`}>{uncategorizedCount}</span>
               <button
-                className="ml-2 p-1 rounded-full hover:bg-blue-100 text-blue-500 hover:text-blue-700 transition"
+                className="ml-2 p-1 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 text-blue-500 hover:text-blue-700 transition"
                 title="Download Folder"
                 onClick={e => { e.stopPropagation(); handleDownloadFolder(UNCATEGORIZED_ID, 'Uncategorized'); }}
               >
@@ -364,7 +364,7 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
             {folders.map(folder => (
               <div
                 key={folder.folderId}
-                className={`flex items-center justify-between cursor-pointer px-3 py-2 rounded mb-1 ${selectedFolder === folder.folderId ? 'bg-blue-100 text-blue-700 font-semibold' : 'hover:bg-gray-200'}`}
+                className={`flex items-center justify-between cursor-pointer px-3 py-2 rounded-xl mb-1 text-xs sm:text-sm font-semibold transition-colors ${selectedFolder === folder.folderId ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800'}`}
                 onClick={e => {
                   if ((e.target as HTMLElement).closest('.folder-action-menu, form')) return;
                   setSelectedFolder(folder.folderId);
@@ -375,48 +375,48 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
                   {renamingFolderId === folder.folderId ? (
                     <form onSubmit={handleRenameFolderSubmit} className="flex items-center gap-1">
                       <input
-                        className="border rounded px-1 py-0.5 text-sm w-28 focus:outline-none focus:ring focus:border-blue-400"
+                        className="border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded px-1.5 py-0.5 text-xs w-28 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         value={renameFolderName}
                         onChange={e => setRenameFolderName(e.target.value)}
                         autoFocus
                         maxLength={50}
                         onClick={e => e.stopPropagation()}
                       />
-                      <button type="submit" className="text-blue-600 hover:text-blue-800 px-1" title="Save"><Save className="w-4 h-4" /></button>
-                      <button type="button" className="text-gray-400 hover:text-gray-700 px-1" title="Cancel" onClick={e => { e.stopPropagation(); setRenamingFolderId(null); }}><X className="w-4 h-4" /></button>
+                      <button type="submit" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 px-1" title="Save"><Save className="w-4 h-4" /></button>
+                      <button type="button" className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 px-1" title="Cancel" onClick={e => { e.stopPropagation(); setRenamingFolderId(null); }}><X className="w-4 h-4" /></button>
                     </form>
                   ) : (
                     <span className="truncate">{folder.folderName}</span>
                   )}
-                  <span className="ml-auto text-xs text-gray-500 bg-gray-100 rounded px-2 py-0.5 flex-shrink-0">{folderCounts[folder.folderId] || 0}</span>
+                  <span className={`ml-auto text-xs rounded-md px-1.5 py-0.5 shrink-0 ${selectedFolder === folder.folderId ? 'bg-blue-700 text-blue-100' : 'bg-slate-200/60 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>{folderCounts[folder.folderId] || 0}</span>
                 </span>
-                <span className="relative folder-action-menu ml-2 flex-shrink-0">
+                <span className="relative folder-action-menu ml-2 shrink-0">
                   <button
-                    className="p-1 rounded-full hover:bg-gray-200 text-gray-500 hover:text-blue-700 transition"
+                    className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition"
                     title="More actions"
                     onClick={e => { e.stopPropagation(); setOpenFolderMenuId(folder.folderId === openFolderMenuId ? null : folder.folderId); }}
                   >
-                    <MoreVertical className="w-5 h-5" />
+                    <MoreVertical className="w-4 h-4" />
                   </button>
                   {openFolderMenuId === folder.folderId && (
-                    <div className="absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-50 folder-action-menu animate-fade-in">
+                    <div className="absolute right-0 mt-2 w-36 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 folder-action-menu animate-in fade-in-0 zoom-in-95">
                       <button
-                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded-t-lg"
+                        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-t-xl"
                         onClick={e => { e.stopPropagation(); handleRenameFolder(folder.folderId, folder.folderName); setOpenFolderMenuId(null); }}
                       >
-                        <Edit className="w-4 h-4" /> Rename
+                        <Edit className="w-3.5 h-3.5" /> Rename
                       </button>
                       <button
-                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-blue-50"
+                        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                         onClick={e => { e.stopPropagation(); handleDownloadFolder(folder.folderId, folder.folderName); setOpenFolderMenuId(null); }}
                       >
-                        <Download className="w-4 h-4" /> Download
+                        <Download className="w-3.5 h-3.5" /> Download
                       </button>
                       <button
-                        className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-lg"
+                        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-b-xl"
                         onClick={e => { e.stopPropagation(); setShowDeleteFolderId(folder.folderId); setOpenFolderMenuId(null); }}
                       >
-                        <Trash2 className="w-4 h-4" /> Delete
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
                       </button>
                     </div>
                   )}
@@ -426,13 +426,13 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
           </div>
         </div>
         {/* Main transcript list */}
-        <div className="flex-1 flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b">
-            <h3 className="text-lg font-semibold flex items-center gap-2"><ArrowLeft className="w-5 h-5" />Transcript History</h3>
+        <div className="flex-1 flex flex-col bg-white dark:bg-slate-900">
+          <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2"><ArrowLeft className="w-5 h-5" />Transcript History</h3>
             <div className="flex items-center gap-2">
               {!selectionMode && filteredTranscripts.length > 0 && (
                 <button
-                  className="px-3 py-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm font-medium transition"
+                  className="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/80 text-xs font-bold hover:bg-blue-100 dark:hover:bg-blue-900/60 transition"
                   onClick={() => setSelectionMode(true)}
                 >
                   Select
@@ -440,21 +440,21 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
               )}
               {selectionMode && (
                 <button
-                  className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium transition"
+                  className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition"
                   onClick={handleCancelSelection}
                 >
                   Cancel
                 </button>
               )}
-              <button onClick={onClose} className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-200 transition" title="Close"><X className="w-5 h-5" /></button>
+              <button onClick={onClose} className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Close"><X className="w-5 h-5" /></button>
             </div>
           </div>
           {/* Bulk move bar */}
           {selectionMode && selectedTranscripts.length > 0 && (
-            <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 border-b border-blue-200 shadow-sm rounded-t-md relative">
-              <span className="text-blue-800 font-semibold text-sm">{selectedTranscripts.length} selected</span>
+            <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-950/80 border-b border-blue-200 dark:border-blue-900 shadow-xs rounded-t-md relative">
+              <span className="text-blue-800 dark:text-blue-200 font-bold text-xs sm:text-sm">{selectedTranscripts.length} selected</span>
               <select
-                className="px-2 py-1.5 border border-blue-300 rounded-md text-sm bg-white shadow-sm hover:border-blue-500 focus:border-blue-500 transition"
+                className="px-2 py-1.5 border border-blue-300 dark:border-blue-700 rounded-xl text-xs sm:text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs hover:border-blue-500 focus:border-blue-500 transition focus:outline-none"
                 defaultValue=""
                 title="Move selected transcripts to folder"
                 onChange={e => {
@@ -475,67 +475,67 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
                 <option value="create-new">+ Create New Folder</option>
               </select>
               <button
-                className="px-2 py-1.5 rounded-md bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition flex items-center gap-1.5"
+                className="px-2.5 py-1.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-xs"
                 onClick={() => setShowBulkDownloadModal(true)}
                 title="Download selected transcripts"
               >
                 <Download className="w-4 h-4" /> Download
               </button>
               <button
-                className="px-2 py-1.5 rounded-md bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition flex items-center gap-1.5"
+                className="px-2.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-xs"
                 onClick={handleBulkDelete}
                 title="Delete selected transcripts"
               >
                 <Trash2 className="w-4 h-4" /> Delete
               </button>
-              <button className="ml-2 text-xs text-blue-700 hover:text-blue-900 underline px-2 py-1 rounded transition" onClick={handleCancelSelection}>Clear</button>
+              <button className="ml-2 text-xs text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100 underline px-2 py-1 rounded-lg transition" onClick={handleCancelSelection}>Clear</button>
               {bulkMoveMessage && (
-                <span className="absolute right-4 text-green-600 font-medium bg-green-50 px-3 py-1 rounded shadow-sm animate-fade-in">{bulkMoveMessage}</span>
+                <span className="absolute right-4 text-green-600 dark:text-green-400 font-bold bg-green-50 dark:bg-green-950/80 border border-green-200 dark:border-green-800 px-3 py-1 rounded-xl shadow-xs animate-in fade-in-0">{bulkMoveMessage}</span>
               )}
             </div>
           )}
           <div className="flex-1 overflow-y-auto p-4">
             {loading ? (
-              <div className="text-gray-400 text-center py-8">Loading...</div>
+              <div className="text-slate-400 dark:text-slate-500 text-center py-8 text-sm">Loading...</div>
             ) : filteredTranscripts.length === 0 ? (
-              <div className="text-gray-400 text-center py-8">Transcript history will appear here.</div>
+              <div className="text-slate-400 dark:text-slate-500 text-center py-8 text-sm">Transcript history will appear here.</div>
             ) : (
-              <ul className="space-y-4">
+              <ul className="space-y-3">
                 {selectionMode && (
                   <li className="flex items-center gap-2 mb-3">
                     <input
                       type="checkbox"
                       checked={selectAll}
                       onChange={handleSelectAll}
-                      className="accent-blue-500 w-4 h-4 rounded cursor-pointer"
+                      className="accent-blue-600 w-4 h-4 rounded cursor-pointer"
                       title={selectAll ? 'Deselect all' : 'Select all'}
                     />
-                    <span className="text-xs text-gray-600 cursor-pointer select-none">{selectAll ? 'Deselect All' : 'Select All'}</span>
+                    <span className="text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none font-semibold">{selectAll ? 'Deselect All' : 'Select All'}</span>
                   </li>
                 )}
                 {filteredTranscripts.map((t, idx) => (
-                  <li key={t.transcriptId} className={`border rounded-lg p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-gray-50 transition-colors shadow-sm ${selectionMode && selectedTranscripts.includes(t.transcriptId) ? 'ring-2 ring-blue-400 bg-blue-50 hover:bg-blue-100' : selectionMode ? 'hover:bg-gray-100' : ''}`}>
+                  <li key={t.transcriptId} className={`border border-slate-200/80 dark:border-slate-800 rounded-xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-slate-50/80 dark:bg-slate-800/60 transition-colors shadow-xs ${selectionMode && selectedTranscripts.includes(t.transcriptId) ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950/50' : selectionMode ? 'hover:bg-slate-100 dark:hover:bg-slate-800' : ''}`}>
                     <div className="flex items-center gap-3">
                       {selectionMode && (
                         <input
                           type="checkbox"
                           checked={selectedTranscripts.includes(t.transcriptId)}
                           onChange={e => handleCheckboxClick(e, t.transcriptId, idx)}
-                          className="accent-blue-500 w-4 h-4 rounded cursor-pointer"
+                          className="accent-blue-600 w-4 h-4 rounded cursor-pointer"
                           title="Select transcript"
                         />
                       )}
                       <div className="flex-1 min-w-0 cursor-pointer" onClick={() => handleView(t)}>
-                        <div className="font-semibold truncate text-base">{t.title}</div>
-                        <div className="text-xs text-gray-500">{new Date(t.createdAt).toLocaleString()} &bull; {t.wordCount} words</div>
+                        <div className="font-bold truncate text-sm sm:text-base text-slate-900 dark:text-slate-100">{t.title}</div>
+                        <div className="text-xs text-slate-400 dark:text-slate-500">{new Date(t.createdAt).toLocaleString()} &bull; {t.wordCount} words</div>
                       </div>
                     </div>
-                    <div className="flex gap-2 flex-shrink-0 items-center">
-                      <button className="p-2 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 transition" title="Download" onClick={() => handleDownload(t)}><Download className="w-4 h-4" /></button>
-                      <button className="p-2 rounded-full bg-gray-50 hover:bg-gray-200 text-gray-700 transition" title="Edit" onClick={() => handleEdit(t)}><Edit className="w-4 h-4" /></button>
-                      <button className="p-2 rounded-full bg-red-50 hover:bg-red-100 text-red-700 transition" title="Delete" onClick={() => setShowDeleteTranscriptId(t.transcriptId)}><Trash2 className="w-4 h-4" /></button>
+                    <div className="flex gap-1.5 shrink-0 items-center">
+                      <button className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 transition border border-blue-200/60 dark:border-blue-800/80" title="Download" onClick={() => handleDownload(t)}><Download className="w-4 h-4" /></button>
+                      <button className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Edit" onClick={() => handleEdit(t)}><Edit className="w-4 h-4" /></button>
+                      <button className="p-1.5 rounded-lg bg-red-50 dark:bg-red-950/50 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 transition border border-red-200/60 dark:border-red-800/80" title="Delete" onClick={() => setShowDeleteTranscriptId(t.transcriptId)}><Trash2 className="w-4 h-4" /></button>
                       <select
-                        className="px-1 py-1 text-xs border rounded bg-white text-gray-700"
+                        className="px-2 py-1 text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none"
                         value={t.folderId || UNCATEGORIZED_ID}
                         onChange={e => handleMoveTranscript(t, e.target.value)}
                         title="Move to folder"
@@ -555,18 +555,18 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
       </div>
       {/* New Folder Prompt */}
       {showNewFolderPrompt && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-80 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-xs flex flex-col overflow-hidden border border-slate-200">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h4 className="text-base font-semibold flex items-center gap-2"><FolderPlus className="w-5 h-5" />New Folder</h4>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-2xl shadow-2xl w-full max-w-xs flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+              <h4 className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100"><FolderPlus className="w-5 h-5 text-blue-600 dark:text-blue-400" />New Folder</h4>
               <button onClick={() => {
                 setShowNewFolderPrompt(false);
                 if (isCreatingAndMoving) setIsCreatingAndMoving(false);
-              }} className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-200 transition" title="Close"><X className="w-5 h-5" /></button>
+              }} className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Close"><X className="w-5 h-5" /></button>
             </div>
-            <div className="p-4">
+            <div className="p-4 space-y-3">
               <input
-                className="w-full border rounded px-2 py-1 mb-2 text-base"
+                className="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={newFolderName}
                 onChange={e => setNewFolderName(e.target.value)}
                 placeholder="Folder name"
@@ -574,7 +574,7 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
                 autoFocus
               />
               <button
-                className="w-full px-3 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white font-semibold flex items-center justify-center gap-2"
+                className="w-full px-3 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xs"
                 onClick={handleNewFolder}
               >
                 <Plus className="w-4 h-4" /> Create Folder
@@ -585,16 +585,16 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
       )}
       {/* Delete Transcript Prompt */}
       {showDeleteTranscriptId && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-80 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-xs flex flex-col overflow-hidden border border-slate-200">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h4 className="text-base font-semibold flex items-center gap-2"><Trash2 className="w-5 h-5" />Delete Transcript</h4>
-              <button onClick={() => setShowDeleteTranscriptId(null)} className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-200 transition" title="Close"><X className="w-5 h-5" /></button>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-2xl shadow-2xl w-full max-w-xs flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+              <h4 className="text-base font-bold flex items-center gap-2 text-red-600 dark:text-red-400"><Trash2 className="w-5 h-5" />Delete Transcript</h4>
+              <button onClick={() => setShowDeleteTranscriptId(null)} className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Close"><X className="w-5 h-5" /></button>
             </div>
-            <div className="p-4">
-              <p>Are you sure you want to delete this transcript?</p>
+            <div className="p-4 space-y-4">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">Are you sure you want to delete this transcript?</p>
               <button
-                className="w-full px-3 py-2 mt-4 rounded bg-red-500 hover:bg-red-600 text-white font-semibold flex items-center justify-center gap-2"
+                className="w-full px-3 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xs"
                 onClick={() => handleDeleteTranscript(showDeleteTranscriptId)}
               >
                 <Trash2 className="w-4 h-4" /> Delete
@@ -605,16 +605,16 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
       )}
       {/* Delete Folder Prompt */}
       {showDeleteFolderId && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-80 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-xs flex flex-col overflow-hidden border border-slate-200">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h4 className="text-base font-semibold flex items-center gap-2"><Trash2 className="w-5 h-5" />Delete Folder</h4>
-              <button onClick={() => setShowDeleteFolderId(null)} className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-200 transition" title="Close"><X className="w-5 h-5" /></button>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-2xl shadow-2xl w-full max-w-xs flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+              <h4 className="text-base font-bold flex items-center gap-2 text-red-600 dark:text-red-400"><Trash2 className="w-5 h-5" />Delete Folder</h4>
+              <button onClick={() => setShowDeleteFolderId(null)} className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Close"><X className="w-5 h-5" /></button>
             </div>
-            <div className="p-4">
-              <p>Are you sure you want to delete this folder? All transcripts in this folder will be moved to Uncategorized.</p>
+            <div className="p-4 space-y-4">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">Are you sure you want to delete this folder? All transcripts in this folder will be moved to Uncategorized.</p>
               <button
-                className="w-full px-3 py-2 mt-4 rounded bg-red-500 hover:bg-red-600 text-white font-semibold flex items-center justify-center gap-2"
+                className="w-full px-3 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xs"
                 onClick={() => handleDeleteFolder(showDeleteFolderId)}
               >
                 <Trash2 className="w-4 h-4" /> Delete Folder
@@ -625,30 +625,30 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
       )}
       {/* View/Edit Modal */}
       {selected && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-80 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h4 className="text-base font-semibold flex items-center gap-2">{editMode ? (<><Edit className="w-5 h-5" />Edit Transcript</>) : (<><FileText className="w-5 h-5" />View Transcript</>)} </h4>
-              <button onClick={() => { setSelected(null); setEditMode(false); }} className="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-200 transition" title="Close"><X className="w-5 h-5" /></button>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+              <h4 className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100">{editMode ? (<><Edit className="w-5 h-5 text-blue-600 dark:text-blue-400" />Edit Transcript</>) : (<><FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />View Transcript</>)} </h4>
+              <button onClick={() => { setSelected(null); setEditMode(false); }} className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Close"><X className="w-5 h-5" /></button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               <input
-                className="w-full border rounded px-2 py-1 mb-2 text-base font-semibold"
+                className="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-base font-bold focus:outline-none"
                 value={editTitle}
                 onChange={e => setEditTitle(e.target.value)}
                 disabled={!editMode}
                 maxLength={100}
               />
               <textarea
-                className="w-full border rounded px-2 py-1 text-sm min-h-[120px]"
+                className="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl px-3 py-2 text-sm min-h-[140px] focus:outline-none font-mono"
                 value={editText}
                 onChange={e => setEditText(e.target.value)}
                 disabled={!editMode}
               />
               <div>
-                <label className="block text-xs font-medium mb-1">Folder</label>
+                <label className="block text-xs font-semibold mb-1 text-slate-600 dark:text-slate-400">Folder</label>
                 <select
-                  className="w-full border rounded px-2 py-1 text-sm"
+                  className="w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-sm focus:outline-none"
                   value={selected.folderId || UNCATEGORIZED_ID}
                   onChange={e => {
                     if (editMode && selected) {
@@ -664,14 +664,14 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
                 </select>
               </div>
             </div>
-            <div className="flex justify-end gap-2 p-4 border-t">
+            <div className="flex justify-end gap-2 p-4 border-t border-slate-200 dark:border-slate-800">
               {!editMode && (
-                <button className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center gap-1" onClick={() => setEditMode(true)} title="Edit"><Edit className="w-4 h-4" /></button>
+                <button className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center gap-1 transition" onClick={() => setEditMode(true)} title="Edit"><Edit className="w-4 h-4" /></button>
               )}
-              <button className="p-2 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 flex items-center gap-1" onClick={() => handleDownload(selected)} title="Download"><Download className="w-4 h-4" /></button>
-              <button className="p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-700 flex items-center gap-1" onClick={() => setShowDeleteTranscriptId(selected.transcriptId)} title="Delete"><Trash2 className="w-4 h-4" /></button>
+              <button className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 flex items-center gap-1 transition border border-blue-200/60 dark:border-blue-800/80" onClick={() => handleDownload(selected)} title="Download"><Download className="w-4 h-4" /></button>
+              <button className="p-2 rounded-xl bg-red-50 dark:bg-red-950/50 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 flex items-center gap-1 transition border border-red-200/60 dark:border-red-800/80" onClick={() => setShowDeleteTranscriptId(selected.transcriptId)} title="Delete"><Trash2 className="w-4 h-4" /></button>
               {editMode && (
-                <button className="p-2 rounded-full bg-green-500 hover:bg-green-600 text-white flex items-center gap-1" onClick={async () => {
+                <button className="px-3 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold text-xs flex items-center gap-1.5 transition shadow-xs" onClick={async () => {
                   setSaving(true);
                   await updateTranscript(selected.transcriptId, { title: editTitle, text: editText, folderId: selected.folderId });
                   setSaving(false);
@@ -688,32 +688,32 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
         </div>
       )}
       {showDownloadModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-80 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm flex flex-col p-6 items-center border border-slate-200">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-2xl shadow-2xl w-full max-w-sm flex flex-col p-6 items-center border border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between w-full mb-4">
-              <h4 className="text-lg font-bold flex items-center gap-2"><Download className="w-6 h-6" />Download Folder</h4>
-              <button onClick={() => { setShowDownloadModal(false); setDownloadFolderId(null); }} className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition" title="Close"><X className="w-5 h-5" /></button>
+              <h4 className="text-base sm:text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100"><Download className="w-5 h-5 text-blue-600 dark:text-blue-400" />Download Folder</h4>
+              <button onClick={() => { setShowDownloadModal(false); setDownloadFolderId(null); }} className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Close"><X className="w-5 h-5" /></button>
             </div>
-            <div className="text-gray-600 text-center mb-6 w-full">How would you like to download <span className="font-semibold text-gray-800">{downloadFolderName}</span>?</div>
-            <div className="flex flex-col gap-4 w-full">
+            <div className="text-slate-600 dark:text-slate-400 text-center text-xs sm:text-sm mb-6 w-full">How would you like to download <span className="font-bold text-slate-900 dark:text-slate-100">{downloadFolderName}</span>?</div>
+            <div className="flex flex-col gap-3 w-full">
               <button
-                className="flex items-center justify-center gap-3 w-full py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-base font-semibold shadow transition"
+                className="flex items-center justify-center gap-2.5 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold shadow-xs transition"
                 onClick={handleDownloadFolderAsZip}
               >
-                <Download className="w-5 h-5" /> ZIP (separate files)
+                <Download className="w-4 h-4" /> ZIP (separate files)
               </button>
-              <div className="w-full flex items-center gap-2 text-gray-300">
-                <div className="flex-1 h-px bg-gray-200" />or<div className="flex-1 h-px bg-gray-200" />
+              <div className="w-full flex items-center gap-2 text-slate-300 dark:text-slate-700 text-xs">
+                <div className="flex-1 h-px bg-slate-200 dark:bg-slate-800" />or<div className="flex-1 h-px bg-slate-200 dark:bg-slate-800" />
               </div>
               <button
-                className="flex items-center justify-center gap-3 w-full py-3 rounded-lg bg-green-500 hover:bg-green-600 text-white text-base font-semibold shadow transition"
+                className="flex items-center justify-center gap-2.5 w-full py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm font-bold shadow-xs transition"
                 onClick={handleDownloadFolderMerged}
               >
-                <Download className="w-5 h-5" /> Merge to one .txt
+                <Download className="w-4 h-4" /> Merge to one .txt
               </button>
             </div>
             <button
-              className="mt-6 text-gray-500 hover:text-gray-700 text-sm px-4 py-2 rounded transition"
+              className="mt-4 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xs font-semibold px-4 py-2 rounded-lg transition"
               onClick={() => { setShowDownloadModal(false); setDownloadFolderId(null); }}
             >
               Cancel
@@ -722,32 +722,32 @@ export function TranscriptHistoryPanel({ onClose }: TranscriptHistoryPanelProps)
         </div>
       )}
       {showBulkDownloadModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-80 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm flex flex-col p-6 items-center border border-slate-200">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-2xl shadow-2xl w-full max-w-sm flex flex-col p-6 items-center border border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between w-full mb-4">
-              <h4 className="text-lg font-bold flex items-center gap-2"><Download className="w-6 h-6" />Download Selected</h4>
-              <button onClick={() => setShowBulkDownloadModal(false)} className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition" title="Close"><X className="w-5 h-5" /></button>
+              <h4 className="text-base sm:text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100"><Download className="w-5 h-5 text-blue-600 dark:text-blue-400" />Download Selected</h4>
+              <button onClick={() => setShowBulkDownloadModal(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Close"><X className="w-5 h-5" /></button>
             </div>
-            <div className="text-gray-600 text-center mb-6 w-full">How would you like to download the selected transcripts?</div>
-            <div className="flex flex-col gap-4 w-full">
+            <div className="text-slate-600 dark:text-slate-400 text-center text-xs sm:text-sm mb-6 w-full">How would you like to download the selected transcripts?</div>
+            <div className="flex flex-col gap-3 w-full">
               <button
-                className="flex items-center justify-center gap-3 w-full py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-base font-semibold shadow transition"
+                className="flex items-center justify-center gap-2.5 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold shadow-xs transition"
                 onClick={handleBulkDownloadZip}
               >
-                <FileArchive className="w-5 h-5" /> ZIP (folders & files)
+                <FileArchive className="w-4 h-4" /> ZIP (folders & files)
               </button>
-              <div className="w-full flex items-center gap-2 text-gray-300">
-                <div className="flex-1 h-px bg-gray-200" />or<div className="flex-1 h-px bg-gray-200" />
+              <div className="w-full flex items-center gap-2 text-slate-300 dark:text-slate-700 text-xs">
+                <div className="flex-1 h-px bg-slate-200 dark:bg-slate-800" />or<div className="flex-1 h-px bg-slate-200 dark:bg-slate-800" />
               </div>
               <button
-                className="flex items-center justify-center gap-3 w-full py-3 rounded-lg bg-green-500 hover:bg-green-600 text-white text-base font-semibold shadow transition"
+                className="flex items-center justify-center gap-3 w-full py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm font-bold shadow-xs transition"
                 onClick={handleBulkDownloadMerged}
               >
-                <Download className="w-5 h-5" /> Merge to one .txt
+                <Download className="w-4 h-4" /> Merge to one .txt
               </button>
             </div>
             <button
-              className="mt-6 text-gray-500 hover:text-gray-700 text-sm px-4 py-2 rounded transition"
+              className="mt-4 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xs font-semibold px-4 py-2 rounded-lg transition"
               onClick={() => setShowBulkDownloadModal(false)}
             >
               Cancel

@@ -99,15 +99,15 @@ export function SavedItemsPanel() {
     };
 
     return (
-        <div className="h-full flex flex-col">
+        <div className="h-full flex flex-col bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
             {/* Toggle Switch */}
             <div className="p-4">
-                <div className="flex rounded-lg border p-1">
+                <div className="flex rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-800/60 p-1">
                     <button
                         onClick={() => setViewType('word')}
                         className={cn(
-                            'flex-1 px-3 py-1.5 text-sm rounded-md transition-colors',
-                            viewType === 'word' ? 'bg-blue-500 text-white' : 'text-gray-600'
+                            'flex-1 px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-colors',
+                            viewType === 'word' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                         )}
                     >
                         Words
@@ -115,8 +115,8 @@ export function SavedItemsPanel() {
                     <button
                         onClick={() => setViewType('sentence')}
                         className={cn(
-                            'flex-1 px-3 py-1.5 text-sm rounded-md transition-colors',
-                            viewType === 'sentence' ? 'bg-blue-500 text-white' : 'text-gray-600'
+                            'flex-1 px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-colors',
+                            viewType === 'sentence' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                         )}
                     >
                         Sentences
@@ -129,16 +129,16 @@ export function SavedItemsPanel() {
                 {items.map(item => (
                     <div
                         key={item}
-                        className="group flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                        className="group flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 transition-colors"
                     >
-                        <span className="flex-1 text-base text-gray-700">
+                        <span className="flex-1 text-sm sm:text-base text-slate-800 dark:text-slate-200 font-medium">
                             {viewType === 'word' ? (
                                 <div className="word-popup-wrapper" style={{ position: 'relative' }}>
                                     <WordPopup word={item} preventSave={true} />
                                 </div>
                             ) : (
                                 <button
-                                    className="hover:bg-blue-100 rounded px-1 py-0.5 transition-colors"
+                                    className="hover:bg-blue-100 dark:hover:bg-blue-950/60 rounded px-1 py-0.5 transition-colors text-left"
                                     onClick={(e) => handleSentenceClick(item, e)}
                                 >
                                     {item}
@@ -147,7 +147,7 @@ export function SavedItemsPanel() {
                         </span>
                         <button
                             onClick={(e) => handleDelete(item, e)}
-                            className="opacity-0 group-hover:opacity-100 p-1 text-red-500 hover:bg-red-50 rounded transition-opacity"
+                            className="opacity-0 group-hover:opacity-100 p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-opacity"
                         >
                             <Trash2 size={16} />
                         </button>
@@ -163,7 +163,7 @@ export function SavedItemsPanel() {
                         left: `${selectionPosition.x}px`,
                         top: `${selectionPosition.y}px`,
                         transform: 'translate(0, 0)',
-                        zIndex: 60,
+                        zIndex: 90,
                     }}
                 >
                     <TextSelectionPopup

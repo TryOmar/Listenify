@@ -23,10 +23,10 @@ export function SettingsNavButton({
         'w-auto md:w-full text-left',
         active
           ? 'bg-blue-600 text-white shadow-xs'
-          : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
+          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
       )}
     >
-      <Icon size={18} className={active ? 'text-white' : 'text-slate-500'} />
+      <Icon size={18} className={active ? 'text-white' : 'text-slate-500 dark:text-slate-400'} />
       <span>{label}</span>
     </button>
   );
