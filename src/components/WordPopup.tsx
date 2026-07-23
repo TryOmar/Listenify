@@ -13,9 +13,10 @@ interface WordPopupProps {
   word: string;
   preventSave?: boolean;
   onOpen?: () => void;
+  onHoverContent?: () => void;
 }
 
-export function WordPopup({ word, preventSave = false, onOpen }: WordPopupProps) {
+export function WordPopup({ word, preventSave = false, onOpen, onHoverContent }: WordPopupProps) {
   const { actions, prompts, general } = useSettingsStore();
   const { addMessage } = useChatStore();
   const { isChatPanelOpen, openChatPanel } = usePanelStore();
@@ -130,7 +131,8 @@ export function WordPopup({ word, preventSave = false, onOpen }: WordPopupProps)
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content
-          className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl shadow-2xl animate-in fade-in-0 zoom-in-95 z-[90] border border-slate-200 dark:border-slate-800"
+          onMouseEnter={onHoverContent}
+          className="word-popup-content bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl shadow-2xl animate-in fade-in-0 zoom-in-95 z-[90] border border-slate-200 dark:border-slate-800"
           sideOffset={8}
           side="top"
           align="center"

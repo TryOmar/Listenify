@@ -465,16 +465,26 @@ export function TranscriptPanel() {
           const isPunctuation = /^[.,!?;:()[\]{}'"-]+$/.test(word);
           const handleMouseEnter = (e: React.MouseEvent) => {
             if (!enableTranslationOnHover || isPunctuation) return;
+            const target = e.target as HTMLElement;
+            // Do not trigger hover if mouse enters the action popup
+            if (target.closest('.word-popup-content') || target.closest('.translation-hover-popup')) {
+              return;
+            }
             if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
             const { clientX, clientY } = e;
+            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
             hoverTimeout.current = setTimeout(() => {
               setHoveredWord(word);
               setHoverPosition({ x: clientX, y: clientY });
-              setHoveredWordRect((e.target as HTMLElement).getBoundingClientRect());
+              setHoveredWordRect(rect);
               setTranslationIndex(0);
             }, 300); // debounce 300ms
           };
-          const handleMouseLeave = () => {
+          const handleMouseLeave = (e: React.MouseEvent) => {
+            const related = e.relatedTarget as HTMLElement | null;
+            if (related && related.closest('.translation-hover-popup')) {
+              return; // Allow moving mouse into the popup
+            }
             if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
             setHoveredWord(null);
             setHoverPosition(null);
@@ -499,7 +509,7 @@ export function TranscriptPanel() {
               onMouseMove={handleMouseMove}
               style={{ position: 'relative', zIndex: 1 }}
             >
-              <WordPopup word={word} onOpen={handleWordPopupOpen} />
+              <WordPopup word={word} onOpen={handleWordPopupOpen} onHoverContent={handleWordPopupOpen} />
             </span>
           );
         })}
@@ -654,27 +664,6 @@ export function TranscriptPanel() {
     }
   };
 
-  // Ensure wheel always cycles translations when popup is visible
-  useEffect(() => {
-    if (!hoveredWord) return;
-    const handleGlobalWheel = (e: WheelEvent) => {
-      // Only act if popup is visible
-      if (!hoveredWord) return;
-      e.preventDefault();
-      e.stopPropagation();
-      if (!translationCache[hoveredWord] || !translationCache[hoveredWord].matches?.length) return;
-      let newIndex = translationIndex;
-      const translations = translationCache[hoveredWord].matches.filter((item: { translation: string }, idx: number, arr: { translation: string }[]) => arr.findIndex((t: { translation: string }) => t.translation === item.translation) === idx);
-      if (e.deltaY > 0) {
-        newIndex = (translationIndex + 1) % translations.length;
-      } else if (e.deltaY < 0) {
-        newIndex = (translationIndex - 1 + translations.length) % translations.length;
-      }
-      setTranslationIndex(newIndex);
-    };
-    window.addEventListener('wheel', handleGlobalWheel, { passive: false });
-    return () => window.removeEventListener('wheel', handleGlobalWheel);
-  }, [hoveredWord, translationCache, translationIndex]);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-slate-900 rounded-xl shadow-xs border border-slate-200/80 dark:border-slate-800 overflow-hidden transcript-panel">

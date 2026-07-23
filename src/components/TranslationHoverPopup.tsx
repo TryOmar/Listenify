@@ -89,6 +89,10 @@ export const TranslationHoverPopup: React.FC<TranslationHoverPopupProps> = ({
   useEffect(() => {
     if (!translations.length) return;
     const handleWheel = (e: WheelEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.word-popup-content') || target.closest('[role="dialog"]')) {
+        return; // Allow scrolling inside the popup
+      }
       e.preventDefault();
       e.stopPropagation();
       let newIndex = index;
@@ -131,7 +135,8 @@ export const TranslationHoverPopup: React.FC<TranslationHoverPopupProps> = ({
   return (
     <div
       ref={popupRef}
-      className="fixed z-[90] pointer-events-auto min-w-[140px] max-w-[260px] bg-slate-900 dark:bg-slate-800 border border-slate-700 dark:border-slate-600 text-white rounded-2xl p-3 sm:p-4 text-center shadow-2xl dark:shadow-blue-900/20 transition-all duration-150 ring-1 ring-white/10"
+      onMouseLeave={onClose}
+      className="translation-hover-popup fixed z-[90] pointer-events-auto min-w-[140px] max-w-[260px] bg-slate-900 dark:bg-slate-800 border border-slate-700 dark:border-slate-600 text-white rounded-2xl p-3 sm:p-4 text-center shadow-2xl dark:shadow-blue-900/20 transition-all duration-150 ring-1 ring-white/10"
       style={{
         left: leftPos,
         top: topPos - 4,

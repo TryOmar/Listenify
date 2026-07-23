@@ -296,21 +296,6 @@ export function GeneralTab() {
 
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Enable Transcript Saving</label>
-            <span className="text-xs text-slate-500 dark:text-slate-400">Automatically save transcript chunks to history</span>
-          </div>
-          <button
-            onClick={() => updateGeneralSettings({ enableTranscriptSaving: !general.enableTranscriptSaving })}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${general.enableTranscriptSaving ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'}`}
-            role="switch"
-            aria-checked={general.enableTranscriptSaving}
-          >
-            <span className={`${general.enableTranscriptSaving ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-xs`} />
-          </button>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
             <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Translation on Hover</label>
             <span className="text-xs text-slate-500 dark:text-slate-400">Show translation popup when hovering over a word in the transcript</span>
           </div>
@@ -321,6 +306,21 @@ export function GeneralTab() {
             aria-checked={general.enableTranslationOnHover}
           >
             <span className={`${general.enableTranslationOnHover ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-xs`} />
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Enable Transcript Saving</label>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Automatically save transcript chunks to history</span>
+          </div>
+          <button
+            onClick={() => updateGeneralSettings({ enableTranscriptSaving: !general.enableTranscriptSaving })}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${general.enableTranscriptSaving ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'}`}
+            role="switch"
+            aria-checked={general.enableTranscriptSaving}
+          >
+            <span className={`${general.enableTranscriptSaving ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-xs`} />
           </button>
         </div>
 
