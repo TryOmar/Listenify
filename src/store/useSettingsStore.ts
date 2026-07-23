@@ -73,7 +73,7 @@ const defaultGeneralSettings: GeneralSettings = {
   breakSentences: false,
   lineBreakStyle: 'single',
   enableTranscriptSaving: false,
-  enableTranslationOnHover: false,
+  enableTranslationOnHover: true,
 };
 
 const defaultActions = {

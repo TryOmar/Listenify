@@ -129,18 +129,18 @@ export function WordPopup({ word, preventSave = false, onOpen }: WordPopupProps)
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content
-          className="bg-white rounded-lg shadow-lg animate-in fade-in-0 zoom-in-95"
+          className="bg-white rounded-xl shadow-2xl animate-in fade-in-0 zoom-in-95 z-[90] border border-slate-200/90"
           sideOffset={8}
           side="top"
           align="center"
           alignOffset={0}
           style={{
             maxWidth: '50vw',
-            minWidth: '6em',
+            minWidth: '10em',
             width: 'auto',
-            maxHeight: '35vh',
+            maxHeight: '40vh',
             fontSize: '0.9em',
-            padding: '0.4em 0.6em',
+            padding: '0.6em 0.8em',
             overflow: 'auto',
             boxSizing: 'border-box',
           }}
