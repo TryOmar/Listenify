@@ -11,6 +11,23 @@
   <meta name="apple-mobile-web-app-title" content="Listenify" />
 
   <title>Listenify - Voice to Text Transcription</title>
+  <script>
+    window.addEventListener('error', function(e) {
+      if (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK') {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+              registration.unregister();
+            }
+            if (sessionStorage.getItem('pwa_reloaded') !== 'true') {
+              sessionStorage.setItem('pwa_reloaded', 'true');
+              window.location.reload();
+            }
+          });
+        }
+      }
+    }, true);
+  </script>
 </head>
 
 <body>
