@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Mic, Trash2, Copy, Maximize, Minimize, History, Coffee } from 'lucide-react';
+import { Mic, Trash2, Copy, Maximize, Minimize, History, Coffee, MonitorUp } from 'lucide-react';
 import { useTranscriptStore } from '../store/useTranscriptStore';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { WordPopup } from './WordPopup';
@@ -18,6 +18,7 @@ import { saveTranscript } from '../lib/transcriptDb';
 import { TranscriptHistoryPanel } from './layout/TranscriptHistoryPanel';
 import { TranslationHoverPopup } from './TranslationHoverPopup';
 import { formatTranscriptWithLineBreaks } from '../lib/textFormat';
+import { PiPWindow } from './shared/PiPWindow';
 
 type SpeechRecognitionResult = {
   isFinal: boolean;
@@ -119,7 +120,9 @@ export function TranscriptPanel() {
   const { isChatPanelOpen, toggleChatPanel } = usePanelStore();
   const { addToast } = useToastStore();
   const { isFullscreen, setFullscreen } = useLayoutStore();
-  const [transcriptHeight, setTranscriptHeight] = useState(window.innerHeight * 0.65); // Changed from 0.45 to 0.65
+  const [transcriptHeight, setTranscriptHeight] = useState(window.innerHeight * 0.65);
+  const [isPiPOpen, setIsPiPOpen] = useState(false);
+  const pipEndRef = useRef<HTMLDivElement>(null);
   const [showHistoryPanel, setShowHistoryPanel] = useState(false);
   const autoClearingRef = useRef(false);
   const lastAutoSaveTimeRef = useRef(0); // Timestamp of last auto-save
@@ -132,6 +135,13 @@ export function TranscriptPanel() {
   const { enableTranslationOnHover } = general;
 
   // Handle scroll events to determine if we should auto-scroll
+  // Auto-scroll PiP
+  useEffect(() => {
+    if (isPiPOpen && pipEndRef.current) {
+      pipEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [transcript, isPiPOpen]);
+
   const handleScroll = () => {
     if (!transcriptRef.current) return;
 
@@ -393,7 +403,6 @@ export function TranscriptPanel() {
   // Effect to sync microphone state with localStorage
   useEffect(() => {
     localStorage.setItem('microphoneState', isListening.toString());
-    console.log('Microphone state updated:', isListening, new Date().toISOString());
   }, [isListening]);
 
   const handleClearTranscript = async () => {
@@ -743,6 +752,21 @@ export function TranscriptPanel() {
                 <Copy size={isFullscreen ? 20 : 17} />
               </button>
 
+              {typeof window !== 'undefined' && 'documentPictureInPicture' in window && (
+                <button
+                  onClick={() => setIsPiPOpen(!isPiPOpen)}
+                  className={cn(
+                    "p-1.5 sm:p-2 rounded-lg transition-colors hidden sm:flex",
+                    isPiPOpen 
+                      ? "bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-400"
+                      : "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
+                  )}
+                  title="Picture-in-Picture"
+                >
+                  <MonitorUp size={isFullscreen ? 20 : 17} />
+                </button>
+              )}
+
               {general.enableTranscriptSaving && (
                 <button
                   onClick={() => setShowHistoryPanel((v) => !v)}
@@ -833,6 +857,15 @@ export function TranscriptPanel() {
           onClose={() => setShowHistoryPanel(false)}
         />
       )}
+
+      <PiPWindow isOpen={isPiPOpen} onClose={() => setIsPiPOpen(false)}>
+        <div className="p-4 sm:p-6 bg-slate-50 dark:bg-slate-900 min-h-[100vh] h-full overflow-y-auto">
+          <div className="text-xl leading-relaxed whitespace-pre-wrap break-words break-all font-medium text-slate-800 dark:text-slate-200" style={{ fontSize: `${general.fontSize}px` }}>
+            {formatTranscriptWithLineBreaks(transcript, general.breakSentences, general.lineBreakStyle) || "Waiting for speech..."}
+            <div ref={pipEndRef} className="h-8" />
+          </div>
+        </div>
+      </PiPWindow>
     </div>
   );
 }
