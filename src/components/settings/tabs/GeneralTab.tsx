@@ -83,16 +83,16 @@ export function GeneralTab() {
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Appearance Theme</label>
-              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 rounded-md">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 rounded-md whitespace-nowrap">
                 {general.theme === 'system' ? 'Auto System' : general.theme === 'deep-dark' ? 'Deep Dark' : general.theme === 'dark' ? 'Dark' : 'Light'}
               </span>
             </div>
             <span className="text-xs text-slate-500 dark:text-slate-400">Default is System Preference</span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-200/60 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 w-full sm:w-auto">
+          <div className="grid grid-cols-2 sm:flex sm:flex-row sm:flex-wrap items-center gap-1.5 p-1 bg-slate-200/60 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 w-full sm:w-auto">
             <button
               onClick={() => {
                 updateGeneralSettings({ theme: 'system' });
@@ -154,7 +154,7 @@ export function GeneralTab() {
             <select
               value={general.speechLanguage}
               onChange={(e) => updateGeneralSettings({ speechLanguage: e.target.value })}
-              className="px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {LANGUAGES.map((lang) => (
                 <option key={lang.value} value={lang.value} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
@@ -169,7 +169,7 @@ export function GeneralTab() {
             <select
               value={general.translationLanguage}
               onChange={(e) => updateGeneralSettings({ translationLanguage: e.target.value })}
-              className="px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {LANGUAGES.map((lang) => (
                 <option key={lang.value} value={lang.value} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
@@ -185,7 +185,7 @@ export function GeneralTab() {
           <select
             value={general.ttsVoiceURI}
             onChange={(e) => updateGeneralSettings({ ttsVoiceURI: e.target.value })}
-            className="px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
               Default System Voice
@@ -252,14 +252,14 @@ export function GeneralTab() {
 
           <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Sentence Formatting</label>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 rounded-md">Recommended</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 rounded-md whitespace-nowrap">Recommended</span>
               </div>
               <span className="text-xs text-slate-500 dark:text-slate-400">Choose spacing between transcribed sentences</span>
             </div>
             
-            <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-200/60 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 w-full xl:w-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 items-center gap-1.5 p-1 bg-slate-200/60 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 w-full xl:w-auto">
               <button
                 onClick={() => updateGeneralSettings({ breakSentences: false })}
                 className={`flex-1 xl:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
