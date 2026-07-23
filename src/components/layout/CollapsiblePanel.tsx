@@ -270,8 +270,8 @@ export function CollapsiblePanel({
 
                         {/* Arrow Icon */}
                         <div className={cn(
-                            'absolute bottom-4 text-slate-400',
-                            isHovered && 'text-slate-700'
+                            'absolute bottom-4 text-slate-400 dark:text-slate-500',
+                            isHovered && 'text-slate-700 dark:text-slate-200'
                         )}>
                             {side === 'left' ? (
                                 <ChevronRight size={16} />

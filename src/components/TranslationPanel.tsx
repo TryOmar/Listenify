@@ -164,7 +164,7 @@ Translation (one sentence per line):`;
                               {originalSentences[idx] && (
                                 <button
                                   onClick={() => speakText(originalSentences[idx], speechLanguage)}
-                                  className="p-1 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors ml-2 shrink-0"
+                                  className="p-1 text-slate-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors ml-2 shrink-0"
                                   title="Listen to text (TTS)"
                                 >
                                   <Volume2 size={16} />
@@ -176,7 +176,7 @@ Translation (one sentence per line):`;
                               {translatedLines[idx] && (
                                 <button
                                   onClick={() => speakText(translatedLines[idx], translationLanguage)}
-                                  className="p-1 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors ml-2 shrink-0"
+                                  className="p-1 text-slate-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors ml-2 shrink-0"
                                   title="Listen to translation (TTS)"
                                 >
                                   <Volume2 size={16} />

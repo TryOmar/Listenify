@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 export interface GeneralSettings {
   speechLanguage: string;
   translationLanguage: string;
-  theme: 'light' | 'dark';
+  theme: 'system' | 'light' | 'dark';
   fontSize: number;
   aiChatFontSize: number;
   maxWords: number;
@@ -66,7 +66,7 @@ interface SettingsState {
 const defaultGeneralSettings: GeneralSettings = {
   speechLanguage: 'en',
   translationLanguage: 'ar',
-  theme: 'light',
+  theme: 'system',
   fontSize: 16,
   aiChatFontSize: 12,
   maxWords: 100,

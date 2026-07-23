@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MainLayout } from './components/layout/MainLayout';
 import { ToastContainer } from './components/ui/Toast';
 import { Headphones, Sparkles, MessageCircleHeart, Sun, Moon } from 'lucide-react';
@@ -7,17 +7,52 @@ import './App.css';
 
 function App() {
   const { general, updateGeneralSettings } = useSettingsStore();
+  const [isSystemDark, setIsSystemDark] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(prefers-color-scheme: dark)').matches : false
+  );
 
   useEffect(() => {
-    if (general.theme === 'dark') {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsSystemDark(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  const isDarkActive =
+    general.theme === 'dark' ||
+    (general.theme === 'system' && isSystemDark);
+
+  useEffect(() => {
+    if (isDarkActive) {
       document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.style.colorScheme = 'dark';
     } else {
       document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.documentElement.style.colorScheme = 'light';
     }
-  }, [general.theme]);
+  }, [isDarkActive]);
 
   const toggleTheme = () => {
-    updateGeneralSettings({ theme: general.theme === 'dark' ? 'light' : 'dark' });
+    const nextTheme = isDarkActive ? 'light' : 'dark';
+    if (nextTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.style.colorScheme = 'dark';
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.documentElement.style.colorScheme = 'light';
+    }
+    updateGeneralSettings({ theme: nextTheme });
   };
 
   return (
@@ -55,10 +90,14 @@ function App() {
               {/* Theme Toggle Button */}
               <button
                 onClick={toggleTheme}
-                className="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-amber-400 transition-colors border border-slate-200/80 dark:border-slate-700"
-                title={general.theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                className="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-amber-400 transition-colors border border-slate-200/80 dark:border-slate-700 flex items-center justify-center"
+                title={isDarkActive ? "Switch to Light Mode" : "Switch to Dark Mode"}
               >
-                {general.theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+                {isDarkActive ? (
+                  <Sun size={17} className="text-amber-400" />
+                ) : (
+                  <Moon size={17} className="text-indigo-600" />
+                )}
               </button>
 
               <a

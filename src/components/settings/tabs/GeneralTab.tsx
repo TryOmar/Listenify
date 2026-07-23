@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSettingsStore } from '../../../store/useSettingsStore';
-import { Sun, Moon, Mic, Settings, Copy, Link, Info, ExternalLink, CheckCircle } from 'lucide-react';
+import { Sun, Moon, Mic, Settings, Copy, Link, Info, ExternalLink, CheckCircle, Monitor } from 'lucide-react';
 import { LANGUAGES } from '../../../constants/languages';
 
 export function GeneralTab() {
@@ -27,22 +27,39 @@ export function GeneralTab() {
 
   const browserInfo = getBrowserInfo();
 
-  // Effect to get the currently selected microphone
+  // Function to get active mic label
   useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => {
-        const track = stream.getAudioTracks()[0];
-        const deviceId = track.getSettings().deviceId;
+    async function getActiveMicrophone() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioInputs = devices.filter(d => d.kind === 'audioinput');
 
-        navigator.mediaDevices.enumerateDevices()
-          .then(devices => {
-            const mic = devices.find(device => device.deviceId === deviceId);
-            setCurrentMic(mic ? mic.label : 'No microphone found');
-          });
-      })
-      .catch(error => {
-        console.error('Error accessing microphone:', error);
-      });
+        // Try to get standard label if available
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => null);
+        if (stream) {
+          const track = stream.getAudioTracks()[0];
+          const deviceId = track.getSettings().deviceId;
+          const currentDevice = audioInputs.find(d => d.deviceId === deviceId);
+          if (currentDevice && currentDevice.label) {
+            setCurrentMic(currentDevice.label);
+          } else if (audioInputs.length > 0 && audioInputs[0].label) {
+            setCurrentMic(audioInputs[0].label);
+          } else {
+            setCurrentMic('Default System Microphone');
+          }
+          // Stop stream immediately
+          stream.getTracks().forEach(t => t.stop());
+        } else if (audioInputs.length > 0 && audioInputs[0].label) {
+          setCurrentMic(audioInputs[0].label);
+        } else {
+          setCurrentMic('Default System Microphone');
+        }
+      } catch (e) {
+        setCurrentMic('Default System Microphone');
+      }
+    }
+
+    getActiveMicrophone();
   }, []);
 
   return (
@@ -51,33 +68,51 @@ export function GeneralTab() {
       <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">General Settings</h3>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Theme</label>
+              <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Appearance Theme</label>
               <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 rounded-md">
-                Active
+                {general.theme === 'system' ? 'Auto System' : general.theme === 'dark' ? 'Dark' : 'Light'}
               </span>
             </div>
-            <span className="text-xs text-slate-500 dark:text-slate-400">Choose between light and dark mode</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Default is System Preference</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Sun size={16} className={`transition-colors ${general.theme === 'light' ? 'text-amber-500 font-bold' : 'text-slate-400'}`} />
+
+          <div className="flex items-center gap-1.5 p-1 bg-slate-200/60 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 w-full sm:w-auto">
             <button
-              onClick={() => updateGeneralSettings({
-                theme: general.theme === 'light' ? 'dark' : 'light'
-              })}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${general.theme === 'dark' ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'}`}
-              role="switch"
-              aria-checked={general.theme === 'dark'}
+              onClick={() => updateGeneralSettings({ theme: 'system' })}
+              className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                general.theme === 'system'
+                  ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
             >
-              <span className="sr-only">Toggle theme</span>
-              <span
-                className={`${general.theme === 'dark' ? 'translate-x-6' : 'translate-x-1'
-                  } inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-xs`}
-              />
+              <Monitor size={14} />
+              <span>System</span>
             </button>
-            <Moon size={16} className={`transition-colors ${general.theme === 'dark' ? 'text-blue-400 font-bold' : 'text-slate-400'}`} />
+            <button
+              onClick={() => updateGeneralSettings({ theme: 'light' })}
+              className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                general.theme === 'light'
+                  ? 'bg-white dark:bg-slate-800 text-amber-500 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              <Sun size={14} />
+              <span>Light</span>
+            </button>
+            <button
+              onClick={() => updateGeneralSettings({ theme: 'dark' })}
+              className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                general.theme === 'dark'
+                  ? 'bg-white dark:bg-slate-800 text-blue-400 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              <Moon size={14} />
+              <span>Dark</span>
+            </button>
           </div>
         </div>
 
@@ -90,7 +125,7 @@ export function GeneralTab() {
               className="px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {LANGUAGES.map((lang) => (
-                <option key={lang.value} value={lang.value}>
+                <option key={lang.value} value={lang.value} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
                   {lang.label}
                 </option>
               ))}
@@ -105,7 +140,7 @@ export function GeneralTab() {
               className="px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {LANGUAGES.map((lang) => (
-                <option key={lang.value} value={lang.value}>
+                <option key={lang.value} value={lang.value} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
                   {lang.label}
                 </option>
               ))}
@@ -162,8 +197,10 @@ export function GeneralTab() {
           />
         </div>
 
-        <div className="space-y-4">
-          <div className="flex flex-col gap-2">
+        <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <h4 className="font-bold text-sm text-slate-800 dark:text-slate-200">Sentence Formatting & History</h4>
+
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
@@ -184,24 +221,24 @@ export function GeneralTab() {
                 />
               </button>
             </div>
-          </div>
 
-          <div className={`transition-all duration-300 ease-in-out ${general.breakSentences ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 h-0 overflow-hidden'}`}>
-            <div className="ml-4 pl-4 border-l-2 border-blue-500/30 dark:border-blue-400/30">
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-1">
-                  <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Line Break Style</label>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">Choose spacing between sentences</span>
+            <div className={`transition-all duration-300 ease-in-out ${general.breakSentences ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 h-0 overflow-hidden'}`}>
+              <div className="ml-4 pl-4 border-l-2 border-blue-500/30 dark:border-blue-400/30">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Line Break Style</label>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">Choose spacing between sentences</span>
+                  </div>
+                  <select
+                    value={general.lineBreakStyle}
+                    onChange={(e) => updateGeneralSettings({ lineBreakStyle: e.target.value as 'single' | 'double' })}
+                    className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl text-xs sm:text-sm focus:outline-none"
+                    disabled={!general.breakSentences}
+                  >
+                    <option value="single" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Single Line Break</option>
+                    <option value="double" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Double Line Break</option>
+                  </select>
                 </div>
-                <select
-                  value={general.lineBreakStyle}
-                  onChange={(e) => updateGeneralSettings({ lineBreakStyle: e.target.value as 'single' | 'double' })}
-                  className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl text-xs sm:text-sm focus:outline-none"
-                  disabled={!general.breakSentences}
-                >
-                  <option value="single">Single Line Break</option>
-                  <option value="double">Double Line Break</option>
-                </select>
               </div>
             </div>
           </div>

@@ -430,15 +430,15 @@ export function TranscriptPanel() {
           <div className={cn(
             "w-14 h-14 rounded-2xl flex items-center justify-center mb-3 transition-all shadow-xs border",
             isListening
-              ? "bg-red-50 border-red-200 text-red-600 animate-pulse"
-              : "bg-slate-50 border-slate-200 text-slate-400"
+              ? "bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 animate-pulse"
+              : "bg-slate-50 dark:bg-slate-800/60 border-slate-200/80 dark:border-slate-700 text-slate-400 dark:text-slate-500"
           )}>
             <Mic size={26} />
           </div>
-          <p className="text-sm font-semibold text-slate-800">
+          <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
             {isListening ? 'Listening for speech...' : 'Microphone is paused'}
           </p>
-          <p className="text-xs text-slate-500 max-w-xs mt-1 leading-relaxed">
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mt-1 leading-relaxed">
             {isListening
               ? 'Speak into your microphone to transcribe in real-time.'
               : 'Tap the microphone button above to start live transcription.'}
@@ -767,7 +767,7 @@ export function TranscriptPanel() {
 
               <button
                 onClick={toggleFullscreen}
-                className="p-1.5 sm:p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors hidden sm:inline-flex"
+                className="p-1.5 sm:p-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors hidden sm:inline-flex"
                 title={isFullscreen ? "Minimize screen" : "Fullscreen"}
               >
                 {isFullscreen ? <Minimize size={18} /> : <Maximize size={17} />}

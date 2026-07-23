@@ -95,22 +95,22 @@ export function BottomPanel({
             {/* Panel */}
             <div
                 className={cn(
-                    'fixed bottom-0 left-0 right-0 bg-white shadow-lg transition-all duration-200 ease-in-out z-panel',
+                    'fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 shadow-xl border-t border-slate-200 dark:border-slate-800 transition-all duration-200 ease-in-out z-panel',
                     'panel-container'
                 )}
                 style={panelStyle}
             >
                 {/* Panel Header */}
                 <div className={cn(
-                    "h-12 bg-gray-50 border-b flex items-center px-4 gap-2",
+                    "h-12 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center px-4 gap-2",
                     isVisible ? 'opacity-100' : 'opacity-0'
                 )}>
-                    <h2 className="text-sm font-semibold text-gray-700">{title}</h2>
+                    <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">{title}</h2>
                 </div>
 
                 {/* Panel Content */}
                 <div className={cn(
-                    'h-[calc(100%-3rem)] overflow-auto hide-scrollbar',
+                    'h-[calc(100%-3rem)] overflow-auto hide-scrollbar text-slate-900 dark:text-slate-100',
                     isVisible ? 'opacity-100' : 'opacity-0'
                 )}>
                     {children}
@@ -119,7 +119,7 @@ export function BottomPanel({
                 {/* Resize Handle */}
                 <div
                     className={cn(
-                        'absolute top-0 left-0 right-0 h-1 cursor-row-resize hover:bg-blue-100 z-resize-handle transition-colors duration-150',
+                        'absolute top-0 left-0 right-0 h-1.5 cursor-row-resize hover:bg-blue-400/50 z-resize-handle transition-colors duration-150',
                         'panel-resize-handle'
                     )}
                     onMouseDown={handleMouseDown}
@@ -130,12 +130,12 @@ export function BottomPanel({
                     <button
                         onClick={togglePanel}
                         className={cn(
-                            'absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-white shadow-md',
-                            'flex items-center justify-center hover:bg-gray-50 transition-colors duration-150',
-                            'border border-gray-200 z-50'
+                            'absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-white dark:bg-slate-800 shadow-md',
+                            'flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-150',
+                            'border border-slate-200 dark:border-slate-700 z-50'
                         )}
                     >
-                        <ChevronDown size={14} className="text-gray-600" />
+                        <ChevronDown size={14} className="text-slate-600 dark:text-slate-300" />
                     </button>
                 )}
             </div>
@@ -152,20 +152,20 @@ export function BottomPanel({
                 onMouseLeave={() => setIsHovered(false)}
             >
                 <div className={cn(
-                    'absolute inset-0 bg-gray-50 border-t hover:bg-gray-100 transition-colors duration-150'
+                    'absolute inset-0 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors duration-150'
                 )}>
                     {/* Title Container */}
                     <div className="absolute inset-0 flex items-center justify-center">
                         <div className={cn(
-                            'flex items-center gap-2',
-                            isHovered ? 'text-gray-900' : 'text-gray-600'
+                            'flex items-center gap-2 font-bold',
+                            isHovered ? 'text-slate-900 dark:text-slate-100' : 'text-slate-600 dark:text-slate-400'
                         )}>
-                            <span className="text-xs font-semibold tracking-wider uppercase">
+                            <span className="text-xs tracking-wider uppercase">
                                 {title}
                             </span>
                             <ChevronUp size={16} className={cn(
-                                'text-gray-400',
-                                isHovered && 'text-gray-600'
+                                'text-slate-400 dark:text-slate-500',
+                                isHovered && 'text-slate-600 dark:text-slate-300'
                             )} />
                         </div>
                     </div>
