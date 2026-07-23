@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Volume2 } from 'lucide-react';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { speakText } from '../lib/tts';
 
 interface TranslationMatch {
   translation: string;
@@ -139,8 +141,20 @@ export const TranslationHoverPopup: React.FC<TranslationHoverPopupProps> = ({
       {loading && <div className="text-xs text-slate-400 animate-pulse">Loading...</div>}
       {error && <div className="text-xs text-red-400 font-medium">{error}</div>}
       {!loading && !error && translations.length > 0 && (
-        <div>
-          <div className="font-bold text-base sm:text-lg text-white mb-0.5">{translations[index]?.translation}</div>
+        <div className="relative">
+          <div className="flex items-center justify-center gap-2 mb-0.5">
+            <div className="font-bold text-base sm:text-lg text-white">{translations[index]?.translation}</div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                speakText(translations[index]?.translation, translationLanguage);
+              }}
+              className="p-1 text-slate-400 hover:text-white transition-colors shrink-0"
+              title="Listen to translation (TTS)"
+            >
+              <Volume2 size={16} />
+            </button>
+          </div>
           <div className="text-[11px] text-slate-400 font-medium mt-1">{index + 1} / {translations.length}</div>
         </div>
       )}

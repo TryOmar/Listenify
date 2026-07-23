@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import * as Popover from '@radix-ui/react-popover';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Volume2 } from 'lucide-react';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { speakText } from '../lib/tts';
 import { useChatStore } from '../store/useChatStore';
 import { usePanelStore } from '../store/usePanelStore';
 import { useToastStore } from '../store/useToastStore';
@@ -146,6 +147,17 @@ export function WordPopup({ word, preventSave = false, onOpen }: WordPopupProps)
           }}
         >
           <div className="flex flex-col gap-1">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                speakText(word, general.speechLanguage);
+              }}
+              className="flex items-center justify-center gap-2 p-2 mb-1 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 border border-blue-200/60 dark:border-blue-800/60 rounded-xl transition-colors text-blue-700 dark:text-blue-300 w-full text-center shadow-xs"
+              title="Read aloud (TTS)"
+            >
+              <Volume2 size={16} />
+              <span className="font-bold text-sm">Read Aloud</span>
+            </button>
             <div className="border-b border-slate-200 dark:border-slate-800 pb-2 mb-2">
               <h3 className="font-medium text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Actions</h3>
               {actions.word.map((action) => (

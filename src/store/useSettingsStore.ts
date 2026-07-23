@@ -12,6 +12,7 @@ export interface GeneralSettings {
   lineBreakStyle: 'single' | 'double';
   enableTranscriptSaving: boolean;
   enableTranslationOnHover: boolean;
+  ttsVoiceURI: string;
 }
 
 export interface Action {
@@ -74,6 +75,7 @@ const defaultGeneralSettings: GeneralSettings = {
   lineBreakStyle: 'single',
   enableTranscriptSaving: false,
   enableTranslationOnHover: true,
+  ttsVoiceURI: '',
 };
 
 const defaultActions = {

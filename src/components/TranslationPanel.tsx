@@ -4,6 +4,7 @@ import { useSettingsStore } from '../store/useSettingsStore';
 import { generateGeminiResponse } from '../services/geminiService';
 import { useToastStore } from '../store/useToastStore';
 import { formatTranscriptWithLineBreaks } from '../lib/textFormat';
+import { speakText } from '../lib/tts';
 
 interface TranslationPanelProps {
     textToTranslate: string;
@@ -20,19 +21,11 @@ export function TranslationPanel({ textToTranslate, speechLanguage, translationL
     const { addToast } = useToastStore();
     const activeModel = aiModels.find(model => model.id === activeModelId);
 
-    const speakText = (text: string, langCode: string) => {
-        if (!text.trim()) return;
-        if (!('speechSynthesis' in window)) {
+    const handleSpeakText = (text: string, langCode: string) => {
+        const success = speakText(text, langCode);
+        if (!success && !('speechSynthesis' in window)) {
             addToast('Text-to-Speech (TTS) is not supported in this browser.', 'error');
-            return;
-        }
-        try {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = langCode;
-            window.speechSynthesis.speak(utterance);
-        } catch (e) {
-            console.error('TTS error:', e);
+        } else if (!success) {
             addToast('Failed to play Text-to-Speech audio', 'error');
         }
     };
@@ -163,7 +156,7 @@ Translation (one sentence per line):`;
                               <span>{originalSentences[idx] || ''}</span>
                               {originalSentences[idx] && (
                                 <button
-                                  onClick={() => speakText(originalSentences[idx], speechLanguage)}
+                                  onClick={() => handleSpeakText(originalSentences[idx], speechLanguage)}
                                   className="p-1 text-slate-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors ml-2 shrink-0"
                                   title="Listen to text (TTS)"
                                 >
@@ -175,7 +168,7 @@ Translation (one sentence per line):`;
                               <span>{translatedLines[idx] || ''}</span>
                               {translatedLines[idx] && (
                                 <button
-                                  onClick={() => speakText(translatedLines[idx], translationLanguage)}
+                                  onClick={() => handleSpeakText(translatedLines[idx], translationLanguage)}
                                   className="p-1 text-slate-400 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors ml-2 shrink-0"
                                   title="Listen to translation (TTS)"
                                 >

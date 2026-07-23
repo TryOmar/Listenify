@@ -7,6 +7,19 @@ export function GeneralTab() {
   const { general, updateGeneralSettings } = useSettingsStore();
   const [showMessage, setShowMessage] = useState(false);
   const [currentMic, setCurrentMic] = useState('');
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+
+  // Fetch TTS Voices
+  useEffect(() => {
+    const loadVoices = () => {
+      setVoices(window.speechSynthesis.getVoices());
+    };
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
 
   // Function to detect the current browser
   const getBrowserInfo = () => {
@@ -165,6 +178,24 @@ export function GeneralTab() {
               ))}
             </select>
           </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold text-slate-800 dark:text-slate-200">Text-to-Speech Voice</label>
+          <select
+            value={general.ttsVoiceURI}
+            onChange={(e) => updateGeneralSettings({ ttsVoiceURI: e.target.value })}
+            className="px-3 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+              Default System Voice
+            </option>
+            {voices.map((voice) => (
+              <option key={voice.voiceURI} value={voice.voiceURI} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+                {voice.name} ({voice.lang}) {voice.default ? ' [Default]' : ''}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-2">
