@@ -40,7 +40,7 @@ export function EmojiPicker({ value, onChange, readOnly }: EmojiPickerProps) {
                 {value}
             </button>
             {showPicker && !readOnly && (
-                <div className="absolute z-60 top-full left-0 mt-1 shadow-2xl rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+                <div className="absolute z-[999] top-full left-0 mt-1 shadow-2xl rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
                     <EmojiPickerReact
                         onEmojiClick={handleEmojiClick}
                         theme={isDark ? Theme.DARK : Theme.LIGHT}
