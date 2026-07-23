@@ -117,50 +117,50 @@ export function ActionCard({
                 isDeleting ? 'bg-red-50 border border-red-200' : 'bg-white border border-gray-200 hover:border-blue-200 hover:shadow-sm'
             )}
         >
-            <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 flex-1">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
                     <EmojiPicker value={icon} onChange={() => { }} readOnly />
-                    <span className="font-medium">{name}</span>
+                    <span className="font-medium text-xs sm:text-sm truncate">{name}</span>
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                     {/* Move Up/Down buttons */}
                     {onMoveUp && !isFirst && (
                         <button
                             onClick={onMoveUp}
-                            className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-md"
+                            className="p-1 sm:p-1.5 text-slate-500 hover:bg-slate-100 rounded-md"
                             title="Move Up"
                         >
-                            <ChevronUp size={18} />
+                            <ChevronUp size={16} />
                         </button>
                     )}
                     {onMoveDown && !isLast && (
                         <button
                             onClick={onMoveDown}
-                            className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-md"
+                            className="p-1 sm:p-1.5 text-slate-500 hover:bg-slate-100 rounded-md"
                             title="Move Down"
                         >
-                            <ChevronDown size={18} />
+                            <ChevronDown size={16} />
                         </button>
                     )}
 
                     {/* Full View button */}
                     <button
                         onClick={() => setIsFullView(!isFullView)}
-                        className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-md"
+                        className="p-1 sm:p-1.5 text-slate-500 hover:bg-slate-100 rounded-md"
                         title={isFullView ? 'Minimize' : 'Full View'}
                     >
-                        {isFullView ? <X size={18} /> : <Maximize2 size={18} />}
+                        {isFullView ? <X size={16} /> : <Maximize2 size={16} />}
                     </button>
 
                     {/* Edit button */}
                     {onEdit && (
                         <button
                             onClick={handleEdit}
-                            className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-md"
+                            className="p-1 sm:p-1.5 text-slate-500 hover:bg-slate-100 rounded-md"
                             title="Edit"
                         >
-                            <Edit2 size={18} />
+                            <Edit2 size={16} />
                         </button>
                     )}
 
@@ -168,21 +168,21 @@ export function ActionCard({
                     <button
                         onClick={handleDelete}
                         className={cn(
-                            'p-1.5 rounded-md transition-colors',
+                            'p-1 sm:p-1.5 rounded-md transition-colors',
                             isDeleting
                                 ? 'text-red-500 hover:bg-red-100'
-                                : 'text-gray-500 hover:bg-gray-100'
+                                : 'text-slate-500 hover:bg-slate-100'
                         )}
                         title={isDeleting ? 'Click again to confirm deletion' : 'Delete'}
                     >
-                        <Trash2 size={18} />
+                        <Trash2 size={16} />
                     </button>
                 </div>
             </div>
 
             <div
                 className={cn(
-                    'text-sm text-gray-600 font-mono pl-10 transition-all duration-200',
+                    'text-xs sm:text-sm text-slate-600 font-mono pl-0 xs:pl-8 break-all transition-all duration-200',
                     !isFullView && 'line-clamp-1'
                 )}
             >

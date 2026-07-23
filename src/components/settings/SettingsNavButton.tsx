@@ -19,14 +19,15 @@ export function SettingsNavButton({
     <button
       onClick={onClick}
       className={cn(
-        'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors',
+        'flex items-center gap-2 sm:gap-2.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap',
+        'w-auto md:w-full text-left',
         active
-          ? 'bg-blue-50 text-blue-600'
-          : 'text-gray-600 hover:bg-gray-100'
+          ? 'bg-blue-600 text-white shadow-xs'
+          : 'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900'
       )}
     >
-      <Icon size={20} className={active ? 'text-blue-600' : 'text-gray-500'} />
-      <span className="font-medium">{label}</span>
+      <Icon size={18} className={active ? 'text-white' : 'text-slate-500'} />
+      <span>{label}</span>
     </button>
   );
 }

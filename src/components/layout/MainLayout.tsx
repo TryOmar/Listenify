@@ -95,7 +95,7 @@ export function MainLayout() {
         return () => window.removeEventListener('resize', handleResize);
     }, [leftPanelWidth, rightPanelWidth, lastModifiedPanel, setLeftPanelWidth, setRightPanelWidth]);
 
-    const isMobileViewport = typeof window !== 'undefined' && window.innerWidth < 768;
+    const isDrawerViewport = typeof window !== 'undefined' && window.innerWidth < 1100;
 
     return (
         <div className={cn(
@@ -106,15 +106,15 @@ export function MainLayout() {
             <div
                 className={cn(
                     'h-full transition-all duration-150 ease-in-out overflow-auto',
-                    !isMainPanelVisible && !isMobileViewport && 'opacity-0 pointer-events-none'
+                    !isMainPanelVisible && !isDrawerViewport && 'opacity-0 pointer-events-none'
                 )}
                 style={{
-                    marginLeft: isMobileViewport ? '0px' : `${leftPanelWidth > 0 ? leftPanelWidth + PANEL_SPACING : TITLE_BAR_WIDTH + 16}px`,
-                    marginRight: isMobileViewport ? '0px' : `${rightPanelWidth > 0 ? rightPanelWidth + PANEL_SPACING : TITLE_BAR_WIDTH + 16}px`,
-                    minWidth: isMobileViewport ? '100%' : `${MIN_MAIN_PANEL_WIDTH}px`,
+                    marginLeft: isDrawerViewport ? '0px' : `${leftPanelWidth > 0 ? leftPanelWidth + PANEL_SPACING + 4 : TITLE_BAR_WIDTH + 12}px`,
+                    marginRight: isDrawerViewport ? '0px' : `${rightPanelWidth > 0 ? rightPanelWidth + PANEL_SPACING + 4 : TITLE_BAR_WIDTH + 12}px`,
+                    minWidth: isDrawerViewport ? '100%' : `${MIN_MAIN_PANEL_WIDTH}px`,
                 }}
             >
-                <div className="w-full h-full px-2 sm:px-4 py-2 sm:py-3">
+                <div className="w-full h-full px-2 sm:px-4 md:px-5 py-2 sm:py-3">
                     <TranscriptPanel />
                 </div>
             </div>
